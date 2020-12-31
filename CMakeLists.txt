@@ -16,7 +16,7 @@ INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include/deepmd")
 LINK_DIRECTORIES("${DEEPMD_DIR}/lib")
 
 # We need to know where TensorFlow is installed so we can access the headers and libraries.
-SET(TENSORFLOW_DIR "/usr/local/tensorflow/r1.14" CACHE PATH "Where TensorFlow is installed")
+SET(TENSORFLOW_DIR "/usr/local/tensorflow" CACHE PATH "Where TensorFlow is installed")
 INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include")
 INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include/tensorflow/c")
 LINK_DIRECTORIES("${TENSORFLOW_DIR}/lib")

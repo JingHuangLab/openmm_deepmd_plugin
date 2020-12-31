@@ -137,6 +137,7 @@ dp_system.addForce(dp_force)
 # Runnning the NPT ensemble
 if NPT:
     dp_system.addForce(MonteCarloBarostat(1*u.atmospheres, temp*u.kelvin))
+# Running NVT ensemble.
 if NVT:
     # Setttings for Anderson thermostat.
     if Thermostat == "Anderson":

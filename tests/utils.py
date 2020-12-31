@@ -14,7 +14,6 @@ import sys
 import re
 from math import sqrt
 from datetime import datetime, timedelta
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -347,62 +346,6 @@ class Simulation4Deepmd(object):
             xml = file.read()
         self.context.setState(mm.XmlSerializer.deserialize(xml))
 
-
-class Force_Analysis():
-    def __init__(self, force_file, pdb_file):
-        self.force_file = force_file
-        self.topology = PDBFile(pdb_file).topology
-        self.atoms = self.topology.atoms
-        self.MaxFrame = 10000
-        self.natoms = self.topology.getNumAtoms()
-        self.forces, self.nframes = self.getForceVec3(force_file) 
-        print(self.forces.shape, self.nframes)
-
-    def getForceVec3(self, force_file):
-        forces = None
-        nframes = 0
-        with open(force_file, 'r') as f:
-            #nframes = len(f)
-            forces = np.zeros((self.MaxFrame, self.natoms, 3))
-            for idxFrame, line in tqdm(enumerate(f), desc = "Loop over .txt file"):
-                temp = line.split()
-                for ii in range(self.natoms):
-                    str_forces = temp[ii*3:ii*3+3]
-                    for dd, s in enumerate(str_forces):
-                        fi = self.__match_number(s)
-                        forces[idxFrame][ii][dd] = fi
-                nframes += 1
-
-        return forces, nframes
-
-    def getForceDict(self):
-        atomsForces = dict()
-        atoms = self.topology.atoms()
-        for atom in tqdm(atoms, desc="Loop over atoms"):
-            atomIndex = atom.index
-            atomId = int(atom.id)
-            # Skip hydrogen atoms.
-            #if atom.element._symbol == "H":
-            #    continue
-            atomsForces[atomId] = dict()
-            atomsForces[atomId]['atomName'] = atom.name
-            atomsForces[atomId]['atomElement'] = atom.element._symbol
-            atomsForces[atomId]['atomIndex'] = atomIndex
-            atomsForces[atomId]['Force'] = []
-            for ii in range(self.nframes):
-                f = 0.
-                #print(atomId)
-                for fi in self.forces[ii][atomIndex]:
-                    f += fi*fi
-                f = sqrt(f)
-                atomsForces[atomId]['Force'].append(f)
-            atomsForces[atomId]['Force'] = np.array(atomsForces[atomId]['Force'])
-        
-        return atomsForces
-
-    def __match_number(self, string):
-        num = re.findall(r"[-+]?[0-9]*\.?[0-9]+", string)
-        return float(num[-1])
 
 
 def DrawScatter(x, y, name, xlabel="Time", ylabel="Force, unit is KJ/(mol*nm)", withLine = True):
