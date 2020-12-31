@@ -43,7 +43,6 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
 #include "tensorflow/c/c_api.h"
-#include "mpi.h"
 #include <fstream>
 #include "internal/windowsExportDeepmd.h"
 

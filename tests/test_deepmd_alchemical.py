@@ -29,14 +29,14 @@ box = [20, 0, 0, 0, 20, 0, 0, 0, 20]
 mini_Tol = 10 #KJ/mol
 mini_nstep = 1000
 
-pdb_file = "./input/lw_216_qiaozhu.pdb"
-output_dcd = "./output/lw_216_qiaozhu_alchem_lambda_"+str(Lambda)+".dcd"
-output_force_txt = "./output/lw_216_qiaozhu.alchem."+str(Lambda)+".force.txt"
+pdb_file = "./input/lw_pimd_64.pdb"
+output_dcd = "./output/lw_pimd_64_alchem_lambda_"+str(Lambda)+".dcd"
+output_force_txt = "./output/lw_pimd_64.alchem."+str(Lambda)+".force.txt"
 show_force = False
 used4Alchemical = True
 
 # This model is trained by deepmd-kit 1.2.0
-model_file = "/home/dingye/Documents/Data/Water/input_1.2.0/lw_pimd.v1.pb"
+model_file = "./frozen_model/lw_pimd.v1.pb"
 
 print("nsteps:", nsteps, " Resid: ", alchemical_resid, " Lambda: ", Lambda)
 print(pdb_file)
@@ -143,6 +143,3 @@ end_time = time.time()
 cost_time = end_time - start_time
 print(platform.getName(),"%.4f s" % cost_time)
 
-#print(lw_pdb.topology.getNumBonds())
-#crd = simulation.context.getState(getPositions=True).getPositions()
-#PDBFile.writeFile(lw_pdb.topology, crd, open("./output/test.pdb", 'w'))

@@ -3,7 +3,7 @@
 #----------------------------------------------------
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-SET(CMAKE_VERBOSE_MAKEFILE ON)
+SET(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # We need to know where OpenMM is installed so we can access the headers and libraries.
 SET(OPENMM_DIR "/usr/local/openmm" CACHE PATH "Where OpenMM is installed")
@@ -11,20 +11,15 @@ INCLUDE_DIRECTORIES("${OPENMM_DIR}/include")
 LINK_DIRECTORIES("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")
 
 # Include the deepmd-kit.
-SET(DEEPMD_DIR "/home/dingye/.local/deepmd-kit-1.2.0/" CACHE PATH "Where deepmd-kit is installed")
+SET(DEEPMD_DIR "/usr/local/deepmd/" CACHE PATH "Where deepmd-kit is installed")
 INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include/deepmd")
 LINK_DIRECTORIES("${DEEPMD_DIR}/lib")
 
 # We need to know where TensorFlow is installed so we can access the headers and libraries.
-SET(TENSORFLOW_DIR "/home/dingye/.local/tensorflow/r1.14" CACHE PATH "Where TensorFlow is installed")
+SET(TENSORFLOW_DIR "/usr/local/tensorflow/r1.14" CACHE PATH "Where TensorFlow is installed")
 INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include")
 INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include/tensorflow/c")
 LINK_DIRECTORIES("${TENSORFLOW_DIR}/lib")
-
-# We need to know where TensorFlow is installed so we can access the headers and libraries.
-# We don't need tensorflow package here since we used NNPInter.h which is written by Prof.Han Wang.
-
-
 
 # Specify the C++ version we are building for.
 SET (CMAKE_CXX_STANDARD 11)

@@ -34,7 +34,7 @@ output_dcd = "./output/lw_pimd_64.dcd"
 output_force_txt = "./output/lw_pimd_64.force.txt"
 used4Alchemical = False
 show_force = False
-loadFromState = False
+
 NPT = False
 NVE = True
 NVT = False
@@ -48,9 +48,7 @@ Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
 
 # This model is trained by deepmd-kit 1.2.0
-model_file = "/home/dingye/Documents/Data/Water/input_1.2.0/lw_pimd.v1.pb"
-state_file = "./mpid4water/rstrestat-swm6_50ns.rst"
-
+model_file = "./frozen_model/lw_pimd.v1.pb"
 
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
@@ -152,16 +150,8 @@ for ii in range(num4forces):
 sim = Simulation4Deepmd(topology, dp_system, integrator, platform)
 
 sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
-
-if loadFromState:
-    # Read the state from MPID simulation.
-    with open(state_file, "r") as f:
-        mpid_state = mm.XmlSerializer.deserialize(f.read())
-    sim.context.setPositions(mpid_state.getPositions())
-    sim.context.setVelocities(mpid_state.getVelocities())
-else:
-    sim.context.setPositions(lw_pdb.getPositions())
-    sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
+sim.context.setPositions(lw_pdb.getPositions())
+sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
 
 
 # Add reporter.
@@ -184,6 +174,3 @@ end_time = time.time()
 cost_time = end_time - start_time
 print(platform.getName(),"%.4f s" % cost_time)
 
-#print(lw_pdb.topology.getNumBonds())
-#crd = sim.context.getState(getPositions=True).getPositions()
-#PDBFile.writeFile(lw_pdb.topology, crd, open("./output/test.pdb", 'w'))
