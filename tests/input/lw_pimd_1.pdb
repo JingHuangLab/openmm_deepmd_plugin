@@ -1,0 +1,9 @@
+HEADER 
+TITLE     Built with Packmol                                             
+REMARK   Packmol generated pdb file 
+REMARK   Home-Page: http://m3g.iqm.unicamp.br/packmol
+REMARK
+ATOM      1  OH2 TIP3A   1      9.093  9.289   10.194  1.00  0.00      SOLV    
+ATOM      2  H1  TIP3A   1      9.182  10.003   10.828  1.00  0.00      SOLV    
+ATOM      3  H2  TIP3A   1      9.988  9.021   10.006  1.00  0.00      SOLV    
+END
