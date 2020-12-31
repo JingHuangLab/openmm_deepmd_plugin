@@ -36,7 +36,9 @@ And then compile this plugin with steps below.
 
 ## Usage
 
-In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files. That's used for running of this plugin with on trained [water model](./tests/frozen_model/lw_pimd.v1.pb). Alchemical simulation feature for Deepmd-kit is also implement in this plugin. More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
+In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files for reference.
+That's used for running of this plugin with on trained [water model](./tests/frozen_model/lw_pimd.v1.pb).
+Alchemical simulation feature for Deepmd-kit is also implement in this plugin. More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
 
 ## Problem to Be Solved
 
