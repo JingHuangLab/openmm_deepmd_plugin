@@ -13,23 +13,23 @@ This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v1.14**,
 And then compile this plugin with steps below.
 
 1. Clone this repository and create a directory in which to build the plugin.
-   ```
+   ```shell
    git clone https://github.com/dingye18/openmm_deepmd_plugin.git
    cd openmm_deepmd_plugin && mkdir build && cd build
    ```
 2. Run `cmake` command with required parameters.
-   ```
+   ```shell
    cmake .. -DOPENMM_DIR={OPENMM_INSTALLED_DIR} -DDEEPMD_DIR={DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
    ```
    You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR={CUDA_DIR}`.
    The default value for `OPENMM_DIR`, `DEEPMD_DIR`, `TENSORFLOW_DIR` are `/usr/local/openmm/`, `/usr/local/deepmd`, `/usr/local/tensorflow` respectively. 
 3. Compile the shared library with command `make` running in `build` directory.
-   ```
+   ```shell
    make && sudo make install
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
 4. Compile the Python interface of this plugin with
-   ```
+   ```shell
    make PythonInstall
    ```
    Attention that running of this plugin with python need OpenMM python library to be installed first.

@@ -28,7 +28,7 @@ time_step = 0.1  # unit is femtosecond.
 temp = 300 # system temperature
 
 # Units is angstrom here.
-box = [150, 0, 0, 0, 150, 0, 0, 0, 150]
+box = [20, 0, 0, 0, 20, 0, 0, 0, 20]
 pdb_file = "./input/lw_pimd_64.pdb"
 output_dcd = "./output/lw_pimd_64.dcd"
 output_force_txt = "./output/lw_pimd_64.force.txt"
@@ -125,9 +125,9 @@ for atom in topology.atoms():
 dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinates.
-# Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * A))
+# Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
 # Third number is energy coefficient, which used for transformation graph output energy unit to openmm used unit (kJ/mol)
-dp_force.setUnitTransformCoefficients(10.0, 960.0, 96.0)
+dp_force.setUnitTransformCoefficients(10.0, 964.87, 96.487)
 
 print(nHydrogen, nOxygen)
 
