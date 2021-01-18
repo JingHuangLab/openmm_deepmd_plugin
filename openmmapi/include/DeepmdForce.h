@@ -43,6 +43,7 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
 #include "tensorflow/c/c_api.h"
+#include "mpi.h"
 #include <fstream>
 #include "internal/windowsExportDeepmd.h"
 
@@ -71,9 +72,11 @@ public:
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
+    void addBond(const int particle1, const int particle2);
     const std::string& getDeepmdGraphFile() const;
     const map<int, string>& getType4EachParticle() const;
     const map<string, vector<int>>& getParticles4EachType() const;
+    const vector<pair<int, int>> getBondsList() const;
     const map<string, int>& getTypesIndexMap() const;
     const string& getDeepmdOpFile() const;
     double getCoordUnitCoefficient() const;
@@ -113,6 +116,7 @@ private:
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
+    vector<pair<int, int>> bondsList;
     double coordCoeff, forceCoeff, energyCoeff;
 
     // Used for alchemical simulation.

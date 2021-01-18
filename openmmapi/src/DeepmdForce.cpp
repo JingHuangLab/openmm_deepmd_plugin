@@ -116,6 +116,15 @@ void DeepmdForce::addType(const int typeIndex, const string Type){
     }
 }
 
+void DeepmdForce::addBond(const int particle1, const int particle2){
+    bondsList.push_back(make_pair(particle1, particle2));
+}
+
+const vector<pair<int, int>> DeepmdForce::getBondsList() const{
+    return bondsList;
+}
+
+
 ForceImpl* DeepmdForce::createImpl() const {
     cout<<"Create DeepmdForce Implementation"<<endl ;
     return new DeepmdForceImpl(*this);

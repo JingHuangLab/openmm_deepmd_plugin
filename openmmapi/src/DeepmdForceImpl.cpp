@@ -62,6 +62,10 @@ double DeepmdForceImpl::calcForcesAndEnergy(ContextImpl& context, bool includeFo
     return 0.0;
 }
 
+vector<pair<int, int>> DeepmdForceImpl::getBondedParticles() const{
+    return owner.getBondsList();
+}
+
 std::vector<std::string> DeepmdForceImpl::getKernelNames() {
     std::vector<std::string> names;
     names.push_back(CalcDeepmdForceKernel::Name());
