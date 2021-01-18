@@ -16,25 +16,46 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.openmm.openmm import AndersenThermostat
 from simtk.unit import *
+from openmmtools.integrators import VelocityVerletIntegrator
+import argparse
 
 from OpenMMDeepmdPlugin import *
-from utils import ForceReporter, Simulation4Deepmd
+from utils import ForceReporter, Simulation4Deepmd, DrawScatter
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-m','--mole', dest='mole', help='Molecule name, used for pdb select.', required=True)
+parser.add_argument('-n', '--nsteps', type = int, dest='nsteps', help='Number of steps', default=100000)
+parser.add_argument('--dt', type = float, dest='timestep', help='Time step for simulation, unit is femtosecond', default=0.2)
+parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
+parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 
-nsteps = 100000
-nstout = 100
-time_step = 0.1  # unit is femtosecond.
+args = parser.parse_args()
+
+mole_name = args.mole
+nsteps = args.nsteps
+time_step = args.timestep
+nstout = args.nstout
+
+#nsteps = 150000
+#nstout = 100
+#time_step = 0.2  # unit is femtosecond.
 temp = 300 # system temperature
 
 # Units is angstrom here.
-box = [20, 0, 0, 0, 20, 0, 0, 0, 20]
-pdb_file = "./input/lw_pimd_64.pdb"
-output_dcd = "./output/lw_pimd_64.dcd"
-output_force_txt = "./output/lw_pimd_64.force.txt"
+#box = [20, 0, 0, 0, 20, 0, 0, 0, 20]
+#box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
+box = [args.box, 0, 0, 0, args.box, 0, 0, 0, args.box]
+
+#mole_name = "lw_packmol_256_10ns_npt_tip3p.npt"
+pdb_file = "./input/"+mole_name+".pdb"
+output_dcd = "./output/"+mole_name+".dcd"
+output_force_txt = "./output/"+mole_name+".force.txt"
+output_log = "./output/"+mole_name+".log"
+tot_index = -5
 used4Alchemical = False
 show_force = False
-
+loadFromState = False
 NPT = False
 NVE = True
 NVT = False
@@ -46,9 +67,10 @@ Thermostat = "Langevin"
 # Integrator setting:
 Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
+#Integrator = "VelocityVerletIntegrator"
 
 # This model is trained by deepmd-kit 1.2.0
-model_file = "./frozen_model/lw_pimd.v1.pb"
+model_file = "./graph/lw_pimd.se_a.pb"
 
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
@@ -72,7 +94,7 @@ randomSeed = random.randint(0, natoms)
 box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
 box = [x.value_in_unit(u.nanometers) for x in box]
 
-print("Box setting:", box)
+print("Box setting (unit is nanometers):", box)
 # Create the system.
 dp_system = mm.System()
 # Set the thermostat or Integrator here.
@@ -99,6 +121,9 @@ elif NVE:
     elif Integrator == "VariableVerletIntegrator":
         print("VariableVerletIntegrator is used")
         integrator = mm.VariableVerletIntegrator(0.000001)
+    elif Integrator == "VelocityVerletIntegrator":
+        print("VelocityVerletIntegrator is used")
+        integrator = VelocityVerletIntegrator(time_step*u.femtoseconds)
 
 # Get platform
 platform = mm.Platform.getPlatformByName('CUDA')
@@ -116,6 +141,10 @@ for atom in topology.atoms():
         dp_system.addParticle(element.oxygen.mass)
         dp_force.addParticle(atom.index, element.oxygen.symbol)
         nOxygen += 1
+        for at in atom.residue.atoms():
+            topology.addBond(at, atom)
+            if at.index != atom.index:
+                dp_force.addBond(atom.index, at.index)
     elif atom.element == element.hydrogen:
         dp_system.addParticle(element.hydrogen.mass)
         dp_force.addParticle(atom.index, element.hydrogen.symbol)
@@ -124,20 +153,19 @@ for atom in topology.atoms():
 # Set the deepmd compiled op library file path so that we can load it.
 dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
-# First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinates.
+# First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
 # Third number is energy coefficient, which used for transformation graph output energy unit to openmm used unit (kJ/mol)
-dp_force.setUnitTransformCoefficients(10.0, 964.87, 96.487)
+dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
 
 print(nHydrogen, nOxygen)
 
-dp_force.setForceGroup(1)
+#dp_force.setForceGroup(1)
 # Add force in dp_system
 dp_system.addForce(dp_force)
 # Runnning the NPT ensemble
 if NPT:
     dp_system.addForce(MonteCarloBarostat(1*u.atmospheres, temp*u.kelvin))
-# Running NVT ensemble.
 if NVT:
     # Setttings for Anderson thermostat.
     if Thermostat == "Anderson":
@@ -148,18 +176,21 @@ print(num4forces, " forces totally.")
 for ii in range(num4forces):
     print(dp_system.getForce(ii))
 
+print(dp_system.usesPeriodicBoundaryConditions())
+
 sim = Simulation4Deepmd(topology, dp_system, integrator, platform)
 
 sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
-sim.context.setPositions(lw_pdb.getPositions())
-sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
 
+sim.context.setPositions(lw_pdb.getPositions())
+if not NVE:
+    sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
 
 # Add reporter.
-sim.reporters.append(app.DCDReporter(output_dcd, nstout))
+sim.reporters.append(app.DCDReporter(output_dcd, nstout, enforcePeriodicBox=False))
 sim.reporters.append(
-        StateDataReporter(sys.stdout, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
-                          remainingTime=True, speed=True, totalSteps=nsteps, separator='\t')
+        StateDataReporter(output_log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
+                          remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
     )
 
 if show_force:
@@ -174,4 +205,18 @@ sim.step(nsteps)
 end_time = time.time()
 cost_time = end_time - start_time
 print(platform.getName(),"%.4f s" % cost_time)
+
+with open(output_log, "r")  as f:
+    log_content = f.readlines()
+
+total_energy = []
+
+for ii, line in enumerate(log_content):    
+    if ii == 0:
+        continue
+    temp = line.split()
+    total_energy.append(float(temp[tot_index]))
+
+total_energy = np.array(total_energy)
+print(output_log, total_energy.shape[0], np.average(total_energy), np.std(total_energy), np.std(total_energy)/natoms)
 
