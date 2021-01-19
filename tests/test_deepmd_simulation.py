@@ -16,7 +16,6 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.openmm.openmm import AndersenThermostat
 from simtk.unit import *
-from openmmtools.integrators import VelocityVerletIntegrator
 import argparse
 
 from OpenMMDeepmdPlugin import *
@@ -70,13 +69,13 @@ Integrator = "VerletIntegrator"
 #Integrator = "VelocityVerletIntegrator"
 
 # This model is trained by deepmd-kit 1.2.0
-model_file = "./graph/lw_pimd.se_a.pb"
+model_file = "./frozen_model/lw_pimd.se_a.pb"
 
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
 print(pdb_file)
-print("System Temperature: ", temp)
-print("Time Step: ", time_step)
+print("System Temperature: %.2f kelvin", temp)
+print("Time Step: %.2f fs"%time_step)
 print(output_dcd)
 print(show_force, output_force_txt)
 print(model_file)
@@ -121,9 +120,6 @@ elif NVE:
     elif Integrator == "VariableVerletIntegrator":
         print("VariableVerletIntegrator is used")
         integrator = mm.VariableVerletIntegrator(0.000001)
-    elif Integrator == "VelocityVerletIntegrator":
-        print("VelocityVerletIntegrator is used")
-        integrator = VelocityVerletIntegrator(time_step*u.femtoseconds)
 
 # Get platform
 platform = mm.Platform.getPlatformByName('CUDA')

@@ -55,7 +55,7 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     coordUnitCoeff = force.getCoordUnitCoefficient();
     natoms = system.getNumParticles();
 
-
+    /*
     TF_Status* LoadOpStatus = TF_NewStatus();
     string OP_library = force.getDeepmdOpFile();
     cout<<"Load Custom OP first: "<<OP_library<<endl;
@@ -67,7 +67,8 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     }
     TF_DeleteStatus(LoadOpStatus);
     TF_DeleteLibraryHandle(op_lib);
-
+    */
+   
     numb_models = 1;
     // Load the ordinary graph firstly.
     int node_rank = 0;

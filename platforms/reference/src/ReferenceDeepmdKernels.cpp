@@ -76,6 +76,7 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
 
     natoms = system.getNumParticles();
 
+    /*
     // Load the custom op for tensorflow.
     TF_Status* LoadOpStatus = TF_NewStatus();
     string OP_library = force.getDeepmdOpFile();
@@ -88,7 +89,7 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
     }
     TF_DeleteStatus(LoadOpStatus);
     TF_DeleteLibraryHandle(op_lib);
-
+    */
     numb_models = 1;
     // Load the ordinary graph firstly.
     int node_rank = 0;
