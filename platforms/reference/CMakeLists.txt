@@ -5,7 +5,7 @@
 # Collect up information about the version of the OpenMM library we're building
 # and make it available to the code so it can be built into the binaries.
 
-SET(OPENMMDEEPMDREFERENCE_LIBRARY_NAME DeepmdReference)
+SET(OPENMMDEEPMDREFERENCE_LIBRARY_NAME OpenMMDeepmdReference)
 
 SET(SHARED_TARGET ${OPENMMDEEPMDREFERENCE_LIBRARY_NAME})
 
