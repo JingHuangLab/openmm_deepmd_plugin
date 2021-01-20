@@ -93,7 +93,7 @@ const string& DeepmdForce::getDeepmdOpFile() const{return op_file;}
 const map<int, string>& DeepmdForce::getType4EachParticle() const{return type4EachParticle;}
 const map<string, vector<int>>& DeepmdForce::getParticles4EachType() const{return particleGroup4EachType;}
 const map<string, int>& DeepmdForce::getTypesIndexMap() const{return typesIndexMap;}
-const int getGPUNode() const{
+const int DeepmdForce::getGPUNode() const{
     return gpu_node;
 }
 
