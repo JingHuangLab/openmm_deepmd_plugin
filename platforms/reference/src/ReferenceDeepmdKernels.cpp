@@ -76,7 +76,7 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
 
     natoms = system.getNumParticles();
 
-    /*
+    
     // Load the custom op for tensorflow.
     TF_Status* LoadOpStatus = TF_NewStatus();
     string OP_library = force.getDeepmdOpFile();
@@ -89,10 +89,10 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
     }
     TF_DeleteStatus(LoadOpStatus);
     TF_DeleteLibraryHandle(op_lib);
-    */
+    
     numb_models = 1;
     // Load the ordinary graph firstly.
-    int node_rank = 0;
+    int node_rank = force.getGPUNode();
     nnp_inter = NNPInter(graph_file, node_rank);
     if(used4Alchemical){
         cout<<"Used for alchemical simulation. Load the other two graphs here."<<endl;
@@ -190,7 +190,7 @@ double ReferenceCalcDeepmdForceKernel::execute(ContextImpl& context, bool includ
         dcoord[ii * 3 + 1] = pos[ii][1] * coordUnitCoeff;
         dcoord[ii * 3 + 2] = pos[ii][2] * coordUnitCoeff;
     }
-    
+    /*
     cout<<"Coord: ";
     for(int ii = 0; ii < natoms; ++ii){
         cout<<dcoord[ii * 3 + 0]<<","<<dcoord[ii * 3 + 1]<<","<<dcoord[ii * 3 + 2]<<",";
@@ -206,7 +206,7 @@ double ReferenceCalcDeepmdForceKernel::execute(ContextImpl& context, bool includ
         cout<<dbox[ii]<<',';
     }
     cout<<endl;
-    
+    */
 
     // Assign the input coord for alchemical simulation.
     if(used4Alchemical){
@@ -323,7 +323,7 @@ double ReferenceCalcDeepmdForceKernel::execute(ContextImpl& context, bool includ
     if(includeForces){
         for(int ii = 0; ii < natoms; ii ++){
         //cout<<"Force on atom "<<ii<<endl;
-        cout<<AddedForces[ii * 3 + 0]<<" "<<AddedForces[ii * 3 + 1]<<" "<<AddedForces[ii * 3 + 2]<<endl;
+        //cout<<AddedForces[ii * 3 + 0]<<" "<<AddedForces[ii * 3 + 1]<<" "<<AddedForces[ii * 3 + 2]<<endl;
         force[ii][0] += AddedForces[ii * 3 + 0];
         force[ii][1] += AddedForces[ii * 3 + 1];
         force[ii][2] += AddedForces[ii * 3 + 2];

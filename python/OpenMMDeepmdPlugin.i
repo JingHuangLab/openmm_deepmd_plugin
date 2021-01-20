@@ -60,6 +60,7 @@ public:
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
     void setDeepmdOpFile(const string op_file);
+    void setGPUNode(const int gpu_id);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     /*
     * Used for alchemical simulation.

@@ -69,6 +69,7 @@ public:
     // For ordinary simulation.
     void setDeepmdOpFile(const string op_file);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
+    void setGPUNode(const int gpu_id);
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
@@ -78,6 +79,7 @@ public:
     const vector<pair<int, int>> getBondsList() const;
     const map<string, int>& getTypesIndexMap() const;
     const string& getDeepmdOpFile() const;
+    const int getGPUNode() const;
     double getCoordUnitCoefficient() const;
     double getForceUnitCoefficient() const;
     double getEnergyUnitCoefficient() const;
@@ -111,6 +113,7 @@ private:
     // graph_1 and 2 are used for alchemical simulation.
     string graph_file, graph_file_1, graph_file_2;
     bool used4Alchemical = false;
+    int gpu_node = 0;
     string op_file = "/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so";
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;

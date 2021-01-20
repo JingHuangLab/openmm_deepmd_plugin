@@ -74,6 +74,10 @@ void DeepmdForce::setDeepmdOpFile(const string op_file){
     this->op_file = op_file;
 }
 
+void DeepmdForce::setGPUNode(const int gpu_id){
+    gpu_node = gpu_id;
+}
+
 void DeepmdForce::setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient){
     coordCoeff = coordCoefficient;
     forceCoeff = forceCoefficient;
@@ -88,8 +92,10 @@ const string& DeepmdForce::getDeepmdGraphFile() const{return graph_file;}
 const string& DeepmdForce::getDeepmdOpFile() const{return op_file;}
 const map<int, string>& DeepmdForce::getType4EachParticle() const{return type4EachParticle;}
 const map<string, vector<int>>& DeepmdForce::getParticles4EachType() const{return particleGroup4EachType;}
-
 const map<string, int>& DeepmdForce::getTypesIndexMap() const{return typesIndexMap;}
+const int getGPUNode() const{
+    return gpu_node;
+}
 
 void DeepmdForce::addParticle(const int particleIndex, const string particleType){
     auto insertResult = type4EachParticle.insert(pair<int, string>(particleIndex, particleType));
