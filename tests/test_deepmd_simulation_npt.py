@@ -71,8 +71,8 @@ output_chk = os.path.join(output_dir, mole_name+".npt")
 output_pdb = os.path.join(output_dir, mole_name+".npt")
 
 
-num_dcd = ceil(nsteps / ((dcd_dt / time_step)* 1000))
-dcd_steps = nsteps/num_dcd
+num_dcd = ceil(nsteps / ((dcd_dt / time_step)* 1000000))
+dcd_steps = int(nsteps/num_dcd)
 
 
 tot_index = -5
@@ -206,10 +206,10 @@ sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
 
 for ii in range(num_dcd):
     dcd = output_dcd+ "."+str(ii)+".dcd"
-    chk = os.path.join(output_chk + "."+str(ii)+".chk")
-    state = os.path.join(output_state + '.'+str(ii)+".state")
-    log = os.path.join(output_log + "."+str(ii)+".log")
-    pdb = os.path.join(output_pdb + "."+str(ii)+".pdb")
+    chk = output_chk + "."+str(ii)+".chk"
+    state = output_state + '.'+str(ii)+".state"
+    log = output_log + "."+str(ii)+".log"
+    pdb = output_pdb + "."+str(ii)+".pdb"
 
     # Set initial velocities and positions.
     if not restart:
@@ -227,7 +227,7 @@ for ii in range(num_dcd):
         )
 
     # Run dynamics
-    print('Running dynamics')
+    print('Running dynamics of %dth dcd, %d steps, %s, %s, %s, %s'%(ii+1, dcd_steps, dcd, chk, log, state))
     start_time = time.time()
     sim.step(dcd_steps)
     end_time = time.time()
@@ -235,15 +235,15 @@ for ii in range(num_dcd):
     print(platform.getName(),"%.4f s" % cost_time)
     # Save state and checkpoint.
     sim.saveCheckpoint(chk)
-    state=sim.context.getState(getPositions=True, getVelocities=True)    
+    save_state=sim.context.getState(getPositions=True, getVelocities=True)    
     with open(state, 'w') as f:
-        f.write(mm.XmlSerializer.serialize(state))
+        f.write(mm.XmlSerializer.serialize(save_state))
     # Set restart = True here. And update the checkpoint file.
     restart = True
     checkpoint = chk
 
-    position=state.getPositions()
-    velocity=state.getVelocities()
+    position=save_state.getPositions()
+    velocity=save_state.getVelocities()
     app.PDBFile.writeFile(sim.topology, position, open(pdb, 'w'))
 
     with open(output_log, "r")  as f:
