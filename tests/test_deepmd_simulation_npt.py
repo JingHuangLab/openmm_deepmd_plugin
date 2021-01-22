@@ -29,7 +29,7 @@ parser.add_argument('-m','--mole', dest='mole', help='Molecule name, used for pd
 parser.add_argument('-n', '--nsteps', type = int, dest='nsteps', help='Number of steps', default=100000)
 parser.add_argument('--dt', type = float, dest='timestep', help='Time step for simulation, unit is femtosecond', default=0.2)
 parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
-parser.add_argument('--dcd-dt', type = int, dest='dcd_dt', help='dcd file save time gap. Unit is ns. Default to be 0.1ns ', default=0.1)
+parser.add_argument('--dcd-dt', type = float, dest='dcd_dt', help='dcd file save time gap. Unit is ns. Default to be 0.1ns ', default=0.1)
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 parser.add_argument('--output', type = str, dest='output', help='Output directory when write logs and dcd.', default="./output/")
 parser.add_argument('--restart', type = bool, dest='restart', help='Restart or not', default=False)
@@ -246,7 +246,7 @@ for ii in range(num_dcd):
     velocity=save_state.getVelocities()
     app.PDBFile.writeFile(sim.topology, position, open(pdb, 'w'))
 
-    with open(output_log, "r")  as f:
+    with open(log, "r")  as f:
         log_content = f.readlines()
 
     total_energy = []
@@ -259,5 +259,5 @@ for ii in range(num_dcd):
 
     total_energy = np.array(total_energy)
     print("%d th dcd saved at %s: "%(ii+1, dcd))
-    print(output_log, total_energy.shape[0], np.average(total_energy), np.std(total_energy), np.std(total_energy)/natoms)
+    print(log, total_energy.shape[0], np.average(total_energy), np.std(total_energy), np.std(total_energy)/natoms)
 
