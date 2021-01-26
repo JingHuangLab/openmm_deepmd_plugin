@@ -33,7 +33,7 @@ parser.add_argument('--dcd-dt', type = float, dest='dcd_dt', help='dcd file save
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 parser.add_argument('--output', type = str, dest='output', help='Output directory when write logs and dcd.', default="./output/")
 parser.add_argument('--restart', type = bool, dest='restart', help='Restart or not', default=False)
-parser.add_argument('--chk', type = str, dest='chk', help='Path to .rst file. Used when restart set to be true.', default="")
+parser.add_argument('--chk', type = str, dest='chk', help='Path to .chk file. Used when restart set to be true.', default="")
 
 args = parser.parse_args()
 
