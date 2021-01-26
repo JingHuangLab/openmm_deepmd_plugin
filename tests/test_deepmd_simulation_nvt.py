@@ -16,7 +16,9 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.openmm.openmm import AndersenThermostat
 from simtk.unit import *
+#from openmmtools.integrators import VelocityVerletIntegrator
 import argparse
+from math import floor, ceil
 
 from OpenMMDeepmdPlugin import *
 from utils import ForceReporter, Simulation4Deepmd, DrawScatter
@@ -27,8 +29,11 @@ parser.add_argument('-m','--mole', dest='mole', help='Molecule name, used for pd
 parser.add_argument('-n', '--nsteps', type = int, dest='nsteps', help='Number of steps', default=100000)
 parser.add_argument('--dt', type = float, dest='timestep', help='Time step for simulation, unit is femtosecond', default=0.2)
 parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
+parser.add_argument('--dcd-dt', type = float, dest='dcd_dt', help='dcd file save time gap. Unit is ns. Default to be 0.1ns ', default=0.1)
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
-parser.add_argument('--state', type = str, dest='state', help='Initial state file for simulation', default="")
+parser.add_argument('--output', type = str, dest='output', help='Output directory when write logs and dcd.', default="./output/")
+parser.add_argument('--restart', type = bool, dest='restart', help='Restart or not', default=False)
+parser.add_argument('--chk', type = str, dest='chk', help='Path to .rst file. Used when restart set to be true.', default="")
 parser.add_argument('--temp', type = int, dest='temp', help='Temperature of this simulation.', default=300)
 
 args = parser.parse_args()
@@ -37,6 +42,10 @@ mole_name = args.mole
 nsteps = args.nsteps
 time_step = args.timestep
 nstout = args.nstout
+output_dir = os.path.join(args.output, mole_name)
+restart = args.restart
+checkpoint = args.chk
+dcd_dt = args.dcd_dt
 
 #nsteps = 150000
 #nstout = 100
@@ -48,15 +57,29 @@ temp = args.temp # system temperature
 #box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
 box = [args.box, 0, 0, 0, args.box, 0, 0, 0, args.box]
 
+
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
 #mole_name = "lw_packmol_256_10ns_npt_tip3p.npt"
 pdb_file = "./input/"+mole_name+".pdb"
-output_dcd = "./output/"+mole_name+".nve.dcd"
-output_force_txt = "./output/"+mole_name+".force.txt"
-output_log = "./output/"+mole_name+".nve.log"
+
+output_dcd =  os.path.join(output_dir, mole_name+".nvt." + str(temp))
+output_force_txt = os.path.join(output_dir, mole_name+".force.txt")
+output_log = os.path.join(output_dir, mole_name+".nvt." + str(temp))
+output_state = os.path.join(output_dir, mole_name+".nvt." + str(temp))
+output_chk = os.path.join(output_dir, mole_name+".nvt." + str(temp))
+output_pdb = os.path.join(output_dir, mole_name+".nvt." + str(temp))
+
+
+num_dcd = ceil(nsteps / ((dcd_dt / time_step)* 1000000))
+dcd_steps = int(nsteps/num_dcd)
+
+
 tot_index = -5
 used4Alchemical = False
 show_force = False
-loadFromState = True
+loadFromState = False
 NPT = False
 NVE = False
 NVT = True
@@ -72,12 +95,11 @@ Integrator = "VerletIntegrator"
 
 # This model is trained by deepmd-kit 1.2.0
 model_file = "./frozen_model/lw_pimd.se_a.pb"
-state_file = args.state
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
 print(pdb_file)
-print("System Temperature: %.2f kelvin", temp)
-print("Time Step: %.2f fs"%time_step)
+print("System Temperature: ", temp)
+print("Time Step: ", time_step)
 print(output_dcd)
 print(show_force, output_force_txt)
 print(model_file)
@@ -122,6 +144,9 @@ elif NVE:
     elif Integrator == "VariableVerletIntegrator":
         print("VariableVerletIntegrator is used")
         integrator = mm.VariableVerletIntegrator(0.000001)
+    elif Integrator == "VelocityVerletIntegrator":
+        print("VelocityVerletIntegrator is used")
+        integrator = VelocityVerletIntegrator(time_step*u.femtoseconds)
 
 # Get platform
 platform = mm.Platform.getPlatformByName('CUDA')
@@ -175,57 +200,65 @@ for ii in range(num4forces):
     print(dp_system.getForce(ii))
 
 print(dp_system.usesPeriodicBoundaryConditions())
-
 sim = Simulation4Deepmd(topology, dp_system, integrator, platform)
-
 sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
 
-sim.context.setPositions(lw_pdb.getPositions())
-if not NVE:
-    sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
 
-# Add reporter.
-#sim.reporters.append(app.DCDReporter(output_dcd, nstout, enforcePeriodicBox=False))
-sim.reporters.append(app.DCDReporter(output_dcd, nstout))
-sim.reporters.append(
-        StateDataReporter(output_log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
-                          remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
-    )
+for ii in range(num_dcd):
+    dcd = output_dcd+ "."+str(ii)+".dcd"
+    chk = output_chk + "."+str(ii)+".chk"
+    state = output_state + '.'+str(ii)+".state"
+    log = output_log + "."+str(ii)+".log"
+    pdb = output_pdb + "."+str(ii)+".pdb"
 
-if show_force:
-    force_reporter_1 = ForceReporter(output_force_txt, None, nstout)
-    sim.reporters.append(force_reporter_1)
+    # Set initial velocities and positions.
+    if not restart:
+        sim.context.setPositions(lw_pdb.getPositions())
+        if not NVE:
+            sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
+    elif restart:
+        sim.loadCheckpoint(checkpoint)
 
-if loadFromState:
-    # Read the state from NPT DeepMD simulation.
-    with open(state_file, "r") as f:
-        load_state = mm.XmlSerializer.deserialize(f.read())
-    sim.context.setPositions(load_state.getPositions())
-    sim.context.setVelocities(load_state.getVelocities())
-else:
-    sim.context.setPositions(lw_pdb.getPositions())
-    if not NVE:
-        sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
+    # Add reporter.
+    sim.reporters.append(app.DCDReporter(dcd, nstout))
+    sim.reporters.append(
+            StateDataReporter(log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
+                            remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
+        )
 
-# Run dynamics
-print('Running dynamics')
-start_time = time.time()
-sim.step(nsteps)
-end_time = time.time()
-cost_time = end_time - start_time
-print(platform.getName(),"%.4f s" % cost_time)
+    # Run dynamics
+    print('Running dynamics of %dth dcd, %d steps, %s, %s, %s, %s'%(ii+1, dcd_steps, dcd, chk, log, state))
+    start_time = time.time()
+    sim.step(dcd_steps)
+    sim.reporters = [] # Clear reporters.
+    end_time = time.time()
+    cost_time = end_time - start_time
+    print(platform.getName(),"%.4f s" % cost_time)
+    # Save state and checkpoint.
+    sim.saveCheckpoint(chk)
+    save_state=sim.context.getState(getPositions=True, getVelocities=True)    
+    with open(state, 'w') as f:
+        f.write(mm.XmlSerializer.serialize(save_state))
+    # Set restart = True here. And update the checkpoint file.
+    restart = True
+    checkpoint = chk
 
-with open(output_log, "r")  as f:
-    log_content = f.readlines()
+    position=save_state.getPositions()
+    velocity=save_state.getVelocities()
+    app.PDBFile.writeFile(sim.topology, position, open(pdb, 'w'))
 
-total_energy = []
+    with open(log, "r")  as f:
+        log_content = f.readlines()
 
-for ii, line in enumerate(log_content):    
-    if ii == 0:
-        continue
-    temp = line.split()
-    total_energy.append(float(temp[tot_index]))
+    total_energy = []
 
-total_energy = np.array(total_energy)
-print(output_log, total_energy.shape[0], np.average(total_energy), np.std(total_energy), np.std(total_energy)/natoms)
+    for ii, line in enumerate(log_content):    
+        if ii == 0:
+            continue
+        temp = line.split()
+        total_energy.append(float(temp[tot_index]))
+
+    total_energy = np.array(total_energy)
+    print("%d th dcd saved at %s: "%(ii+1, dcd))
+    print(log, total_energy.shape[0], np.average(total_energy), np.std(total_energy), np.std(total_energy)/natoms)
 
