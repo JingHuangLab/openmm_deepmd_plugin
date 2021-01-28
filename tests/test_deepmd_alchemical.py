@@ -58,13 +58,13 @@ Lambda = args.Lambda
 box = [args.box, 0, 0, 0, args.box, 0, 0, 0, args.box]
 
 if not os.path.exists(output_dir):
-    os.makedirs(output_dir, exists_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
 num_dcd = ceil(nsteps / ((dcd_dt / timestep)* 1000000))
 dcd_steps = int(nsteps/num_dcd)
 
 # Set the input .pdb file
-pdb_file = "./input/"+mole+".pdb"
+pdb_file = "./input/"+mole_name+".pdb"
 
 output_dcd = os.path.join(output_dir, mole_name+".lambda."+str(Lambda)+".nvt")
 output_force_txt = os.path.join(output_dir, mole_name+".alchem."+str(Lambda)+".nvt")
@@ -230,7 +230,7 @@ for ii in range(num_dcd):
         simulation.loadCheckpoint(checkpoint)
     
     # Add reporter.
-    simulation.reporters.append(app.DCDReporter(output_dcd, nstout))
+    simulation.reporters.append(app.DCDReporter(dcd, nstout))
     simulation.reporters.append(
             StateDataReporter(log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True, remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
         )
