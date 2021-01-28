@@ -222,8 +222,7 @@ for ii in range(num_dcd):
     # Add reporter.
     sim.reporters.append(app.DCDReporter(dcd, nstout))
     sim.reporters.append(
-            StateDataReporter(log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
-                            remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
+            StateDataReporter(log, nstout, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True, remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
         )
 
     # Run dynamics
