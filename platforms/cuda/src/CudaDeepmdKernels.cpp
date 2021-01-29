@@ -174,7 +174,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         dbox[7] = box[2][1] * coordUnitCoeff;
         dbox[8] = box[2][2] * coordUnitCoeff;
     }else{
-        throw OpenMMException("System have no periodic boundary conditions. Which is not compatible with deepmd-kit.");
+        throw OpenMMException("System have no periodic boundary conditions. Which is not compatible with Deepmd Plugin for now.");
     }
     // Set input coord.
     for(int ii = 0; ii < natoms; ++ii){

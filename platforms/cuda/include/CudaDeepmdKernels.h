@@ -87,16 +87,7 @@ private:
     vector<float > aparam;
     float eps;
     #endif
-    void make_ttm_aparam(
-    #ifdef HIGH_PREC
-        vector<double > & dparam
-    #else
-        vector<float > & dparam
-    #endif
-        );
-    bool do_ttm;
-    string ttm_fix_id;
-
+    
     int natoms;
     int nghost = 0;
     ENERGYTYPE dener;
