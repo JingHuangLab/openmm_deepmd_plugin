@@ -14,7 +14,7 @@ And then compile this plugin with steps below.
 
 1. Clone this repository and create a directory in which to build the plugin.
    ```shell
-   git clone https://github.com/dingye18/openmm_deepmd_plugin.git
+   git clone https://github.com/JingHuangLab/openmm_deepmd_plugin.git
    cd openmm_deepmd_plugin && mkdir build && cd build
    ```
 2. Run `cmake` command with required parameters.
