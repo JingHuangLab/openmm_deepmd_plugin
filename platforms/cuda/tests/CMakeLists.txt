@@ -4,7 +4,6 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 SET(OPENMM_DIR "/usr/local/openmm_gcc6.5_7.5_cuda_9.2" CACHE PATH "Where OpenMM is installed")
 INCLUDE_DIRECTORIES("${OPENMM_DIR}/include")
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 LINK_DIRECTORIES("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")
 
 # We need to know where TensorFlow is installed so we can access the headers and libraries.
@@ -38,25 +37,29 @@ else ()
 endif()
 add_definitions (${PREC_DEF})
 
-add_executable(testDeepmdPluginReference TestDeepmdPlugin4Reference.cpp neighborList.cpp)
+add_executable(testDeepmdPluginCUDA TestDeepmdPlugin4CUDA.cpp)
 add_executable(testDeepmdPluginWithMicromd TestDeepmdPluginWithMicromd.cpp micromd.cpp)
 
-target_link_libraries(testDeepmdPluginReference ${TensorFlowFramework_LIBRARY} ${TensorFlowCore_LIBRARY})
-TARGET_LINK_LIBRARIES(testDeepmdPluginReference deepmd)
-TARGET_LINK_LIBRARIES(testDeepmdPluginReference OpenMM)
-TARGET_LINK_LIBRARIES(testDeepmdPluginReference OpenMMDeepmd)
-TARGET_LINK_LIBRARIES(testDeepmdPluginReference OpenMMDeepmdReference)
-target_include_directories(testDeepmdPluginReference PUBLIC ${TensorFlowFramework_INCLUDE} ${PROJECT_BINARY_DIR})
+target_link_libraries(testDeepmdPluginCUDA ${TensorFlowFramework_LIBRARY} ${TensorFlowCore_LIBRARY})
+TARGET_LINK_LIBRARIES(testDeepmdPluginCUDA deepmd)
+TARGET_LINK_LIBRARIES(testDeepmdPluginCUDA OpenMM)
+TARGET_LINK_LIBRARIES(testDeepmdPluginCUDA OpenMMDeepmd)
+TARGET_LINK_LIBRARIES(testDeepmdPluginCUDA OpenMMDeepmdCUDA)
+TARGET_LINK_LIBRARIES(testDeepmdPluginCUDA OpenMMCUDA)
+target_include_directories(testDeepmdPluginCUDA PUBLIC ${TensorFlowFramework_INCLUDE} ${PROJECT_BINARY_DIR})
 
 target_link_libraries(testDeepmdPluginWithMicromd ${TensorFlowFramework_LIBRARY} ${TensorFlowCore_LIBRARY})
 TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd deepmd)
 TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd OpenMM)
 TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd OpenMMDeepmd)
-TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd OpenMMDeepmdReference)
+TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd OpenMMDeepmdCUDA)
+TARGET_LINK_LIBRARIES(testDeepmdPluginWithMicromd OpenMMCUDA)
 target_include_directories(testDeepmdPluginWithMicromd PUBLIC ${TensorFlowFramework_INCLUDE} ${PROJECT_BINARY_DIR})
 
+
+
 set_target_properties(
-    testDeepmdPluginReference
+    testDeepmdPluginCUDA
     PROPERTIES 
     COMPILE_FLAGS ${OP_CXX_FLAG}
     )
