@@ -29,6 +29,7 @@ parser.add_argument('--dt', type = float, dest='timestep', help='Time step for s
 parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 parser.add_argument('--state', type = str, dest='state', help='Initial state file for simulation', default="")
+parser.add_argument('--graph', type = str, dest='graph', help='Trained TF graph, used for simulation.', default="./frozen_model/lw_pimd.se_a.wlsc-gpu.pb")
 
 args = parser.parse_args()
 
@@ -55,7 +56,7 @@ output_log = "./output/"+mole_name+".nve.log"
 tot_index = -5
 used4Alchemical = False
 show_force = False
-loadFromState = True
+loadFromState = False 
 NPT = False
 NVE = True
 NVT = False
@@ -70,7 +71,8 @@ Integrator = "VerletIntegrator"
 #Integrator = "VelocityVerletIntegrator"
 
 # This model is trained by deepmd-kit 1.2.0
-model_file = "./frozen_model/lw_pimd.se_a.pb"
+# model_file = "./frozen_model/lw_pimd.se_a.wlsc-gpu.pb"
+model_file = args.graph
 state_file = args.state
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
@@ -148,7 +150,7 @@ for atom in topology.atoms():
         nHydrogen += 1
 
 # Set the deepmd compiled op library file path so that we can load it.
-dp_force.setDeepmdOpFile("/home/dingye/local/deepmd1.2.0_tf1.14/lib/libdeepmd_op.so")
+dp_force.setDeepmdOpFile("/public/home/huangjinggroup/dingye/.local/deepmd-kit/v1.2.0/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
@@ -202,8 +204,8 @@ if loadFromState:
     sim.context.setVelocities(load_state.getVelocities())
 else:
     sim.context.setPositions(lw_pdb.getPositions())
-    if not NVE:
-        sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
+    #if not NVE:
+    sim.context.setVelocitiesToTemperature(temp*u.kelvin, randomSeed)
 
 # Run dynamics
 print('Running dynamics')
