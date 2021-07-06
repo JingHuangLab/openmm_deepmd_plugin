@@ -150,7 +150,7 @@ for atom in topology.atoms():
         nHydrogen += 1
 
 # Set the deepmd compiled op library file path so that we can load it.
-dp_force.setDeepmdOpFile("/public/home/huangjinggroup/dingye/.local/deepmd-kit/v1.2.0/lib/libdeepmd_op.so")
+dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
