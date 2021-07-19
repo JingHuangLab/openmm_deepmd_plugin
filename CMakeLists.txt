@@ -79,6 +79,18 @@ FOREACH(subdir ${DEEPMD_PLUGIN_SOURCE_SUBDIRS})
     INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/include)
 ENDFOREACH(subdir)
 
+if (DEFINED FLOAT_PREC)
+  string ( TOLOWER ${FLOAT_PREC} lower_float_prec )
+  if (lower_float_prec STREQUAL "high")
+    set(PREC_DEF "-DHIGH_PREC")
+  else ()
+    set(PREC_DEF "")
+  endif ()
+else ()
+    set(PREC_DEF "-DHIGH_PREC")
+endif()
+add_definitions (${PREC_DEF})
+
 # Create the library.
 
 ADD_LIBRARY(${SHARED_DEEPMD_TARGET} SHARED ${SOURCE_FILES} ${SOURCE_INCLUDE_FILES} ${API_INCLUDE_FILES})
