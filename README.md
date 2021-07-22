@@ -9,7 +9,7 @@ forces to particles during a simulation.
 
 ## Installation
 
-This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v1.14**, **Deepmd-kit, v1.2.0**. It uses CMake as its build tool. CUDA is also needed for this plugin. This plugin support **CUDA, Reference** platform for now.
+This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v1.14**, **Deepmd-kit, v1.2.0**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
 And then compile this plugin with steps below.
 
 1. Clone this repository and create a directory in which to build the plugin.
@@ -22,10 +22,11 @@ And then compile this plugin with steps below.
    cmake .. -DOPENMM_DIR={OPENMM_INSTALLED_DIR} -DDEEPMD_DIR={DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
    ```
    You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR={CUDA_DIR}`.
+   By default, precision is set to be `double`, you can also set the precision to be `float` with cmake flags `-DFLOAT_PREC=low`.
    The default value for `OPENMM_DIR`, `DEEPMD_DIR`, `TENSORFLOW_DIR` are `/usr/local/openmm/`, `/usr/local/deepmd`, `/usr/local/tensorflow` respectively. 
 3. Compile the shared library with command `make` running in `build` directory.
    ```shell
-   make && sudo make install
+   make && make install
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
 4. Compile the Python interface of this plugin with
@@ -39,7 +40,3 @@ And then compile this plugin with steps below.
 In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files for reference.
 That's used for running of this plugin with on trained [water model](./tests/frozen_model/lw_pimd.v1.pb).
 Alchemical simulation feature for Deepmd-kit is also implement in this plugin. More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
-
-## Problem to Be Solved
-
-**Energy not conserved with NVE simulation......**
