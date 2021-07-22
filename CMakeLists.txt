@@ -31,7 +31,7 @@ IF(${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
     IF(WIN32)
         SET(CMAKE_INSTALL_PREFIX "$ENV{ProgramFiles}/OpenMM" CACHE PATH "Where to install the plugin" FORCE)
     ELSE(WIN32)
-        SET(CMAKE_INSTALL_PREFIX "/usr/local/openmm" CACHE PATH "Where to install the plugin" FORCE)
+        SET(CMAKE_INSTALL_PREFIX "${OPENMM_DIR}" CACHE PATH "Where to install the plugin" FORCE)
     ENDIF(WIN32)
 ENDIF(${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
 
