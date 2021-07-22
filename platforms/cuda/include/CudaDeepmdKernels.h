@@ -41,6 +41,7 @@
 #include <tensorflow/core/graph/default_device.h>
 #include <tensorflow/core/graph/graph_def_builder.h>
 
+using namespace deepmd;
 
 namespace DeepmdPlugin {
 
@@ -63,30 +64,7 @@ private:
     // graph_file 1 and 2 are used for alchemical simulation.
     std::string graph_file, graph_file_1, graph_file_2;
     // nnp_inter_1 and nnp_inter_2 are used for alchemical simulation.
-    NNPInter nnp_inter, nnp_inter_1, nnp_inter_2;
-    //NNPInterModelDevi nnp_inter_model_devi;
-    unsigned numb_models;
-    double cutoff;
-    int numb_types;
-    vector<vector<double > > all_force;
-    ofstream fp;
-    int out_freq;
-    string out_file;
-    int dim_fparam;
-    int dim_aparam;
-    int out_each;
-    int out_rel;
-    bool single_model;
-
-    #ifdef HIGH_PREC
-    vector<double > fparam;
-    vector<double > aparam;
-    double eps;
-    #else
-    vector<float > fparam;
-    vector<float > aparam;
-    float eps;
-    #endif
+    DeepPot dp, dp_1, dp_2;    
     
     int natoms;
     int nghost = 0;
@@ -96,12 +74,6 @@ private:
     vector<VALUETYPE> dcoord;
     vector<VALUETYPE> dbox;
     vector<int> dtype;
-
-    #ifdef HIGH_PREC
-    vector<double > daparam;
-    #else 
-    vector<float > daparam;
-    #endif
 
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
