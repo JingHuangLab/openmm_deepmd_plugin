@@ -36,6 +36,7 @@
 #include <algorithm>
 
 using namespace DeepmdPlugin;
+using namespace deepmd;
 using namespace OpenMM;
 using namespace tensorflow;
 using namespace std;
@@ -69,16 +70,15 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     TF_DeleteLibraryHandle(op_lib);
     
    
-    numb_models = 1;
     // Load the ordinary graph firstly.
     int node_rank = force.getGPUNode();
-    nnp_inter = NNPInter(graph_file, node_rank);
+    dp = DeepPot(graph_file, node_rank);
     if(used4Alchemical){
         cout<<"Used for alchemical simulation. Load the other two graphs here."<<endl;
         graph_file_1 = force.getGraph1_4Alchemical();
         graph_file_2 = force.getGraph2_4Alchemical();
-        nnp_inter_1 = NNPInter(graph_file_1, node_rank);
-        nnp_inter_2 = NNPInter(graph_file_2, node_rank);
+        dp_1 = DeepPot(graph_file_1, node_rank);
+        dp_2 = DeepPot(graph_file_2, node_rank);
         lambda = force.getLambda();
         atomsIndex4Graph1 = force.getAtomsIndex4Graph1();
         atomsIndex4Graph2 = force.getAtomsIndex4Graph2();
@@ -205,7 +205,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
     }
 
     #ifdef HIGH_PREC
-      nnp_inter.compute (dener, dforce, dvirial, dcoord, dtype, dbox, nghost);
+      dp.compute (dener, dforce, dvirial, dcoord, dtype, dbox);
     #else
         vector<float> dcoord_(dcoord.size());
         vector<float> dbox_(dbox.size());
@@ -214,7 +214,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         vector<float> dforce_(dforce.size(), 0);
         vector<float> dvirial_(dvirial.size(), 0);
         double dener_ = 0;
-        nnp_inter.compute (dener_, dforce_, dvirial_, dcoord_, dtype, dbox_, nghost);
+        dp.compute (dener_, dforce_, dvirial_, dcoord_, dtype, dbox_);
         for (unsigned dd = 0; dd < dforce.size(); ++dd) dforce[dd] = dforce_[dd];	
         for (unsigned dd = 0; dd < dvirial.size(); ++dd) dvirial[dd] = dvirial_[dd];
 
@@ -224,9 +224,9 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
     if (used4Alchemical){
         #ifdef HIGH_PREC
             // Compute the first graph.
-            nnp_inter_1.compute (dener4alchemical[1], dforce4alchemical[1], dvirial4alchemical[1], dcoord4alchemical[1], dtype4alchemical[1], dbox4alchemical[1], nghost);
+            dp_1.compute (dener4alchemical[1], dforce4alchemical[1], dvirial4alchemical[1], dcoord4alchemical[1], dtype4alchemical[1], dbox4alchemical[1]);
             // Compute the second graph.
-            nnp_inter_2.compute (dener4alchemical[2], dforce4alchemical[2], dvirial4alchemical[2], dcoord4alchemical[2], dtype4alchemical[2], dbox4alchemical[2], nghost);
+            dp_2.compute (dener4alchemical[2], dforce4alchemical[2], dvirial4alchemical[2], dcoord4alchemical[2], dtype4alchemical[2], dbox4alchemical[2]);
         #else
             // Compute the first graph.
             vector<float> dcoord_1(dcoord4alchemical[1].size());
@@ -236,7 +236,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
             vector<float> dforce_1(dforce4alchemical[1].size(), 0);
             vector<float> dvirial_1(dvirial4alchemical[1].size(), 0);
             double dener_1 = 0;
-            nnp_inter_1.compute (dener_1, dforce_1, dvirial_1, dcoord_1, dtype4alchemical[1], dbox_1, nghost);
+            dp_1.compute (dener_1, dforce_1, dvirial_1, dcoord_1, dtype4alchemical[1], dbox_1);
             for (unsigned dd = 0; dd < dforce4alchemical[1].size(); ++dd) dforce4alchemical[1][dd] = dforce_1[dd];	
             for (unsigned dd = 0; dd < dvirial4alchemical[1].size(); ++dd) dvirial4alchemical[1][dd] = dvirial_1[dd];
             dener4alchemical[1] = dener_1;
@@ -249,7 +249,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
             vector<float> dforce_2(dforce4alchemical[2].size(), 0);
             vector<float> dvirial_2(dvirial4alchemical[2].size(), 0);
             double dener_2 = 0;
-            nnp_inter_2.compute (dener_2, dforce_2, dvirial_2, dcoord_2, dtype4alchemical[2], dbox_2, nghost);
+            dp_2.compute (dener_2, dforce_2, dvirial_2, dcoord_2, dtype4alchemical[2], dbox_2);
             for (unsigned dd = 0; dd < dforce4alchemical[2].size(); ++dd) dforce4alchemical[2][dd] = dforce_2[dd];	
             for (unsigned dd = 0; dd < dvirial4alchemical[2].size(); ++dd) dvirial4alchemical[2][dd] = dvirial_2[dd];
             dener4alchemical[2] = dener_2;

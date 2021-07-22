@@ -35,8 +35,8 @@
 #include "openmm/Context.h"
 #include "openmm/Force.h"
 #include <vector>
-// Include NNPInter.h for TF Inference.
-#include "NNPInter.h"
+// Include DeepPot.h for DeepPotential model inference.
+#include "DeepPot.h"
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/framework/op.h"
 #include <tensorflow/core/public/session.h>
@@ -54,6 +54,7 @@ typedef float  VALUETYPE;
 typedef double ENERGYTYPE;
 #endif
 
+using namespace std;
 
 namespace DeepmdPlugin {
 
@@ -114,7 +115,7 @@ private:
     string graph_file, graph_file_1, graph_file_2;
     bool used4Alchemical = false;
     int gpu_node = 0;
-    string op_file = "/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so";
+    string op_file = "";
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;

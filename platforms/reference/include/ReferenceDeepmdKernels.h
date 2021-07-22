@@ -35,6 +35,7 @@
 #include "DeepmdKernels.h"
 #include "openmm/Platform.h"
 #include <vector>
+using namespace deepmd;
 
 namespace DeepmdPlugin {
 
@@ -73,40 +74,13 @@ public:
 private:
     // graph_file 1 and 2 are used for alchemical simulation.
     std::string graph_file, graph_file_1, graph_file_2;
-    // nnp_inter_1 and nnp_inter_2 are used for alchemical simulation.
-    NNPInter nnp_inter, nnp_inter_1, nnp_inter_2;
-    //NNPInterModelDevi nnp_inter_model_devi;
-    unsigned numb_models;
+    // dp_1 and dp_2 are used for alchemical simulation.
+    DeepPot dp, dp_1, dp_2;
+
     double cutoff;
     int numb_types;
     vector<vector<double > > all_force;
     ofstream fp;
-    int out_freq;
-    string out_file;
-    int dim_fparam;
-    int dim_aparam;
-    int out_each;
-    int out_rel;
-    bool single_model;
-
-    #ifdef HIGH_PREC
-    vector<double > fparam;
-    vector<double > aparam;
-    double eps;
-    #else
-    vector<float > fparam;
-    vector<float > aparam;
-    float eps;
-    #endif
-    void make_ttm_aparam(
-    #ifdef HIGH_PREC
-        vector<double > & dparam
-    #else
-        vector<float > & dparam
-    #endif
-        );
-    bool do_ttm;
-    string ttm_fix_id;
 
     int natoms;
     int nghost = 0;
@@ -135,7 +109,7 @@ private:
 
     // Parameters for alchemical simulation.
     bool used4Alchemical = false;
-    double lambda; // U = lambda * U_A + (1 - lambda) * (U_1 + U_2). Where U_A comes from the original graph, U_1 and U_2 comes from alchemical graph.
+    double lambda; // U = lambda * U_A + (1 - lambda) * (U_1 + U_2). Where U_A comes from the original graph, U_1 and U_2 come from two alchemical graph.
     vector<int> atomsIndex4Graph1;
     vector<int> atomsIndex4Graph2;
     map<int, vector<VALUETYPE>> dcoord4alchemical;
