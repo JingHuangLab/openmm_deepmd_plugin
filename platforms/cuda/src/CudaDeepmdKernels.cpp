@@ -55,20 +55,6 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     energyUnitCoeff = force.getEnergyUnitCoefficient();
     coordUnitCoeff = force.getCoordUnitCoefficient();
     natoms = system.getNumParticles();
-
-    
-    TF_Status* LoadOpStatus = TF_NewStatus();
-    string OP_library = force.getDeepmdOpFile();
-    cout<<"Load Custom OP first: "<<OP_library<<endl;
-    TF_Library* op_lib = TF_LoadLibrary(OP_library.c_str(), LoadOpStatus);
-
-    if (TF_GetCode(LoadOpStatus) != TF_OK) {
-        cout<<TF_GetCode(LoadOpStatus)<<endl;
-        throw OpenMMException(string("Error loading TensorFlow Custom OP: ")+TF_Message(LoadOpStatus));
-    }
-    TF_DeleteStatus(LoadOpStatus);
-    TF_DeleteLibraryHandle(op_lib);
-    
    
     // Load the ordinary graph firstly.
     int node_rank = force.getGPUNode();

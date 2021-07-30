@@ -42,7 +42,6 @@
 #include <tensorflow/core/public/session.h>
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
-#include "tensorflow/c/c_api.h"
 #include <fstream>
 #include "internal/windowsExportDeepmd.h"
 
@@ -68,7 +67,6 @@ public:
     ~DeepmdForce();
     
     // For ordinary simulation.
-    void setDeepmdOpFile(const string op_file);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     void setGPUNode(const int gpu_id);
     void addParticle(const int particleIndex, const string particleType);
@@ -115,7 +113,6 @@ private:
     string graph_file, graph_file_1, graph_file_2;
     bool used4Alchemical = false;
     int gpu_node = 0;
-    string op_file = "";
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;

@@ -47,8 +47,6 @@ using namespace OpenMM;
 using namespace tensorflow;
 using namespace std;
 
-
-
 static vector<RealVec>& extractPositions(ContextImpl& context) {
     ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
     return *((vector<RealVec>*) data->positions);
@@ -77,20 +75,6 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
 
     natoms = system.getNumParticles();
 
-    
-    // Load the custom op for tensorflow.
-    TF_Status* LoadOpStatus = TF_NewStatus();
-    string OP_library = force.getDeepmdOpFile();
-    cout<<"Load Custom OP first: "<<OP_library<<endl;
-    TF_Library* op_lib = TF_LoadLibrary(OP_library.c_str(), LoadOpStatus);
-
-    if (TF_GetCode(LoadOpStatus) != TF_OK) {
-        cout<<TF_GetCode(LoadOpStatus)<<endl;
-        throw OpenMMException(string("Error loading TensorFlow Custom OP: ")+TF_Message(LoadOpStatus));
-    }
-    TF_DeleteStatus(LoadOpStatus);
-    TF_DeleteLibraryHandle(op_lib);
-    
     // Load the ordinary graph firstly.
     int node_rank = force.getGPUNode();
     dp = DeepPot(graph_file, node_rank);

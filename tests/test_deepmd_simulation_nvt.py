@@ -84,8 +84,8 @@ NPT = False
 NVE = False
 NVT = True
 # Thermostat setting:
-Thermostat = "Langevin"
-#Thermostat = "Anderson"
+#Thermostat = "Langevin"
+Thermostat = "Anderson"
 #Thermostat = "NoseHoover"
 
 # Integrator setting:
@@ -93,8 +93,8 @@ Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
 #Integrator = "VelocityVerletIntegrator"
 
-# This model is trained by deepmd-kit 1.2.0
-model_file = "./frozen_model/lw_pimd.se_a.pb"
+# This model is trained by deepmd-kit 2.0.0.b3
+model_file = "./frozen_model/graph_from_han_dp2.0_compress.pb"
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
 print(pdb_file)
@@ -174,7 +174,7 @@ for atom in topology.atoms():
         nHydrogen += 1
 
 # Set the deepmd compiled op library file path so that we can load it.
-dp_force.setDeepmdOpFile("/home/dingye/local/deepmd1.2.0_tf1.14/lib/libdeepmd_op.so")
+#dp_force.setDeepmdOpFile("/home/dingye/local/deepmd1.2.0_tf1.14/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
