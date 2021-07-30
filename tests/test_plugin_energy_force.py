@@ -90,7 +90,6 @@ if __name__ == "__main__":
 
     dat_dir = args.dat_dir
     graph = args.graph
-    #graph = "./graph/lw_pimd.se_a_v1.2.0.float_step.1M_batchSize.1.pb"
     type_raw = os.path.join(dat_dir, "type.raw")
     with open(type_raw, 'r') as f:
         content = f.readlines()

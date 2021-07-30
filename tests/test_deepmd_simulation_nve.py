@@ -29,7 +29,7 @@ parser.add_argument('--dt', type = float, dest='timestep', help='Time step for s
 parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 parser.add_argument('--state', type = str, dest='state', help='Initial state file for simulation', default="")
-parser.add_argument('--graph', type = str, dest='graph', help='Trained TF graph, used for simulation.', default="./frozen_model/lw_pimd.se_a.wlsc-gpu.pb")
+parser.add_argument('--graph', type = str, dest='graph', help='Trained TF graph, used for simulation.', default="./frozen_model/graph_from_han_dp2.0_compress.pb")
 
 args = parser.parse_args()
 
@@ -70,8 +70,6 @@ Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
 #Integrator = "VelocityVerletIntegrator"
 
-# This model is trained by deepmd-kit 1.2.0
-# model_file = "./frozen_model/lw_pimd.se_a.wlsc-gpu.pb"
 model_file = args.graph
 state_file = args.state
 
@@ -149,15 +147,11 @@ for atom in topology.atoms():
         dp_force.addParticle(atom.index, element.hydrogen.symbol)
         nHydrogen += 1
 
-# Set the deepmd compiled op library file path so that we can load it.
-dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
 # Third number is energy coefficient, which used for transformation graph output energy unit to openmm used unit (kJ/mol)
 dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
-
-print(nHydrogen, nOxygen)
 
 #dp_force.setForceGroup(1)
 # Add force in dp_system

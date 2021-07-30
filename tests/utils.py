@@ -430,8 +430,6 @@ class AlchemicalContext():
         dp_force.setAtomsIndex4Graph2(graph2_particles)
         dp_force.setLambda(Lambda)
 
-        # Set the deepmd compiled op library file path so that we can load it.
-        dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
         # Set the units transformation coefficients from openmm to graph input tensors.
         # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
         # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
@@ -525,7 +523,6 @@ class DeepPotentialContext():
                 dp_force.addParticle(ii, element.hydrogen.symbol)
                 nHydrogen += 1
 
-        dp_force.setDeepmdOpFile("/home/dingye/.local/deepmd-kit-1.2.0/lib/libdeepmd_op.so")
         dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
 
         dp_system.addForce(dp_force)
