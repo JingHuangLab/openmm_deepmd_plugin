@@ -38,12 +38,29 @@
 
 using namespace DeepmdPlugin;
 using namespace OpenMM;
+using namespace deepmd;
 using namespace std;
 
 extern "C" void registerDeepmdSerializationProxies();
 
+const double TOL = 1e-5;
+const string graph = "../tests/frozen_model/graph_from_han_dp2.0_compress.pb";
+const double coordUnitCoeff = 10;
+const double forceUnitCoeff = 964.8792534459;
+const double energyUnitCoeff = 96.48792534459;
+const double temperature = 300;
+
 void testSerialization() {
     // Create a Force.
+    DeepmdForce dp_force = DeepmdForce(graph, " ", " ", false);
+    
+    stringstream buffer;
+    XmlSerializer::serialize<DeepmdForce>(&dp_force, "Force", buffer);
+    DeepmdForce* copy = XmlSerializer::deserialize<DeepmdForce>(buffer);
+
+    // Compare the two forces to see if they are identical.
+    DeepmdForce& dp_force2 = *copy;
+    ASSERT_EQUAL(dp_force2.getDeepmdGraphFile(), dp_force.getDeepmdGraphFile());
     return;
 }
 

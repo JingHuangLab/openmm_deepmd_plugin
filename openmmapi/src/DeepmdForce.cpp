@@ -128,7 +128,6 @@ const vector<pair<int, int>> DeepmdForce::getBondsList() const{
 
 
 ForceImpl* DeepmdForce::createImpl() const {
-    cout<<"Create DeepmdForce Implementation"<<endl ;
     return new DeepmdForceImpl(*this);
 }
 

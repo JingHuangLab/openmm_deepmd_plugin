@@ -77,7 +77,6 @@ public:
     const map<string, vector<int>>& getParticles4EachType() const;
     const vector<pair<int, int>> getBondsList() const;
     const map<string, int>& getTypesIndexMap() const;
-    const string& getDeepmdOpFile() const;
     const int getGPUNode() const;
     double getCoordUnitCoefficient() const;
     double getForceUnitCoefficient() const;

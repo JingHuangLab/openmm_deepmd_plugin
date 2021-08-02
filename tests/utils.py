@@ -348,15 +348,30 @@ class Simulation4Deepmd(object):
 
 
 
-def DrawScatter(x, y, name, xlabel="Time", ylabel="Force, unit is KJ/(mol*nm)", withLine = True):
+def DrawScatter(x, y, name, xlabel="Time", ylabel="Force, unit is KJ/(mol*nm)", withLine = True, fitting = False):
     plt.clf()
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.title(name)
 
-    plt.scatter(x, y, c='b', alpha=0.5)
-    if withLine:
-        plt.plot(x, y)
+    color_list = ['r', 'g', 'b']
+
+    if len(y.shape) > 1 and y.shape[1] != 0:
+        for ii, y_row in enumerate(y):
+            plt.scatter(x, y_row, c=color_list[ii], alpha=0.5)
+            if withLine:
+                plt.plot(x, y_row)    
+    else:
+        plt.scatter(x, y, c='b', alpha=0.5)
+        if withLine:
+            plt.plot(x, y)
+    if fitting:
+        coef, bias = np.polyfit(x, y, 1)
+        min_x = min(x)
+        max_x = max(x)
+        fitting_x = np.linspace(min_x, max_x, 500)
+        fitting_y = coef * fitting_x + bias
+        plt.plot(fitting_x, fitting_y, '-r')
 
     plt.savefig("./output/"+name+'.png')
     return

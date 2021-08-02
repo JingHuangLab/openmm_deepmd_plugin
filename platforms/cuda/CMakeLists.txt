@@ -74,3 +74,6 @@ INSTALL(TARGETS ${SHARED_TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/plugins
 IF (APPLE)
     INSTALL(CODE "EXECUTE_PROCESS(COMMAND install_name_tool -add_rpath @loader_path/.. ${CMAKE_INSTALL_PREFIX}/lib/plugins/lib${SHARED_TARGET}.dylib)")
 ENDIF (APPLE)
+
+
+SUBDIRS (tests)
