@@ -9,7 +9,7 @@ forces to particles during a simulation.
 
 ## Installation
 
-This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v1.14**, **Deepmd-kit, v1.2.0**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
+This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v2.4.1**, **Deepmd-kit, v2.0.0.b3**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
 And then compile this plugin with steps below.
 
 1. Clone this repository and create a directory in which to build the plugin.
@@ -38,5 +38,5 @@ And then compile this plugin with steps below.
 ## Usage
 
 In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files for reference.
-That's used for running of this plugin with on trained [water model](./tests/frozen_model/lw_pimd.v1.pb).
+That's used for running of this plugin with on trained [water model](./tests/frozen_model/graph_from_han_dp2.0_compress.pb).
 Alchemical simulation feature for Deepmd-kit is also implement in this plugin. More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
