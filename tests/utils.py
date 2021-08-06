@@ -404,7 +404,7 @@ class AlchemicalContext():
                                 1.0/u.picoseconds,  # Friction coefficient
                                 0.2*u.femtoseconds, # Time step
         )
-        platform = mm.Platform.getPlatformByName('Reference')
+        platform = mm.Platform.getPlatformByName('CUDA')
         # Create the system.
         dp_system = mm.System()
 
@@ -465,45 +465,6 @@ class AlchemicalContext():
         potential = state.getPotentialEnergy()
         return potential
 
-class TIP3P_Context():
-    def __init__(self, pdb, box):
-        import simtk.openmm.app.element as elem
-        import simtk.openmm.app.forcefield as forcefield
-        from simtk import openmm as mm
-        from sys import stdout, argv
-        from simtk.openmm import LangevinIntegrator
-                
-        # Construct the system and dp_force.
-        pdb_object = PDBFile(pdb)        
-        topology = pdb_object.topology
-        natoms = topology.getNumAtoms()
-        forcefield = ForceField('tip3p.xml')
-
-        box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
-        box = [x.value_in_unit(u.nanometers) for x in box]
-
-        #integrator = mm.VerletIntegrator(1*u.femtoseconds)
-        platform = mm.Platform.getPlatformByName('Reference')
-        pdb_object.topology.setPeriodicBoxVectors(box)
-        system = forcefield.createSystem(pdb_object.topology, nonbondedMethod=PME, nonbondedCutoff=8.6*u.angstrom, switchDistance=8.5*u.angstrom, ewaldErrorTolerance=0.00001, constraints=HBonds)
-        integrator = LangevinIntegrator(300*u.kelvin, 1.0/u.picosecond, 2*u.femtoseconds)
-        #system.addForce(MonteCarloBarostat(1*atmospheres, temp*kelvin))
-        integrator.setConstraintTolerance(0.00001)
-        
-        #simulation = Simulation(pdb.topology, system, integrator, platform)
-        
-        self.system = system
-        self.context = mm.Context(self.system, integrator, platform)
-        self.context.setPeriodicBoxVectors(box[0], box[1], box[2])
-        self.topology = topology
-        return
-
-    def getPotentialEnergy(self, positions):
-        self.context.setPositions(positions)
-        state = self.context.getState(getEnergy=True)
-        potential = state.getPotentialEnergy()
-        return potential
-
 class DeepPotentialContext():
     def __init__(self, model_file, type_list):
         try:
@@ -522,7 +483,7 @@ class DeepPotentialContext():
         dp_force.addType(0, element.oxygen.symbol)
         dp_force.addType(1, element.hydrogen.symbol)
         
-        platform = mm.Platform.getPlatformByName('Reference')
+        platform = mm.Platform.getPlatformByName('CUDA')
         # Create the system.
         dp_system = mm.System()
 
@@ -539,12 +500,11 @@ class DeepPotentialContext():
                 nHydrogen += 1
 
         dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
-
         dp_system.addForce(dp_force)
+
         self.system = dp_system
         self.context = mm.Context(self.system, integrator, platform)
         return
-
 
     def getPotentialEnergy(self, positions):
         self.context.setPositions(positions)

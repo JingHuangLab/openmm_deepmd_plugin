@@ -91,8 +91,8 @@ Thermostat = "Langevin"
 Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
 
-# This model is trained by deepmd-kit 1.2.0
-model_file = "./frozen_model/lw_pimd.se_a.pb"
+# This model is trained by deepmd-kit 2.0.0.b3
+model_file = "./frozen_model/graph_from_han_dp2.0_compress.pb"
 
 print("nsteps:", nsteps, " Resid: ", alchemical_resid, " Lambda: ", Lambda)
 print(pdb_file)
@@ -179,8 +179,6 @@ dp_force.setAtomsIndex4Graph1(graph1_particles)
 dp_force.setAtomsIndex4Graph2(graph2_particles)
 dp_force.setLambda(Lambda)
 
-# Set the deepmd compiled op library file path so that we can load it.
-dp_force.setDeepmdOpFile("/home/dingye/local/deepmd1.2.0_tf1.14/lib/libdeepmd_op.so")
 # Set the units transformation coefficients from openmm to graph input tensors.
 # First is the coordinates coefficient, which used for transformation from nanometers to graph needed coordinate unit.
 # Second number is force coefficient, which used for transformation graph output force unit to openmm used unit (kJ/(mol * nm))
@@ -206,7 +204,6 @@ num4forces = dp_system.getNumForces()
 print(num4forces, " forces totally.")
 for ii in range(num4forces):
     print(dp_system.getForce(ii))
-
 
 
 simulation = Simulation4Deepmd(topology, dp_system, integrator, platform)
