@@ -61,7 +61,7 @@ def readEnergyAndDraw(mole_name, log_file, totalOnly=False, natoms = 256 * 3):
     DrawScatter(x, y, name, xlabel, ylabel)
     return
 
-def draw_potential_distribution(logs_1, logs_2, temp1, temp2, bins_num=20):
+def draw_potential_distribution(logs_1, logs_2, temp1, temp2, bins_num=30):
     potential = dict()
     potential[1] = []
     potential[2] = []
@@ -75,7 +75,8 @@ def draw_potential_distribution(logs_1, logs_2, temp1, temp2, bins_num=20):
                 continue
             temp = line.split()
             ene = float(temp[3])
-            potential[1].append(ene)
+            if (ii - 1) % 10 == 0: 
+                potential[1].append(ene)
     
     for log in logs_2:
         with open(log, 'r') as f:
@@ -85,7 +86,8 @@ def draw_potential_distribution(logs_1, logs_2, temp1, temp2, bins_num=20):
                 continue
             temp = line.split()
             ene = float(temp[3])
-            potential[2].append(ene)
+            if ( ii - 1 ) % 10 == 0:
+                potential[2].append(ene)
     
     potential[1] = np.array(potential[1])
     potential[2] = np.array(potential[2])
@@ -209,10 +211,16 @@ def getRDF(pdb_file, dcd_files, fig_name):
         exit(1)
 
     u = mda.Universe(pdb_file, dcd_files)
+    all_atom = u.select_atoms("all")
+    with MDAnalysis.Writer("./output/lw_256_nvt_300K_4ns.xtc", all_atom.n_atoms) as W:
+        for ts in u.trajectory:
+            if ts.frame % 10 == 0:
+                W.write(all_atom)
+
     oxygen = u.select_atoms("name O")
 
     print("Running RDF")
-    rdf = InterRDF(oxygen, oxygen, nbins=500, range=[2.0, 10.0], verbose=True)
+    rdf = InterRDF(oxygen, oxygen, nbins=400, range=[1.9, 10.0], verbose=True)
     rdf.run()
 
     num = len(rdf.bins)
