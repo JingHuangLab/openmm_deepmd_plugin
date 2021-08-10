@@ -102,7 +102,6 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
         }
 
         if ((natoms4alchemical[1] + natoms4alchemical[2]) != natoms){
-        //cout<<natoms4alchemical[1]<<" "<<natoms4alchemical[2]<<" "<<natoms<<endl;
         throw OpenMMException("Wrong atoms number for graph1 and graph2. Summation of atoms number in graph 1 and 2 is not equal to total atoms number.");
         }
     }

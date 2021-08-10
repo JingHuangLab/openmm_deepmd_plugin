@@ -81,7 +81,6 @@ public:
             return (dynamic_cast<DeepmdPlugin::DeepmdForce*>(&force) != NULL);
         }
     }
-
 };
 
 }

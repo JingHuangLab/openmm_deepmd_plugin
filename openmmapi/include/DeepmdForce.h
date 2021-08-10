@@ -42,7 +42,6 @@
 #include <tensorflow/core/public/session.h>
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
-#include <fstream>
 #include "internal/windowsExportDeepmd.h"
 
 #ifdef HIGH_PREC
@@ -61,12 +60,12 @@ namespace DeepmdPlugin {
 class OPENMM_EXPORT_DEEPMD DeepmdForce : public OpenMM::Force {
 public:
     /**
-     * Create an DeepmdForce.
+     * Create a DeepmdForce.
      */
     DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
     ~DeepmdForce();
     
-    // For ordinary simulation.
+    // For normal simulation.
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     void setGPUNode(const int gpu_id);
     void addParticle(const int particleIndex, const string particleType);
@@ -81,7 +80,6 @@ public:
     double getCoordUnitCoefficient() const;
     double getForceUnitCoefficient() const;
     double getEnergyUnitCoefficient() const;
-    
     
     // For alchemical simulation.
     void setAlchemical(const bool used4Alchemical);
@@ -104,7 +102,6 @@ public:
         //Deepmd-kit simulation must needs PBC for now.
         return true;
     }
-
 protected:
     OpenMM::ForceImpl* createImpl() const;
 private:

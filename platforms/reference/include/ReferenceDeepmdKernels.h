@@ -40,7 +40,7 @@ using namespace deepmd;
 namespace DeepmdPlugin {
 
 /**
- * This kernel is invoked by ExampleForce to calculate the forces acting on the system and the energy of the system.
+ * This kernel is invoked by DeepmdForceImpl to calculate the forces acting on the system and the energy of the system.
  */
 class ReferenceCalcDeepmdForceKernel : public CalcDeepmdForceKernel {
 public:
@@ -69,33 +69,19 @@ public:
      * @param context    the context to copy parameters to
      * @param force      the ExampleForce to copy the parameters from
      */
-
-
 private:
     // graph_file 1 and 2 are used for alchemical simulation.
     std::string graph_file, graph_file_1, graph_file_2;
     // dp_1 and dp_2 are used for alchemical simulation.
     DeepPot dp, dp_1, dp_2;
 
-    double cutoff;
-    int numb_types;
-    vector<vector<double > > all_force;
-    ofstream fp;
-
     int natoms;
-    int nghost = 0;
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
     vector<VALUETYPE> dvirial;
     vector<VALUETYPE> dcoord;
     vector<VALUETYPE> dbox;
     vector<int> dtype;
-
-    #ifdef HIGH_PREC
-    vector<double > daparam;
-    #else 
-    vector<float > daparam;
-    #endif
 
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
@@ -122,8 +108,6 @@ private:
 
     map<int, int> natoms4alchemical;
     vector<pair<int, int>> atomsIndexMap4U_B;
-
-
 };
 
 } // namespace DeepmdPlugin

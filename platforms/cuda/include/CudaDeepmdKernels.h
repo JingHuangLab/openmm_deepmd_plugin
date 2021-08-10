@@ -46,7 +46,7 @@ using namespace deepmd;
 namespace DeepmdPlugin {
 
 /**
- * This kernel is invoked by Deepmd to calculate the forces acting on the system and the energy of the system.
+ * This kernel is invoked by DeepmdForceImpl to calculate the forces acting on the system and the energy of the system.
  */
 class CudaCalcDeepmdForceKernel : public CalcDeepmdForceKernel{
 public:
@@ -74,7 +74,6 @@ private:
     vector<VALUETYPE> dcoord;
     vector<VALUETYPE> dbox;
     vector<int> dtype;
-
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
@@ -93,13 +92,11 @@ private:
     map<int, vector<VALUETYPE>> dcoord4alchemical;
     map<int, vector<VALUETYPE>> dbox4alchemical;
     map<int, vector<int>> dtype4alchemical;
-
     map<int, ENERGYTYPE> dener4alchemical;
     map<int, vector<VALUETYPE>> dforce4alchemical;
     map<int, vector<VALUETYPE>> dvirial4alchemical;
     map<int, int> natoms4alchemical;
     vector<pair<int, int>> atomsIndexMap4U_B;
-
 };
 
 
