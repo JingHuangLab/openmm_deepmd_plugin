@@ -37,11 +37,6 @@
 #include <vector>
 // Include DeepPot.h for DeepPotential model inference.
 #include "DeepPot.h"
-#include "tensorflow/core/platform/env.h"
-#include "tensorflow/core/framework/op.h"
-#include <tensorflow/core/public/session.h>
-#include "tensorflow/core/framework/op_kernel.h"
-#include "tensorflow/core/framework/shape_inference.h"
 #include "internal/windowsExportDeepmd.h"
 
 #ifdef HIGH_PREC
