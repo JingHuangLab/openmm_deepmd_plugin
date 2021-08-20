@@ -50,7 +50,7 @@ public:
      * Initialize the kernel.
      * 
      * @param system     the System this kernel will be applied to
-     * @param force      the ExampleForce this kernel will be used for
+     * @param force      the DeepmdForce this kernel will be used for
      */
     ~ReferenceCalcDeepmdForceKernel();
     void initialize(const OpenMM::System& system, const DeepmdForce& force);
@@ -67,7 +67,7 @@ public:
      * Copy changed parameters over to a context.
      *
      * @param context    the context to copy parameters to
-     * @param force      the ExampleForce to copy the parameters from
+     * @param force      the DeepmdForce to copy the parameters from
      */
 private:
     // graph_file 1 and 2 are used for alchemical simulation.

@@ -41,7 +41,7 @@
 namespace DeepmdPlugin {
 
 /**
- * This kernel is invoked by ExampleForce to calculate the forces acting on the system and the energy of the system.
+ * This kernel is invoked by DeepmdForce to calculate the forces acting on the system and the energy of the system.
  */
 class CalcDeepmdForceKernel : public OpenMM::KernelImpl {
 public:
@@ -54,7 +54,7 @@ public:
      * Initialize the kernel.
      * 
      * @param system     the System this kernel will be applied to
-     * @param force      the ExampleForce this kernel will be used for
+     * @param force      the DeepmdForce this kernel will be used for
      */
     virtual void initialize(const OpenMM::System& system, const DeepmdForce& force) = 0;
     /**

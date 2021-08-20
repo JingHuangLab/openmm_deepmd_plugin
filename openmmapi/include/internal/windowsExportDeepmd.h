@@ -12,7 +12,7 @@
  *       being compiled with the expectation of linking with the
  *       OpenMM static library (nothing special needed)
  * In the CMake script for building this library, we define one of the symbols
- *     EXAMPLE_BUILDING_{SHARED|STATIC}_LIBRARY
+ *     DEEPMD_BUILDING_{SHARED|STATIC}_LIBRARY
  * Client code normally has no special symbol defined, in which case we'll
  * assume it wants to use the shared library. However, if the client defines
  * the symbol OPENMM_USE_STATIC_LIBRARIES we'll suppress the dllimport so

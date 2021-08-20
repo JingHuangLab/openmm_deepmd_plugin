@@ -38,7 +38,7 @@
 namespace OpenMM {
 
 /**
- * This is a proxy for serializing ExampleForce objects.
+ * This is a proxy for serializing DeepmdForce objects.
  */
 
 class OPENMM_EXPORT_DEEPMD DeepmdForceProxy : public SerializationProxy {

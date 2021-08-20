@@ -199,8 +199,6 @@ def alchemMBAR(npy_prefix, N_max, lambda_list, RT = unit.AVOGADRO_CONSTANT_NA._v
 
     return hfe[0][0][-1] * RT
 
-
-
 def getRDF(pdb_file, dcd_files, fig_name):
     try:
         import MDAnalysis as mda
@@ -280,6 +278,52 @@ def getRDF_Oxygen_Hydrogen(pdb_file, dcd_files, fig_name):
     print("Figure saved at %s"%("./output/"+fig_name+'.png'))
 
     return
+
+def draw_nve_figure4presentation(nve_log, save_fig):
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("matplotlib can not be imported.")
+    with open(nve_log, "r") as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    content = content[1:]
+    step_num = []
+    step_time = []
+    total_energy = []
+
+    for line in content:
+        temp = line.split()
+        step_num.append(int(temp[1]))
+        step_time.append(float(temp[2]))
+        total_energy.append(float(temp[5]))
+
+    total_energy = np.array(total_energy)
+    total_energy = total_energy / (3 * 256 * 3 - 6)
+    total_energy = total_energy - total_energy[0]
+    # Convert unit from kJ/mol to kcal/mol.
+    total_energy = total_energy * 0.239006
+    step_time = np.array(step_time)
+
+    plt.clf()
+    plt.figure(figsize=(12,8))
+    font = {'family' : 'normal',
+        #'weight' : 'bold',
+        'size'   : 13}
+    plt.rc('font', **font)
+    plt.tick_params(direction='in')
+
+    plt.ylim(-0.001, +0.001)
+    plt.yticks(np.arange(-0.001, 0.002, step=0.001))
+    plt.xlim(0, 200)
+    plt.plot(step_time, total_energy, '-')
+    plt.xlabel("Time (ps)")
+    plt.ylabel("Total Energy per DOF (kcal/mol)")
+
+    plt.savefig(save_fig)
+
+    return
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -394,11 +438,35 @@ if __name__ == "__main__":
         
         for ii in range(n):
             temp = alchemMBAR(npy_prefix, int((ii+1) * points_gap), lambda_list)
-            hfe.append(-temp)
+            hfe.append(temp)
             x.append((ii+1)*points_gap*1)
         hfe = np.array(hfe)
         x = np.array(x)
-        DrawScatter(x, hfe, "alchem_timeseries", xlabel="Time (ps)", ylabel="HFE (kJ/mol)")
+        
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print("matplotlib can not be imported.")
+
+        plt.clf()
+        plt.figure(figsize=(10,8))
+        font = {'family' : 'normal',
+            #'weight' : 'bold',
+            'size'   : 13}
+        plt.rc('font', **font)
+        plt.tick_params(direction='in')
+
+        plt.ylim(-32, -29)
+        plt.yticks(np.arange(-32, -28.5, step=0.5))
+        plt.xlim(0, 3100)
+        plt.scatter(x, hfe)
+        plt.plot(x, hfe, '-')
+        plt.xlabel("Time (ps)")
+        plt.ylabel("Hydration Free Energy (kJ/mol)")
+
+        plt.savefig("./output/alchem_timeseries.png")        
+        
+        #DrawScatter(x, hfe, "alchem_timeseries", xlabel="Time (ps)", ylabel="HFE (kJ/mol)")
     
     if analysis == "compareRDF":
         rdf_gmx_file = args.rdf_gmx
@@ -407,9 +475,17 @@ if __name__ == "__main__":
         fig_name = "rdf_omm_gmx_lmp"
         import matplotlib.pyplot as plt
         plt.clf()
+        font = {'family' : 'normal',
+        #'weight' : 'bold',
+        'size'   : 13}
+        plt.rc('font', **font)
+        plt.tick_params(direction='in')
+        
+        plt.xlim(2, 10)
+        plt.ylim(0.0, 3.7)
         plt.ylabel("g(r)")
         plt.xlabel("r($\AA$)")
-        plt.title("Compare oxygen-oxygen RDF")
+        #plt.title("RDF of Oxygen-Oxygen", fontweight='bold')
 
         if rdf_gmx_file is not None:
             temp_bins = []
@@ -423,7 +499,7 @@ if __name__ == "__main__":
                     if bin_index * 10 >= 2:
                         temp_bins.append(bin_index * 10)
                         temp_rdf.append(rdf)
-            plt.plot(temp_bins, temp_rdf, 'r-', label = "RDF of GMX")
+            plt.plot(temp_bins, temp_rdf, 'r-', label = "Gromacs")
 
         if rdf_lmp_file is not None:
             temp_bins = []
@@ -438,7 +514,7 @@ if __name__ == "__main__":
                         temp_bins.append(bin_index * 10)
                         temp_rdf.append(rdf)
 
-            plt.plot(temp_bins, temp_rdf, 'b-', label = "RDF of LMP")
+            plt.plot(temp_bins, temp_rdf, 'b-', label = "LAMMPS")
 
         if rdf_omm_file is not None:
             temp_bins = []
@@ -453,8 +529,12 @@ if __name__ == "__main__":
                         temp_bins.append(bin_index)
                         temp_rdf.append(rdf)
 
-            plt.plot(temp_bins, temp_rdf, 'g-', label = "RDF of OMM")
+            plt.plot(temp_bins, temp_rdf, 'g-', label = "OpenMM")
         
         plt.legend()
         plt.savefig("./output/"+fig_name+'.png')
         
+    if analysis == "drawNVE":
+        nve_log = args.log
+        save_fig = "output/nve.png"
+        draw_nve_figure4presentation(nve_log, save_fig)
