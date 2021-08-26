@@ -63,6 +63,7 @@ public:
     // For normal simulation.
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     void setGPUNode(const int gpu_id);
+    void setPBC(const bool use_pbc);
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
@@ -93,9 +94,7 @@ public:
 
     void updateParametersInContext(OpenMM::Context& context);
     bool usesPeriodicBoundaryConditions() const {
-        //return false;
-        //Deepmd-kit simulation must needs PBC for now.
-        return true;
+        return use_pbc;
     }
 protected:
     OpenMM::ForceImpl* createImpl() const;
@@ -103,6 +102,7 @@ private:
     // graph_1 and 2 are used for alchemical simulation.
     string graph_file, graph_file_1, graph_file_2;
     bool used4Alchemical = false;
+    bool use_pbc = true;
     int gpu_node = 0;
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;

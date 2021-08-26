@@ -75,6 +75,11 @@ void DeepmdForce::setGPUNode(const int gpu_id){
     gpu_node = gpu_id;
 }
 
+void DeepmdForce::setPBC(const bool use_PBC){
+    // By default, use_pbc is set to be true.
+    use_pbc = use_PBC;
+}
+
 void DeepmdForce::setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient){
     coordCoeff = coordCoefficient;
     forceCoeff = forceCoefficient;
