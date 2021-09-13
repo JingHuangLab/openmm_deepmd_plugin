@@ -19,26 +19,27 @@ And then compile this plugin with steps below.
    conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
    conda install openmm
    ```
-
-1. Clone this repository and create a directory in which to build the plugin.
+2. Clone this repository and create a directory in which to build the plugin.
    ```shell
    git clone https://github.com/JingHuangLab/openmm_deepmd_plugin.git
    cd openmm_deepmd_plugin && mkdir build && cd build
    ```
-2. Run `cmake` command with required parameters.
+3. Run `cmake` command with required parameters.
    ```shell
    cmake .. -DOPENMM_DIR={OPENMM_INSTALLED_DIR} -DDEEPMD_DIR={DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
    ```
+   If you installed the OpenMM and libdeepmd followed by steps above, the `OPENMM_INSTALLED_DIR`, `DEEPMD_INSTALLED_DIR`, `TENSORFLOW_DIR` should be the path to conda created environment. Such as `/home/dingye/anaconda3/envs/dp_openmm` here. 
    You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR={CUDA_DIR}`.
    By default, precision is set to be `double`, you can also set the precision to be `float` with cmake flags `-DFLOAT_PREC=low`.
    The default value for `OPENMM_DIR`, `DEEPMD_DIR`, `TENSORFLOW_DIR` are `/usr/local/openmm/`, `/usr/local/deepmd`, `/usr/local/tensorflow` respectively. 
-3. Compile the shared library with command `make` running in `build` directory.
+4. Compile the shared library with command `make` running in `build` directory.
    ```shell
    make && make install
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
-4. Compile the Python interface of this plugin with
+5. Test the plugin C++ interface and compile the Python interface of this plugin with
    ```shell
+   make test
    make PythonInstall
    ```
    Attention that running of this plugin with python need OpenMM python library to be installed first.
