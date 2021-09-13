@@ -315,7 +315,7 @@ def draw_nve_figure4presentation(nve_log, save_fig):
 
     plt.ylim(-0.001, +0.001)
     plt.yticks(np.arange(-0.001, 0.002, step=0.001))
-    plt.xlim(0, 200)
+    plt.xlim(0, 1000)
     plt.plot(step_time, total_energy, '-')
     plt.xlabel("Time (ps)")
     plt.ylabel("Total Energy per DOF (kcal/mol)")
