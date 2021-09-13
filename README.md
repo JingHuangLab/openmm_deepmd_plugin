@@ -12,6 +12,14 @@ forces to particles during a simulation.
 This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v2.4.1**, **Deepmd-kit, v2.0.0.b3**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
 And then compile this plugin with steps below.
 
+1. Prepare the installation environment.
+   ```
+   conda create -n dp_openmm
+   conda activate dp_openmm
+   conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
+   conda install openmm
+   ```
+
 1. Clone this repository and create a directory in which to build the plugin.
    ```shell
    git clone https://github.com/JingHuangLab/openmm_deepmd_plugin.git
