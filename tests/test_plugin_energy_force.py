@@ -10,7 +10,6 @@ import argparse
 
 
 def check_energy_force_set(set_dir, dp_context, natoms):
-    #set_dir = "/home/dingye/Documents/Data/Water/lw_pimd/set.000"
     force_npy = os.path.join(set_dir, "force.npy")
     energy_npy = os.path.join(set_dir, "energy.npy")
     coord_npy = os.path.join(set_dir, "coord.npy")
@@ -20,9 +19,7 @@ def check_energy_force_set(set_dir, dp_context, natoms):
     energy = np.load(energy_npy)
     coord = np.load(coord_npy)
     box = np.load(box_npy)
-
     frame = 0
-
     omm_dp_energy = []
     omm_dp_forces = []
     diff = {"force":[], "energy":[], "posi":[]}

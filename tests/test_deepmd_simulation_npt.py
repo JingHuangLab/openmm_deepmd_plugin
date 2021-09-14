@@ -14,7 +14,7 @@ import time
 import simtk.openmm.app as app
 from simtk.openmm.app import *
 from simtk.openmm import *
-from simtk.openmm.openmm import AndersenThermostat
+from simtk.openmm import AndersenThermostat
 from simtk.unit import *
 #from openmmtools.integrators import VelocityVerletIntegrator
 import argparse

@@ -14,7 +14,7 @@ import time
 import simtk.openmm.app as app
 from simtk.openmm.app import *
 from simtk.openmm import *
-from simtk.openmm.openmm import AndersenThermostat
+from simtk.openmm import AndersenThermostat
 from simtk.unit import *
 import argparse
 
@@ -46,7 +46,8 @@ temp = 300 # system temperature
 #box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
 box = [args.box, 0, 0, 0, args.box, 0, 0, 0, args.box]
 
-#mole_name = "lw_packmol_256_10ns_npt_tip3p.npt"
+if not os.path.exists("output"):
+    os.mkdir("./output")
 pdb_file = "./input/"+mole_name+".pdb"
 output_dcd = "./output/"+mole_name+".dcd"
 output_force_txt = "./output/"+mole_name+".force.txt"
