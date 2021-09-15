@@ -14,7 +14,10 @@ import sys
 import re
 from math import sqrt
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except:
+    print("matplotlib is not installed.")
 import numpy as np
 
 try:

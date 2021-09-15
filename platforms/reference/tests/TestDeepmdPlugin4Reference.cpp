@@ -94,7 +94,7 @@ void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> 
 void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, vector<int> atype, vector<double> box, vector<double> mass, map<int, string> typeDict, int nsteps=100){
 
 
-    ASSERT_EQUAL_TOL(names.size(), atype.size(), TOL);
+    ASSERT_EQUAL(names.size(), atype.size());
 
     System system;
     VerletIntegrator integrator(0.0002); // Time step is 0.2 fs here.

@@ -102,7 +102,7 @@ void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, 
     vector<Vec3> omm_coord;
     vector<Vec3> omm_box;
 
-    ASSERT_EQUAL_TOL(names.size(), atype.size(), TOL);
+    ASSERT_EQUAL(names.size(), atype.size());
     
     for(auto it = typeDict.begin(); it != typeDict.end(); it++){
         dp_force->addType(it->first, it->second);
