@@ -34,4 +34,6 @@ setup(name='OpenMMDeepmdPlugin',
       version='1.0',
       py_modules=['OpenMMDeepmdPlugin'],
       ext_modules=[extension],
+      packages=['OpenMMDeepmdPluginTools'],
+      package_data={"OpenMMDeepmdPluginTools":['data/*.pb', 'data/*.pdb']},
      )

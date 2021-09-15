@@ -16,8 +16,8 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.unit import *
 import argparse
-from OpenMMDeepmdPlugin import *
-from utils import ForceReporter, Simulation4Deepmd, DrawScatter
+from OpenMMDeepmdPlugin import DeepmdForce
+from OpenMMDeepmdPluginTools.utils import ForceReporter, Simulation4Deepmd, DrawScatter
 
 
 parser = argparse.ArgumentParser()
@@ -122,7 +122,10 @@ elif NVE:
         integrator = mm.VariableVerletIntegrator(0.000001)
 
 # Get platform
-platform = mm.Platform.getPlatformByName('CUDA')
+try:
+    platform = mm.Platform.getPlatformByName('CUDA')
+except:
+    platform = mm.Platform.getPlatformByName('Reference')
 
 # Initialize the deepmd force and add type here.
 dp_force = DeepmdForce(model_file, "", "", used4Alchemical)
