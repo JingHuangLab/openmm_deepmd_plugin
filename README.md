@@ -9,6 +9,7 @@ forces to particles during a simulation.
 
 ## Installation
 
+### Install by compiling
 This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v2.4.1**, **Deepmd-kit, v2.0.0.b3**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
 And then compile this plugin with steps below.
 
@@ -26,10 +27,10 @@ And then compile this plugin with steps below.
    ```
 3. Run `cmake` command with required parameters.
    ```shell
-   cmake .. -DOPENMM_DIR={OPENMM_INSTALLED_DIR} -DDEEPMD_DIR={DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
+   cmake .. -DOPENMM_DIR=${OPENMM_INSTALLED_DIR} -DDEEPMD_DIR=${DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
    ```
-   If you installed the OpenMM and libdeepmd followed by steps above, the `OPENMM_INSTALLED_DIR`, `DEEPMD_INSTALLED_DIR`, `TENSORFLOW_DIR` should be the path to conda created environment. Such as `/home/dingye/anaconda3/envs/dp_openmm` here. 
-   You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR={CUDA_DIR}`.
+   If you installed the OpenMM and libdeepmd followed by steps above, the `${OPENMM_INSTALLED_DIR}`, `${DEEPMD_INSTALLED_DIR}`, `${TENSORFLOW_DIR}` should be the path to conda created environment. Such as `/home/dingye/anaconda3/envs/dp_openmm` here. 
+   You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}`.
    By default, precision is set to be `double`, you can also set the precision to be `float` with cmake flags `-DFLOAT_PREC=low`.
    The default value for `OPENMM_DIR`, `DEEPMD_DIR`, `TENSORFLOW_DIR` are `/usr/local/openmm/`, `/usr/local/deepmd`, `/usr/local/tensorflow` respectively. 
 4. Compile the shared library with command `make` running in `build` directory.
@@ -43,6 +44,20 @@ And then compile this plugin with steps below.
    make PythonInstall
    ```
    Attention that running of this plugin with python need OpenMM python library to be installed first.
+
+### Install with conda
+Install from conda is much easier than install by compiling.
+Running these commands in your shell terminal.
+```shell
+conda create -n dp_openmm
+conda activate dp_openmm
+conda install python=3.8
+conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
+conda install -c conda-forge openmm
+conda install -c ye-ding openmm_deepmd_plugin
+python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve
+python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve --platform CUDA
+```
 
 ## Usage
 
