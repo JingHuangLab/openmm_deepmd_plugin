@@ -10,8 +10,8 @@ deepmd_dir = '@DEEPMD_DIR@'
 DeepmdPlugin_header_dir = '@DEEPMDPLUGIN_HEADER_DIR@'
 DeepmdPlugin_library_dir = '@DEEPMDPLUGIN_LIBRARY_DIR@'
 
-os.environ["CC"] = "gcc"
-os.environ["CXX"] = "g++"
+os.environ["CC"] = "@CMAKE_C_COMPILER@"
+os.environ["CXX"] = "@CMAKE_CXX_COMPILER@"
 
 extra_compile_args = ['-std=c++11']
 extra_link_args = []
