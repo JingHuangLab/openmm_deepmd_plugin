@@ -250,10 +250,6 @@ def getRDF_Oxygen_Hydrogen(pdb_file, dcd_files, fig_name):
 
     u = mda.Universe(pdb_file, dcd_files)
     all_atom = u.select_atoms("all")
-    with MDAnalysis.Writer("./output/lw_256_nvt_300K.xtc", all_atom.n_atoms) as W:
-        for ts in u.trajectory:
-            W.write(all_atom)
-
     oxygen = u.select_atoms("name O")
     hydrogen = u.select_atoms("type H")
 
@@ -321,6 +317,49 @@ def draw_nve_figure4presentation(nve_log, save_fig):
     plt.ylabel("Total Energy per DOF (kcal/mol)")
 
     plt.savefig(save_fig)
+
+    return
+
+def draw_MSD(pdb_file, dcd_files, fig_name):
+    try:
+        import MDAnalysis as mda
+        import MDAnalysis.analysis.msd as MSD
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("MDAnalysis can not be imported.")
+        exit(1)
+
+    u = mda.Universe(pdb_file, dcd_files)
+
+    MSD4Water = MSD.EinsteinMSD(u, "all", msd_type='xyz', fft=True)
+    MSD4Water.run()
+    MSD4Hydrogen = MSD.EinsteinMSD(u, "name O", msd_type='xyz', fft=True)
+    MSD4Hydrogen.run()
+    MSD4Oxygen = MSD.EinsteinMSD(u, "type H", msd_type='xyz', fft=True)
+    MSD4Oxygen.run()
+
+    time = 0
+    nframes = MSD4Water.n_frames
+    timestep = 1
+    lagtimes = np.arange(nframes) * timestep
+    
+    plt.clf()
+    plt.figure(figsize=(12,8))
+    font = {'family' : 'normal',
+        #'weight' : 'bold',
+        'size'   : 13}
+    plt.rc('font', **font)
+    plt.tick_params(direction='in')
+
+    plt.xlabel('Time')
+    plt.ylabel('MSD')
+    plt.plot(lagtimes,MSD4Water.results.timeseries, label = "Water")
+    plt.plot(lagtimes,MSD4Oxygen.results.timeseries, label = "Oxygen")
+    plt.plot(lagtimes,MSD4Hydrogen.results.timeseries, label = "Hydrogen")
+    plt.legend()
+    fig_name = fig_name.split("/")[-1]
+    plt.savefig("./output/"+fig_name+'.png')
+    print("Figure saved at %s"%("./output/"+fig_name+'.png'))
 
     return
 
@@ -538,3 +577,10 @@ if __name__ == "__main__":
         nve_log = args.log
         save_fig = "output/nve.png"
         draw_nve_figure4presentation(nve_log, save_fig)
+    
+    if analysis == "drawMSD":
+        dcd_files = []
+        for ii in range(num_dcd):
+            temp_dcd = dcd_prefix+"."+str(ii)+".dcd"
+            dcd_files.append(temp_dcd)
+        draw_MSD(pdb_file, dcd_files, dcd_prefix+".msd")
