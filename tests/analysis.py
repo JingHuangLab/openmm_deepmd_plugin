@@ -340,7 +340,7 @@ def draw_MSD(pdb_file, dcd_files, fig_name):
 
     time = 0
     nframes = MSD4Water.n_frames
-    timestep = 1
+    timestep = 0.1
     lagtimes = np.arange(nframes) * timestep
     
     plt.clf()
@@ -351,8 +351,8 @@ def draw_MSD(pdb_file, dcd_files, fig_name):
     plt.rc('font', **font)
     plt.tick_params(direction='in')
 
-    plt.xlabel('Time')
-    plt.ylabel('MSD')
+    plt.xlabel('Time (ps)')
+    plt.ylabel(r'$MSD~(\AA^2)$')
     plt.plot(lagtimes,MSD4Water.results.timeseries, label = "Water")
     plt.plot(lagtimes,MSD4Oxygen.results.timeseries, label = "Oxygen")
     plt.plot(lagtimes,MSD4Hydrogen.results.timeseries, label = "Hydrogen")
