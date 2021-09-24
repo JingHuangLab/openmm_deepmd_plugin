@@ -199,7 +199,7 @@ def alchemMBAR(npy_prefix, N_max, lambda_list, RT = unit.AVOGADRO_CONSTANT_NA._v
 
     return hfe[0][0][-1] * RT
 
-def getRDF(pdb_file, dcd_files, fig_name):
+def getRDF_Oxygen_Oxygen(pdb_file, dcd_files, fig_name):
     try:
         import MDAnalysis as mda
         from MDAnalysis.analysis.rdf import InterRDF
@@ -218,12 +218,12 @@ def getRDF(pdb_file, dcd_files, fig_name):
     oxygen = u.select_atoms("name O")
 
     print("Running RDF")
-    rdf = InterRDF(oxygen, oxygen, nbins=400, range=[1.9, 10.0], verbose=True)
+    rdf = InterRDF(oxygen, oxygen, nbins=400, range=[1.2, 8.0], verbose=True)
     rdf.run()
 
     num = len(rdf.bins)
 
-    with open("output/rdf_dp_omm.csv", "w+") as f:
+    with open("output/rdf_dp_omm_o_o.csv", "w+") as f:
         csv_writer = csv.writer(f, delimiter=',')
         for ii in range(num):
             csv_writer.writerow([rdf.bins[ii], rdf.rdf[ii]])
@@ -259,7 +259,7 @@ def getRDF_Oxygen_Hydrogen(pdb_file, dcd_files, fig_name):
 
     num = len(rdf.bins)
 
-    with open("output/rdf_dp_omm_oxygen_hydrogen.csv", "w+") as f:
+    with open("output/rdf_dp_omm_o_h.csv", "w+") as f:
         csv_writer = csv.writer(f, delimiter=',')
         for ii in range(num):
             csv_writer.writerow([rdf.bins[ii], rdf.rdf[ii]])
@@ -274,6 +274,44 @@ def getRDF_Oxygen_Hydrogen(pdb_file, dcd_files, fig_name):
     print("Figure saved at %s"%("./output/"+fig_name+'.png'))
 
     return
+
+def getRDF_Hydrogen_Hydrogen(pdb_file, dcd_files, fig_name):
+    try:
+        import MDAnalysis as mda
+        from MDAnalysis.analysis.rdf import InterRDF
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("MDAnalysis can not be imported.")
+        exit(1)
+
+    u = mda.Universe(pdb_file, dcd_files)
+    all_atom = u.select_atoms("all")
+    hydrogen_1 = u.select_atoms("type H")
+    hydrogen_2 = u.select_atoms("type H")
+
+    print("Running RDF")
+    rdf = InterRDF(hydrogen_1, hydrogen_2, nbins=400, range=[1.2, 8.0], verbose=True)
+    rdf.run()
+
+    num = len(rdf.bins)
+
+    with open("output/rdf_dp_omm_h_h.csv", "w+") as f:
+        csv_writer = csv.writer(f, delimiter=',')
+        for ii in range(num):
+            csv_writer.writerow([rdf.bins[ii], rdf.rdf[ii]])
+
+    fig_name = fig_name.split("/")[-1]
+    plt.clf()
+    plt.ylabel("g(r)")
+    plt.xlabel("r($\AA$)")
+    plt.title(fig_name)
+    plt.plot(rdf.bins, rdf.rdf)
+    plt.savefig("./output/"+fig_name+'.png')
+    print("Figure saved at %s"%("./output/"+fig_name+'.png'))
+
+    return
+
+
 
 def draw_nve_figure4presentation(nve_log, save_fig):
     try:
@@ -343,6 +381,11 @@ def draw_MSD(pdb_file, dcd_files, fig_name):
     timestep = 0.1
     lagtimes = np.arange(nframes) * timestep
     
+    with open("output/msd_dp_omm_water_oxygen.csv", "w+") as f:
+        csv_writer = csv.writer(f, delimiter=',')
+        for ii in range(nframes):
+            csv_writer.writerow([lagtimes[ii], MSD4Water.results.timeseries[ii], MSD4Oxygen.results.timeseries[ii]])
+
     plt.clf()
     plt.figure(figsize=(12,8))
     font = {'family' : 'normal',
@@ -438,15 +481,15 @@ if __name__ == "__main__":
             logs_2.append(log_prefix + "."+str(temp2)+"."+str(ii)+".log")
 
         draw_potential_distribution(logs_1, logs_2, temp1, temp2) 
-    if analysis == "oxygenRDF":
+    if analysis == "ooRDF":
         dcd_files = []
         for ii in range(num_dcd):
             if ii == 0:
                 continue
             temp_dcd = dcd_prefix+"."+str(ii)+".dcd"
             dcd_files.append(temp_dcd)
-        getRDF(pdb_file, dcd_files, dcd_prefix)
-    if analysis == "oxygen_hydrogen_RDF":
+        getRDF_Oxygen_Oxygen(pdb_file, dcd_files, dcd_prefix+"_oxygen_oxygen")
+    if analysis == "ohRDF":
         dcd_files = []
         for ii in range(num_dcd):
             if ii == 0:
@@ -454,6 +497,16 @@ if __name__ == "__main__":
             temp_dcd = dcd_prefix+"."+str(ii)+".dcd"
             dcd_files.append(temp_dcd)
         getRDF_Oxygen_Hydrogen(pdb_file, dcd_files, dcd_prefix+"_oxygen_hydrogen")
+
+    if analysis == "hhRDF":
+        dcd_files = []
+        for ii in range(num_dcd):
+            if ii == 0:
+                continue
+            temp_dcd = dcd_prefix+"."+str(ii)+".dcd"
+            dcd_files.append(temp_dcd)
+        getRDF_Hydrogen_Hydrogen(pdb_file, dcd_files, dcd_prefix+"_hydrogen_hydrogen")
+
     if analysis == "alchemEnergy":
         model_file = "./frozen_model/graph_from_han_dp2.0_compress.pb"
         # Set the alchemical residue id.
