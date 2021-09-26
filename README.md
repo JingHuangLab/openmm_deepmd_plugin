@@ -54,7 +54,7 @@ conda activate dp_openmm
 conda install python=3.8
 conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
 conda install -c conda-forge openmm
-conda install -c ye-ding openmm_deepmd_plugin
+conda install -c deepmodeling openmm_deepmd_plugin
 python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve
 python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve --platform CUDA
 ```
