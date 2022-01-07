@@ -54,7 +54,9 @@ namespace DeepmdPlugin {
 
 class DeepmdForce : public OpenMM::Force {
 public:
-    DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
+    //DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
+    DeepmdForce(const string& GraphFile);
+    DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2);
 
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);

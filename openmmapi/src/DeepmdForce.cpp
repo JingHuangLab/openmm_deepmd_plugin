@@ -44,12 +44,12 @@ inline bool exists(const std::string& name) {
     return (stat (name.c_str(), &buffer) == 0); 
 }
 
-DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical) {
+DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2){
     graph_file  = GraphFile;
     graph_file_1 = GraphFile_1;
     graph_file_2 = GraphFile_2;
     //this->used4Alchemical = used4Alchemical;
-    this->used4Alchemical = used4Alchemical;
+    this->used4Alchemical = true;
     if(used4Alchemical){
         if (!exists(graph_file_1)){
             throw OpenMMException("Graph file 1 not found: "+graph_file_1);
@@ -61,7 +61,14 @@ DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, con
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
+}
 
+DeepmdForce::DeepmdForce(const string& GraphFile){
+    graph_file  = GraphFile;
+    this->used4Alchemical = false;
+    if (!exists(graph_file)){
+        throw OpenMMException("Graph file not found: "+graph_file);
+    }
 }
 
 DeepmdForce::~DeepmdForce(){

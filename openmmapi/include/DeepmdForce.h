@@ -55,41 +55,180 @@ namespace DeepmdPlugin {
 class OPENMM_EXPORT_DEEPMD DeepmdForce : public OpenMM::Force {
 public:
     /**
-     * Create a DeepmdForce.
+     * @brief Construct a new Deepmd Force object. Used for NVT/NPT/NVE NNP simulation.
+     * 
+     * @param GraphFile 
      */
-    DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
+    DeepmdForce(const string& GraphFile);
+    /**
+     * @brief Construct a new Deepmd Force object. Used when running alchemical simulation.
+     * 
+     * @param GraphFile 
+     * @param GraphFile_1 
+     * @param GraphFile_2 
+     */
+    DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2);
     ~DeepmdForce();
     
-    // For normal simulation.
+    /**
+     * @brief Set the Unit Transform Coefficients.
+     * 
+     * @param coordCoefficient :  the coordinate transform coefficient.
+     * @param forceCoefficient : the force transform coefficient.
+     * @param energyCoefficient : the energy transform coefficient.
+     */
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
+    /**
+     * @brief Set the gpu id for running Deep Potential model.
+     * 
+     * @param gpu_id 
+     */
     void setGPUNode(const int gpu_id);
+    /**
+     * @brief Set the NNP whether to use PBC.
+     * 
+     * @param use_pbc : bool value.
+     */
     void setPBC(const bool use_pbc);
+    /**
+     * @brief Add particle into the Deepmd Force.
+     * 
+     * @param particleIndex 
+     * @param particleType 
+     */
     void addParticle(const int particleIndex, const string particleType);
+    /**
+     * @brief Add the particle types into the Deepmd Force.
+     * 
+     * @param typeIndex 
+     * @param Type 
+     */
     void addType(const int typeIndex, const string Type);
+    /**
+     * @brief Add the bond information into the Deepmd Force. Used for visualization, this bond information is not used in the forces and energy calculation.
+     * 
+     * @param particle1 
+     * @param particle2 
+     */
     void addBond(const int particle1, const int particle2);
+    /**
+     * @brief Get the path to Deepmd Graph (Deep Potential Model) File.
+     * 
+     * @return const std::string& 
+     */
     const std::string& getDeepmdGraphFile() const;
+    /**
+     * @brief Get the types information for each particle.
+     * 
+     * @return const map<int, string>& 
+     */
     const map<int, string>& getType4EachParticle() const;
+    /**
+     * @brief Get the particles index vector for each type.
+     * 
+     * @return const map<string, vector<int>>& 
+     */
     const map<string, vector<int>>& getParticles4EachType() const;
+    /**
+     * @brief Get the bonds list.
+     * 
+     * @return const vector<pair<int, int>> 
+     */
     const vector<pair<int, int>> getBondsList() const;
+    /**
+     * @brief Get the types map.
+     * 
+     * @return const map<string, int>& 
+     */
     const map<string, int>& getTypesIndexMap() const;
+    /**
+     * @brief Get the gpu id for running Deep Potential model.
+     * 
+     * @return const int 
+     */
     const int getGPUNode() const;
+    /**
+     * @brief Get the Coord Unit Coefficient.
+     * 
+     * @return double 
+     */
     double getCoordUnitCoefficient() const;
+    /**
+     * @brief Get the Force Unit Coefficient.
+     * 
+     * @return double 
+     */
     double getForceUnitCoefficient() const;
+    /**
+     * @brief Get the Energy Unit Coefficient.
+     * 
+     * @return double 
+     */
     double getEnergyUnitCoefficient() const;
     
     // For alchemical simulation.
+    /**
+     * @brief Set the Deepmd Force is used for alchemical simulation or not.
+     * 
+     * @param used4Alchemical 
+     */
     void setAlchemical(const bool used4Alchemical);
+    /**
+     * @brief Set the atoms index list for graph 1 in alchemical simulation.
+     * 
+     * @param atomsIndex 
+     */
     void setAtomsIndex4Graph1(const vector<int> atomsIndex);
+    /**
+     * @brief Set the atoms index list for graph 2 in alchemical simulation.
+     * 
+     * @param atomsIndex 
+     */
     void setAtomsIndex4Graph2(const vector<int> atomsIndex);
+    /**
+     * @brief Set the lambda value for this alchemical simulation.
+     * 
+     * @param lambda 
+     */
     void setLambda(const double lambda);
-    // Below are interface for kernel function calls.
+    /**
+     * @brief Check whether the Deepmd Force is used for alchemical simulation or not.
+     * 
+     * @return true : used for alchemical simulation. 
+     * @return false : not used for alchemical simulation.
+     */
     bool alchemical() const {
         return used4Alchemical;
     }
+    /**
+     * @brief Get the lambda value for this alchemical simulation.
+     * 
+     * @return double 
+     */
     double getLambda() const;
+    /**
+     * @brief Get the path to first graph for alchemical simulation.
+     * 
+     * @return const string 
+     */
     const string getGraph1_4Alchemical() const;
+    /**
+     * @brief Get the path to second graph for alchemical simulation.
+     * 
+     * @return const string 
+     */
     const string getGraph2_4Alchemical() const;
+    /**
+     * @brief Get the atoms index vector for graph 1 in alchemical simulation.
+     * 
+     * @return vector<int> 
+     */
     vector<int> getAtomsIndex4Graph1() const;
+    /**
+     * @brief Get the atoms index vector for graph 2 in alchemical simulation.
+     * 
+     * @return vector<int> 
+     */
     vector<int> getAtomsIndex4Graph2() const;
 
     void updateParametersInContext(OpenMM::Context& context);
