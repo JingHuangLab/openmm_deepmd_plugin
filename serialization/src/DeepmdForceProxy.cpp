@@ -47,12 +47,11 @@ void DeepmdForceProxy::serialize(const void* object, SerializationNode& node) co
     node.setStringProperty("file", force.getDeepmdGraphFile());
     node.setStringProperty("file1", force.getGraph1_4Alchemical());
     node.setStringProperty("file2", force.getGraph2_4Alchemical());
-    node.setBoolProperty("alchemical", force.alchemical());
 }
 
 void* DeepmdForceProxy::deserialize(const SerializationNode& node) const {
     if (node.getIntProperty("version") != 1)
         throw OpenMMException("Unsupported version number");
-    DeepmdForce* force = new DeepmdForce(node.getStringProperty("file"), node.getStringProperty("file1"), node.getStringProperty("file2"), node.getBoolProperty("alchemical"));
+    DeepmdForce* force = new DeepmdForce(node.getStringProperty("file"), node.getStringProperty("file1"), node.getStringProperty("file2"));
     return force;
 }

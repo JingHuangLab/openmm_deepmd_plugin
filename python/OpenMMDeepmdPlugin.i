@@ -40,7 +40,7 @@ namespace std {
     }
 }
 
-
+/*
 %feature("shadow") DeepmdPlugin::DeepmdForce::DeepmdForce %{
     def __init__(self, *args):
         this = _OpenMMDeepmdPlugin.new_DeepmdForce(args[0], args[1], args[2], args[3])
@@ -49,7 +49,7 @@ namespace std {
         except Exception:
             self.this = this
 %}
-
+*/
 namespace DeepmdPlugin {
 
 class DeepmdForce : public OpenMM::Force {

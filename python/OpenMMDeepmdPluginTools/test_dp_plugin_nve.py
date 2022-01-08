@@ -125,7 +125,7 @@ elif NVE:
 platform = mm.Platform.getPlatformByName(platform_name)
 
 # Initialize the deepmd force and add type here.
-dp_force = DeepmdForce(model_file, "", "", used4Alchemical)
+dp_force = DeepmdForce(model_file)
 dp_force.addType(0, element.oxygen.symbol)
 dp_force.addType(1, element.hydrogen.symbol)
 

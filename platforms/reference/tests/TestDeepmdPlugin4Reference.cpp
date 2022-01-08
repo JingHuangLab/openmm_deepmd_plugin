@@ -98,7 +98,7 @@ void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, 
 
     System system;
     VerletIntegrator integrator(0.0002); // Time step is 0.2 fs here.
-    DeepmdForce* dp_force = new DeepmdForce(graph, " ", " ", false);
+    DeepmdForce* dp_force = new DeepmdForce(graph);
 
     // Convert the units of coordinates and box from angstrom to nanometers.
     vector<Vec3> omm_coord;
