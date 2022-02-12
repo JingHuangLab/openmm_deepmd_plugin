@@ -143,10 +143,13 @@ elif NVE:
         print("VariableVerletIntegrator is used")
         integrator = mm.VariableVerletIntegrator(0.000001)
 
+
+prop = dict(CudaPrecision="mixed", DeviceIndex="0")
 platform = mm.Platform.getPlatformByName('CUDA')
 
 # Set the dp force for alchemical simulation.
-dp_force = DeepmdForce(model_file, model_file, model_file, used4Alchemical)
+dp_force = DeepmdForce(model_file, model_file, model_file)
+dp_force.setGPUNode(1)
 dp_force.addType(0, element.oxygen.symbol)
 dp_force.addType(1, element.hydrogen.symbol)
 
@@ -206,7 +209,7 @@ for ii in range(num4forces):
     print(dp_system.getForce(ii))
 
 
-simulation = Simulation4Deepmd(topology, dp_system, integrator, platform)
+simulation = Simulation4Deepmd(topology, dp_system, integrator, platform, prop)
 simulation.context.setPeriodicBoxVectors(box[0], box[1], box[2])
 
 for ii in range(num_dcd):
