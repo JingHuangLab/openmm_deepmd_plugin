@@ -17,7 +17,7 @@ And then compile this plugin with steps below.
    ```
    conda create -n dp_openmm
    conda activate dp_openmm
-   conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
+   conda install -c https://conda.deepmodeling.com libdeepmd=2.0.0=1_cuda10.1_gpu
    conda install -c conda-forge openmm
    ```
 2. Clone this repository and create a directory in which to build the plugin.
@@ -52,9 +52,9 @@ Running these commands in your shell terminal.
 conda create -n dp_openmm
 conda activate dp_openmm
 conda install python=3.8
-conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
+conda install -c https://conda.deepmodeling.com libdeepmd=2.0.0=1_cuda10.1_gpu
 conda install -c conda-forge openmm
-conda install -c deepmodeling openmm_deepmd_plugin
+conda install -c https://conda.deepmodeling.com openmm_deepmd_plugin
 python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve
 python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve --platform CUDA
 ```
