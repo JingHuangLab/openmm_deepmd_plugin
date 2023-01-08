@@ -1,7 +1,6 @@
 from distutils.core import setup
 from distutils.extension import Extension
 import os
-import subprocess
 import platform
 
 openmm_dir = '@OPENMM_DIR@'
@@ -15,8 +14,6 @@ os.environ["CXX"] = "@CMAKE_CXX_COMPILER@"
 extra_compile_args = []
 extra_link_args = []
 
-def get_git_revision_short_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 
 # setup extra compile and link arguments on Mac
 if platform.system() == 'Darwin':
@@ -35,7 +32,7 @@ extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
 
 
 setup(name='OpenMMDeepmdPlugin',
-      version=get_git_revision_short_hash(),
+      version="@GIT_HASH@",
       ext_modules=[extension],
       packages=['OpenMMDeepmdPlugin', "OpenMMDeepmdPlugin.tests"],
       package_data={"OpenMMDeepmdPlugin":['data/*.pb', 'data/*.pdb']},
