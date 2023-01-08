@@ -1,7 +1,7 @@
 from distutils.core import setup
 from distutils.extension import Extension
 import os
-import sys
+import subprocess
 import platform
 
 openmm_dir = '@OPENMM_DIR@'
@@ -15,12 +15,15 @@ os.environ["CXX"] = "@CMAKE_CXX_COMPILER@"
 extra_compile_args = []
 extra_link_args = []
 
+def get_git_revision_short_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
 # setup extra compile and link arguments on Mac
 if platform.system() == 'Darwin':
     extra_compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
     extra_link_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7', '-Wl', '-rpath', openmm_dir+'/lib']
 
-extension = Extension(name='_OpenMMDeepmdPlugin',
+extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
                       sources=['OpenMMDeepmdPluginWrapper.cpp'],
                       libraries=['OpenMM', 'OpenMMDeepmd'],
                       include_dirs=[os.path.join(openmm_dir, 'include'), os.path.join(deepmd_dir, 'include'), DeepmdPlugin_header_dir],
@@ -29,10 +32,11 @@ extension = Extension(name='_OpenMMDeepmdPlugin',
                       extra_link_args=extra_link_args
                      )
 
+
+
 setup(name='OpenMMDeepmdPlugin',
-      version='1.1',
-      py_modules=['OpenMMDeepmdPlugin'],
+      version=get_git_revision_short_hash(),
       ext_modules=[extension],
-      packages=['OpenMMDeepmdPluginTools'],
-      package_data={"OpenMMDeepmdPluginTools":['data/*.pb', 'data/*.pdb']},
+      packages=['OpenMMDeepmdPlugin', "OpenMMDeepmdPlugin.tests"],
+      package_data={"OpenMMDeepmdPlugin":['data/*.pb', 'data/*.pdb']},
      )

@@ -6,7 +6,10 @@ from your own code. It provides a combination of extreme flexibility
 """
 from __future__ import absolute_import
 __author__ = "Ye Ding"
+__mail__ = "dingye@westlake.edu.cn"
+__version__ = "@GIT_HASH@"
 
 import os, os.path
 import sys
-from . import utils
+from .tools import DeepPotentialContext, AlchemicalContext, Simulation4Deepmd, ForceReporter
+from .OpenMMDeepmdPlugin import DeepmdForce
