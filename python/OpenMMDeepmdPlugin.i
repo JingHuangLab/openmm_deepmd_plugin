@@ -1,6 +1,6 @@
 %module OpenMMDeepmdPlugin
 
-%import(module="simtk.openmm") "swig/OpenMMSwigHeaders.i"
+%import(module="openmm") "swig/OpenMMSwigHeaders.i"
 %include "swig/typemaps.i"
 %include <std_string.i>
 %include <std_vector.i>
