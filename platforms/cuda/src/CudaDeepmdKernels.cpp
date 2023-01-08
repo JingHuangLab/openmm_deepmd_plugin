@@ -36,9 +36,7 @@
 #include <algorithm>
 
 using namespace DeepmdPlugin;
-using namespace deepmd;
 using namespace OpenMM;
-using namespace tensorflow;
 using namespace std;
 
 
@@ -58,13 +56,13 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
    
     // Load the ordinary graph firstly.
     int node_rank = force.getGPUNode();
-    dp = DeepPot(graph_file, node_rank);
+    dp = DeepPot(graph_file);
     if(used4Alchemical){
         cout<<"Used for alchemical simulation. Load the other two graphs here."<<endl;
         graph_file_1 = force.getGraph1_4Alchemical();
         graph_file_2 = force.getGraph2_4Alchemical();
-        dp_1 = DeepPot(graph_file_1, node_rank);
-        dp_2 = DeepPot(graph_file_2, node_rank);
+        dp_1 = DeepPot(graph_file_1);
+        dp_2 = DeepPot(graph_file_2);
         lambda = force.getLambda();
         atomsIndex4Graph1 = force.getAtomsIndex4Graph1();
         atomsIndex4Graph2 = force.getAtomsIndex4Graph2();

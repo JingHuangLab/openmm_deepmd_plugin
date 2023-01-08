@@ -36,7 +36,7 @@
 #include "openmm/Force.h"
 #include <vector>
 // Include DeepPot.h for DeepPotential model inference.
-#include "DeepPot.h"
+#include <deepmd/deepmd.hpp>
 #include "internal/windowsExportDeepmd.h"
 
 #ifdef HIGH_PREC
@@ -48,6 +48,7 @@ typedef double ENERGYTYPE;
 #endif
 
 using namespace std;
+using deepmd::hpp::DeepPot;
 
 namespace DeepmdPlugin {
 

@@ -9,8 +9,7 @@ add_custom_command(
         -python -c++
         -o "${WRAP_FILE}"
         "-I${OPENMM_DIR}/include"
-        "-I{TENSORFLOW_DIR}/include"
-        "-I{DEEPMD_DIR}/include/deepmd"
+        "-I{DEEPMD_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/OpenMMDeepmdPlugin.i"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/OpenMMDeepmdPlugin.i"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
