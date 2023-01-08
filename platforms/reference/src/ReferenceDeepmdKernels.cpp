@@ -74,7 +74,6 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
     natoms = system.getNumParticles();
 
     // Load the ordinary graph firstly.
-    int node_rank = force.getGPUNode();
     dp = DeepPot(graph_file);
     if(used4Alchemical){
         cout<<"Used for alchemical simulation. Load the other two graphs here."<<endl;

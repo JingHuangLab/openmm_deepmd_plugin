@@ -80,12 +80,6 @@ public:
      */
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     /**
-     * @brief Set the gpu id for running Deep Potential model.
-     * 
-     * @param gpu_id 
-     */
-    void setGPUNode(const int gpu_id);
-    /**
      * @brief Set the NNP whether to use PBC.
      * 
      * @param use_pbc : bool value.
@@ -142,12 +136,6 @@ public:
      * @return const map<string, int>& 
      */
     const map<string, int>& getTypesIndexMap() const;
-    /**
-     * @brief Get the gpu id for running Deep Potential model.
-     * 
-     * @return const int 
-     */
-    const int getGPUNode() const;
     /**
      * @brief Get the Coord Unit Coefficient.
      * 

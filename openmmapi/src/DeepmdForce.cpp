@@ -78,10 +78,6 @@ DeepmdForce::~DeepmdForce(){
 }
 
 
-void DeepmdForce::setGPUNode(const int gpu_id){
-    gpu_node = gpu_id;
-}
-
 void DeepmdForce::setPBC(const bool use_PBC){
     // By default, use_pbc is set to be true.
     use_pbc = use_PBC;
@@ -101,9 +97,6 @@ const string& DeepmdForce::getDeepmdGraphFile() const{return graph_file;}
 const map<int, string>& DeepmdForce::getType4EachParticle() const{return type4EachParticle;}
 const map<string, vector<int>>& DeepmdForce::getParticles4EachType() const{return particleGroup4EachType;}
 const map<string, int>& DeepmdForce::getTypesIndexMap() const{return typesIndexMap;}
-const int DeepmdForce::getGPUNode() const{
-    return gpu_node;
-}
 
 void DeepmdForce::addParticle(const int particleIndex, const string particleType){
     auto insertResult = type4EachParticle.insert(pair<int, string>(particleIndex, particleType));

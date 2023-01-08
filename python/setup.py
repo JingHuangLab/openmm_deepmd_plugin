@@ -30,7 +30,7 @@ extension = Extension(name='_OpenMMDeepmdPlugin',
                      )
 
 setup(name='OpenMMDeepmdPlugin',
-      version='1.0',
+      version='1.1',
       py_modules=['OpenMMDeepmdPlugin'],
       ext_modules=[extension],
       packages=['OpenMMDeepmdPluginTools'],
