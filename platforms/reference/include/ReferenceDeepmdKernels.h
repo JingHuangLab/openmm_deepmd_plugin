@@ -35,7 +35,7 @@
 #include "DeepmdKernels.h"
 #include "openmm/Platform.h"
 #include <vector>
-using namespace deepmd;
+
 
 namespace DeepmdPlugin {
 

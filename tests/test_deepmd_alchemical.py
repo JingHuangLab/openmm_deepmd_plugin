@@ -149,7 +149,6 @@ platform = mm.Platform.getPlatformByName('CUDA')
 
 # Set the dp force for alchemical simulation.
 dp_force = DeepmdForce(model_file, model_file, model_file)
-dp_force.setGPUNode(1)
 dp_force.addType(0, element.oxygen.symbol)
 dp_force.addType(1, element.hydrogen.symbol)
 

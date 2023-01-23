@@ -1,15 +1,17 @@
 from __future__ import absolute_import
-from simtk.openmm import app, KcalPerKJ
-import simtk.openmm as mm
-from simtk.openmm import CustomNonbondedForce
-from simtk import unit as u
-# OpenMM Imports
-import simtk.openmm as mm
-import simtk.openmm.app as app
-from simtk.openmm.app import *
-
-import simtk.openmm as mm
-import simtk.unit as unit
+try:
+    from openmm import app, KcalPerKJ
+    import openmm as mm
+    from openmm import unit as u
+    from openmm.app import *
+    import openmm.unit as unit
+except:
+    from simtk import unit as u
+    import simtk.openmm as mm
+    from simtk.openmm.app import *
+    import simtk.openmm as mm
+    import simtk.unit as unit
+    
 import sys
 import re
 from math import sqrt

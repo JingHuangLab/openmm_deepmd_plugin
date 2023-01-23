@@ -42,7 +42,6 @@
 
 using namespace OpenMM;
 using namespace DeepmdPlugin;
-using namespace deepmd;
 using namespace std;
 
 extern "C" OPENMM_EXPORT void registerDeepmdReferenceKernelFactories();

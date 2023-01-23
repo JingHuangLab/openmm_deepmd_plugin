@@ -1,6 +1,6 @@
 %module OpenMMDeepmdPlugin
 
-%import(module="simtk.openmm") "swig/OpenMMSwigHeaders.i"
+%import(module="openmm") "swig/OpenMMSwigHeaders.i"
 %include "swig/typemaps.i"
 %include <std_string.i>
 %include <std_vector.i>
@@ -61,7 +61,6 @@ public:
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
-    void setGPUNode(const int gpu_id);
     void setPBC(const bool use_pbc);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     /*

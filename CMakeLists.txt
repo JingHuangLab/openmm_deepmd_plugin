@@ -3,7 +3,9 @@
 #----------------------------------------------------
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-SET(CMAKE_VERBOSE_MAKEFILE OFF)
+SET(CMAKE_VERBOSE_MAKEFILE ON)
+
+project(OpenMMDeepmd)
 
 # We need to know where OpenMM is installed so we can access the headers and libraries.
 SET(OPENMM_DIR "/usr/local/openmm" CACHE PATH "Where OpenMM is installed")
@@ -11,15 +13,10 @@ INCLUDE_DIRECTORIES("${OPENMM_DIR}/include")
 LINK_DIRECTORIES("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")
 
 # Include the deepmd-kit.
-SET(DEEPMD_DIR "/usr/local/deepmd/" CACHE PATH "Where deepmd-kit is installed")
-INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include/deepmd")
+SET(DEEPMD_DIR "/usr/local/deepmd/" CACHE PATH "Where libdeepmd_c is installed")
+INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include")
 LINK_DIRECTORIES("${DEEPMD_DIR}/lib")
 
-# We need to know where TensorFlow is installed so we can access the headers and libraries.
-SET(TENSORFLOW_DIR "/usr/local/tensorflow" CACHE PATH "Where TensorFlow is installed")
-INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include")
-INCLUDE_DIRECTORIES("${TENSORFLOW_DIR}/include/tensorflow/c")
-LINK_DIRECTORIES("${TENSORFLOW_DIR}/lib")
 
 # Specify the C++ version we are building for.
 SET (CMAKE_CXX_STANDARD 11)
@@ -96,12 +93,9 @@ add_definitions (${PREC_DEF})
 ADD_LIBRARY(${SHARED_DEEPMD_TARGET} SHARED ${SOURCE_FILES} ${SOURCE_INCLUDE_FILES} ${API_INCLUDE_FILES})
 SET_TARGET_PROPERTIES(${SHARED_DEEPMD_TARGET}
     PROPERTIES COMPILE_FLAGS "-DDEEPMD_BUILDING_SHARED_LIBRARY ${EXTRA_COMPILE_FLAGS}"
-    LINK_FLAGS "${EXTRA_COMPILE_FLAGS}"
-    COMPILE_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=1")
+    LINK_FLAGS "${EXTRA_COMPILE_FLAGS}")
 TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} OpenMM)
-TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_cc deepmd deepmd_op)
-TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} tensorflow_cc)
-TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} tensorflow_framework)
+TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_c)
 
 INSTALL_TARGETS(/lib RUNTIME_DIRECTORY /lib ${SHARED_DEEPMD_TARGET})
 

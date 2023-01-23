@@ -4,20 +4,30 @@ import os, platform
 import numpy as np
 from math import sqrt
 import glob, random
-from simtk.openmm import app, KcalPerKJ
-import simtk.openmm as mm
-from simtk.openmm import CustomNonbondedForce
-from simtk import unit as u
-# OpenMM Imports
-import simtk.openmm as mm
+try:
+    from openmm import app
+    import openmm as mm
+    from openmm import unit as u
+    import openmm as mm
+    import openmm.app as app
+    from openmm.app import *
+    from openmm import *
+    from openmm.unit import *
+except:
+    from simtk.openmm import app
+    import simtk.openmm as mm
+    from simtk import unit as u
+    import simtk.openmm as mm
+    import simtk.openmm.app as app
+    from simtk.openmm.app import *
+    from simtk.openmm import *
+    from simtk.unit import *
+
 import time
-import simtk.openmm.app as app
-from simtk.openmm.app import *
-from simtk.openmm import *
-from simtk.unit import *
 import argparse
+
 from OpenMMDeepmdPlugin import DeepmdForce
-from OpenMMDeepmdPluginTools.utils import ForceReporter, Simulation4Deepmd, DrawScatter
+from OpenMMDeepmdPlugin import ForceReporter, Simulation4Deepmd
 
 
 parser = argparse.ArgumentParser()
@@ -46,12 +56,13 @@ temp = 300 # system temperature
 #box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
 box = [args.box, 0, 0, 0, args.box, 0, 0, 0, args.box]
 
-if not os.path.exists("output"):
-    os.mkdir("./output")
-pdb_file = os.path.dirname(__file__)+"/data/lw_256_test.pdb"
-output_dcd = "./output/"+mole_name+".nve.dcd"
-output_force_txt = "./output/"+mole_name+".force.txt"
-output_log = "./output/"+mole_name+".nve.log"
+if not os.path.exists("/tmp/openmm_deepmd_plugin_test_output"):
+    os.mkdir("/tmp/openmm_deepmd_plugin_test_output")
+    
+pdb_file = os.path.dirname(__file__)+"/../data/lw_256_test.pdb"
+output_dcd = "/tmp/openmm_deepmd_plugin_test_output/"+mole_name+".nve.dcd"
+output_force_txt = "/tmp/openmm_deepmd_plugin_test_output/"+mole_name+".force.txt"
+output_log = "/tmp/openmm_deepmd_plugin_test_output/"+mole_name+".nve.log"
 tot_index = -5
 used4Alchemical = False
 show_force = False
@@ -69,7 +80,7 @@ Integrator = "VerletIntegrator"
 #Integrator = "VariableVerletIntegrator"
 #Integrator = "VelocityVerletIntegrator"
 
-model_file = os.path.dirname(__file__)+'/data/water.pb'
+model_file = os.path.dirname(__file__)+'/../data/water.pb'
 state_file = None
 
 print("nsteps:", nsteps, ". NPT:", NPT, ". NVT:", NVT, ". NVE:", NVE, ". Thermostat:", Thermostat)
