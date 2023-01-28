@@ -27,6 +27,7 @@ jobs:
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      options: -gpus all
 
     steps:
     - uses: actions/checkout@v3
@@ -48,7 +49,7 @@ jobs:
         cd $GITHUB_WORKSPACE/build
         make test
     
-    - name: install
+    - name: Install Python Module
       run: |
         cd $GITHUB_WORKSPACE/build 
         make install

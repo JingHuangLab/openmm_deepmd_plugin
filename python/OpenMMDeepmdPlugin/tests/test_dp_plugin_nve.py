@@ -33,7 +33,7 @@ from OpenMMDeepmdPlugin import ForceReporter, Simulation4Deepmd
 parser = argparse.ArgumentParser()
 parser.add_argument('-n', '--nsteps', type = int, dest='nsteps', help='Number of steps', default=200)
 parser.add_argument('--dt', type = float, dest='timestep', help='Time step for simulation, unit is femtosecond', default=0.2)
-parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=100)
+parser.add_argument('--nstout', type = int, dest='nstout', help='Frame steps for saved log.', default=20)
 parser.add_argument('--box', type = float, dest='box', help='Box dimension size for simulation, unit is angstrom', default=19.807884)
 parser.add_argument('--state', type = str, dest='state', help='Initial state file for simulation', default="")
 parser.add_argument('--platform', type = str, dest='platform', help='Platform for simulation.', default="Reference")
