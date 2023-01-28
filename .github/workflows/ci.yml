@@ -34,25 +34,25 @@ jobs:
     - name: Configure CMake
       run: |
         mkdir $GITHUB_WORKSPACE/build
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_C_COMPILER=${{env.CMAKE_C_COMPILER}} -DCMAKE_CXX_COMPILER=${{env.CMAKE_CXX_COMPILER}}
+        cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_C_COMPILER=${{env.CMAKE_C_COMPILER}} -DCMAKE_CXX_COMPILER=${{env.CMAKE_CXX_COMPILER}}
 
     - name: Build
       run: |
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{env.LD_LIBRARY_PATH}}
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        cmake --build $GITHUB_WORKSPACE/build
 
     - name: Test in C API
-      working-directory: ${{github.workspace}}/build
+      working-directory: $GITHUB_WORKSPACE/build
       run: make test
     
     - name: install
-      working-directory: ${{github.workspace}}/build
+      working-directory: $GITHUB_WORKSPACE/build
       run: | 
         make install
         make PythonInstall
 
     - name: Test in NVE
-      working-directory: ${{github.workspace}}
+      working-directory: $GITHUB_WORKSPACE
       run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
 
     
