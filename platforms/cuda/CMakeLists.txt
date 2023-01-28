@@ -5,9 +5,9 @@
 # Collect up information about the version of the OpenMM library we're building
 # and make it available to the code so it can be built into the binaries.
 
-SET(NN_CUDA_LIBRARY_NAME OpenMMDeepmdCUDA)
+SET(PLUGIN_CUDA_LIBRARY_NAME OpenMMDeepmdCUDA)
 
-SET(SHARED_TARGET ${NN_CUDA_LIBRARY_NAME})
+SET(SHARED_TARGET ${PLUGIN_CUDA_LIBRARY_NAME})
 
 
 # These are all the places to search for header files which are
@@ -47,7 +47,7 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # Create the library
 
-INCLUDE_DIRECTORIES(${CUDA_TOOLKIT_INCLUDE})
+#INCLUDE_DIRECTORIES(${CUDA_TOOLKIT_INCLUDE})
 
 FILE(GLOB CUDA_KERNELS ${CUDA_SOURCE_DIR}/kernels/*.cu)
 ADD_CUSTOM_COMMAND(OUTPUT ${CUDA_KERNELS_CPP} ${CUDA_KERNELS_H}
