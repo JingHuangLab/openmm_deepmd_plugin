@@ -25,6 +25,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      run: docker pull ghcr.io/dingye18/openmm_deepmd_plugin-test:c_api
 
   build:
     runs-on: self-hosted
