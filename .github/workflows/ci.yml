@@ -16,22 +16,13 @@ env:
   LD_LIBRARY_PATH: /usr/local/libdeepmd/libdeepmd_c/lib/
 
 jobs:
-  login:
+  Build-Unittest:
     runs-on: self-hosted
-    steps:
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1 
-      with:
-        registry: ghcr.io
+    container: 
+      image: ghcr.io/dingye18/openmm_deepmd_plugin-test:c_api
+      credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Pull Docker Image
-      run: docker pull ghcr.io/dingye18/openmm_deepmd_plugin-test:c_api
-
-  build:
-    runs-on: self-hosted
-    container: ghcr.io/dingye18/openmm_deepmd_plugin-test:c_api
 
     steps:
     - uses: actions/checkout@v3
@@ -54,11 +45,8 @@ jobs:
         make install
         make PythonInstall
 
-  Unittest:
-    runs-on: self-hosted
-    container: ghcr.io/dingye18/openmm_deepmd_plugin-test:python
-    
-    steps:
     - name: Test in NVE
       working-directory: ${{github.workspace}}
       run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+
+    
