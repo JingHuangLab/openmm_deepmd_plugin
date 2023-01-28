@@ -42,11 +42,14 @@ jobs:
         cmake --build $GITHUB_WORKSPACE/build
 
     - name: Test in C API
-      working-directory: $GITHUB_WORKSPACE/build
-      run: make test
+      working-directory: ${{env.GITHUB_WORKSPACE}} /build
+      run: | 
+        echo `pwd`
+        cat $GITHUB_WORKSPACE/build/CMakeCache.txt
+        make test
     
     - name: install
-      working-directory: $GITHUB_WORKSPACE/build
+      working-directory: ${{env.GITHUB_WORKSPACE}}/build
       run: | 
         make install
         make PythonInstall
