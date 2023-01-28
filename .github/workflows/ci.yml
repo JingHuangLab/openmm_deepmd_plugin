@@ -15,11 +15,16 @@ env:
   CMAKE_CXX_COMPILER: /opt/conda/bin/x86_64-conda-linux-gnu-c++
   LD_LIBRARY_PATH: /usr/local/libdeepmd/libdeepmd_c/lib/
 
+permissions:
+  actions: read
+  contents: read
+  packages: write
+
 jobs:
   Build-Unittest:
     runs-on: self-hosted
     container: 
-      image: ghcr.io/dingye18/openmm_deepmd_plugin-test:c_api
+      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:c_api
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
