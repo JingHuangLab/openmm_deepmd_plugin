@@ -27,7 +27,7 @@ jobs:
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: -gpus all
+      options: --gpus all
 
     steps:
     - uses: actions/checkout@v3
