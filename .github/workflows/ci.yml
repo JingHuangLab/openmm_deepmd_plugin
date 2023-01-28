@@ -18,7 +18,7 @@ env:
 permissions:
   actions: read
   contents: read
-  packages: write
+  packages: read
 
 jobs:
   Build-Unittest:
