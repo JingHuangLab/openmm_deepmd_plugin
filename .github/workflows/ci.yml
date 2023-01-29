@@ -9,38 +9,38 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  OPENMM_DIR: /opt/conda/
-  DEEPMD_DIR: /usr/local/libdeepmd/libdeepmd_c/
-  CMAKE_C_COMPILER: /opt/conda/bin/x86_64-conda-linux-gnu-cc
-  CMAKE_CXX_COMPILER: /opt/conda/bin/x86_64-conda-linux-gnu-c++
-  LD_LIBRARY_PATH: /usr/local/libdeepmd/libdeepmd_c/lib/
+  OPENMM_DIR: /usr/local
+  DEEPMD_DIR: /usr/local/libdeepmd_c/
+  LD_LIBRARY_PATH: /usr/local/libdeepmd_c/lib:/usr/local/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs
 
 permissions:
   actions: read
   packages: read
 
 jobs:
-  BuildReferenceUnittest:
+  BuildAndUnittest:
     runs-on: self-hosted
     container: 
-      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:c_api
+      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c_api.2.2.0.beta.0
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      options: --gpus all # Used when running on a self-hosted runner, thus we can use GPU for CUDA platform testing.
   
     steps:
     - uses: actions/checkout@v3
     - name: Configure CMake
       run: |
+        conda activate test 
         mkdir $GITHUB_WORKSPACE/build
-        cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_C_COMPILER=${{env.CMAKE_C_COMPILER}} -DCMAKE_CXX_COMPILER=${{env.CMAKE_CXX_COMPILER}}
+        cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
       run: |
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{env.LD_LIBRARY_PATH}}
         cmake --build $GITHUB_WORKSPACE/build
 
-    - name: Test in C API
+    - name: Test in C++ API
       run: | 
         cd $GITHUB_WORKSPACE/build
         make test
@@ -51,43 +51,9 @@ jobs:
         make install
         make PythonInstall
 
-    - name: Test in NVE
+    - name: Test in Python interface for NVE in Reference (CPU) Platform
       run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
-  
-  BuildCUDAUnittest:
-    runs-on: self-hosted
-    container: 
-      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:c_api
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-      options: --gpus all
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Configure CMake
-      run: |
-        mkdir $GITHUB_WORKSPACE/build
-        cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_C_COMPILER=${{env.CMAKE_C_COMPILER}} -DCMAKE_CXX_COMPILER=${{env.CMAKE_CXX_COMPILER}} -DPLUGIN_BUILD_CUDA_LIB=ON
-
-    - name: Build
-      run: |
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{env.LD_LIBRARY_PATH}}
-        cmake --build $GITHUB_WORKSPACE/build
-
-    - name: Test in C API
-      run: | 
-        cd $GITHUB_WORKSPACE/build
-        make test
     
-    - name: Install Python Module
-      run: |
-        cd $GITHUB_WORKSPACE/build 
-        make install
-        make PythonInstall
-
-    - name: Test in NVE
+    - name: Test in Python interface for NVE in CUDA (GPU) Platform
       run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
-
-    
+  
