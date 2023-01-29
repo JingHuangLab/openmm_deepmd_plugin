@@ -31,6 +31,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Configure CMake
       run: |
+        source /opt/miniconda3/etc/profile.d/conda.sh
         conda activate test 
         mkdir $GITHUB_WORKSPACE/build
         cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
