@@ -20,6 +20,9 @@ permissions:
 jobs:
   BuildAndUnittest:
     runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash -l {0}
     container: 
       image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c_api.2.2.0.beta.0
       credentials:
@@ -29,10 +32,14 @@ jobs:
   
     steps:
     - uses: actions/checkout@v3
-    - name: Configure CMake
+
+    - name: Activate conda environment
       run: |
         source /opt/miniconda3/etc/profile.d/conda.sh
-        conda activate test 
+        conda activate test
+
+    - name: Configure CMake
+      run: |
         mkdir $GITHUB_WORKSPACE/build
         cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
