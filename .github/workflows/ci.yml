@@ -35,9 +35,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        source /opt/miniconda3/etc/profile.d/conda.sh
         conda activate test
-        echo `which python`
         mkdir $GITHUB_WORKSPACE/build
         cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cat $GITHUB_WORKSPACE/build/CMakeCache.txt
@@ -58,9 +56,9 @@ jobs:
         make install
         make PythonInstall
 
-    - name: Test in Python interface for NVE in Reference (CPU) Platform
-      run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+    - name: Test in Python interface for NVE
+      run: |         
+        conda activate test
+        python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+        python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
     
-    - name: Test in Python interface for NVE in CUDA (GPU) Platform
-      run: python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
-  
