@@ -24,7 +24,7 @@ jobs:
       run:
         shell: bash -l {0}
     container: 
-      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c_api.2.2.0.beta.0
+      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c-api.2.2.0.beta.0
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
