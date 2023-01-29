@@ -9,58 +9,53 @@ forces to particles during a simulation.
 
 ## Installation
 
-### Install by compiling
-This plugin requires the c++ library of **OpenMM, v7.5**, **Tensorflow, v2.4.1**, **Deepmd-kit, v2.0.0.b3**. It uses CMake as its build tool. CUDA is needed for this plugin. This plugin support **CUDA, Reference** platform for now.
-And then compile this plugin with steps below.
+### Install from source
+This plugin requires the library of **OpenMM, v7.6**, **Deepmd-kit C API package, v2.2.0.beta.0**. 
+Compile plugin from source with following steps.
 
-1. Prepare the installation environment.
+1. Prepare the conda environment.
    ```
    conda create -n dp_openmm
    conda activate dp_openmm
-   conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
-   conda install -c conda-forge openmm
+   conda install -c conda-forge openmm cudatoolkit=11.6
    ```
-2. Clone this repository and create a directory in which to build the plugin.
+
+2. Download and install the Deepmd-kit C API library.
+   ```shell
+   wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.0.b0/libdeepmd_c.tar.gz
+   # Extract the C API library of Deepmd-kit to the directory of your choice.
+   tar -xf libdeepmd_c.tar.gz -C /usr/local/libdeepmd_c 
+   ```
+
+3. Clone this repository and create a directory in which to build the plugin.
    ```shell
    git clone https://github.com/JingHuangLab/openmm_deepmd_plugin.git
    cd openmm_deepmd_plugin && mkdir build && cd build
    ```
-3. Run `cmake` command with required parameters.
+4. Run `cmake` command with required parameters.
    ```shell
    cmake .. -DOPENMM_DIR=${OPENMM_INSTALLED_DIR} -DDEEPMD_DIR=${LIBDEEPMD_C_INSTALLED_DIR}
    ```
-   If you installed the OpenMM and libdeepmd followed by steps above, the `${OPENMM_INSTALLED_DIR}`, `${DEEPMD_INSTALLED_DIR}`, `${TENSORFLOW_DIR}` should be the path to conda created environment. Such as `/home/dingye/anaconda3/envs/dp_openmm` here. 
-   You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}`.
-   By default, precision is set to be `double`, you can also set the precision to be `float` with cmake flags `-DFLOAT_PREC=low`.
-   The default value for `OPENMM_DIR`, `DEEPMD_DIR`, `TENSORFLOW_DIR` are `/usr/local/openmm/`, `/usr/local/deepmd`, `/usr/local/tensorflow` respectively. 
-4. Compile the shared library with command `make` running in `build` directory.
+   `OPENMM_INSTALLED_DIR` is the directory where OpenMM is installed.
+   If you installed OpenMM from conda, it is the directory of the location of environment `dp_openmm`.
+   `LIBDEEPMD_C_INSTALLED_DIR` is the directory where Deepmd-kit C API library is installed.
+   For example, if you installed Deepmd-kit C API library to `/usr/local/libdeepmd_c`, 
+   then `LIBDEEPMD_C_INSTALLED_DIR` is `/usr/local/libdeepmd_c`.
+
+5. Compile the shared library with command `make` running in `build` directory.
    ```shell
    make && make install
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
-5. Test the plugin C++ interface and compile the Python interface of this plugin with
+
+6. Test the plugin C++ interface and compile the Python interface of this plugin with
    ```shell
    make test
    make PythonInstall
    ```
-   Attention that running of this plugin with python need OpenMM python library to be installed first.
-
-### Install with conda
-Install from conda is much easier than install by compiling.
-Running these commands in your shell terminal.
-```shell
-conda create -n dp_openmm
-conda activate dp_openmm
-conda install python=3.8
-conda install -c deepmodeling libdeepmd=2.0.0=1_cuda10.1_gpu
-conda install -c conda-forge openmm
-conda install -c deepmodeling openmm_deepmd_plugin
-python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve
-python -m OpenMMDeepmdPluginTools.test_dp_plugin_nve --platform CUDA
-```
-
 ## Usage
 
 In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files for reference.
-That's used for running of this plugin with on trained [water model](./tests/frozen_model/graph_from_han_dp2.0_compress.pb).
-Alchemical simulation feature for Deepmd-kit is also implement in this plugin. More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
+That's used for running of this plugin with on trained [water model](./tests/frozen_model/water.pb).
+Alchemical simulation feature for Deepmd-kit is also implemented in this plugin. 
+More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
