@@ -31,16 +31,13 @@ jobs:
       options: --gpus all # Used when running on a self-hosted runner, thus we can use GPU for CUDA platform testing.
   
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3        
 
-    - name: Activate conda environment
+    - name: Configure CMake
       run: |
         source /opt/miniconda3/etc/profile.d/conda.sh
         conda activate test
         echo `which python`
-
-    - name: Configure CMake
-      run: |
         mkdir $GITHUB_WORKSPACE/build
         cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cat $GITHUB_WORKSPACE/build/CMakeCache.txt
