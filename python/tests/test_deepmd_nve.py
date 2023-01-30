@@ -35,6 +35,7 @@ def test_deepmd_nve_reference():
     platform_name = "Reference"
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
+    box = [x.value_in_unit(u.nanometers) for x in box]
     
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
