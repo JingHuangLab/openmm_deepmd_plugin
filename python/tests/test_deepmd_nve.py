@@ -5,23 +5,13 @@ import numpy as np
 from math import sqrt
 import glob, random
 try:
-    from openmm import app
     import openmm as mm
     from openmm import unit as u
-    import openmm as mm
-    import openmm.app as app
-    from openmm.app import *
-    from openmm import *
-    from openmm.unit import *
+    from openmm.app import PDBFile, StateDataReporter, DCDReporter, element
 except:
-    from simtk.openmm import app
     import simtk.openmm as mm
     from simtk import unit as u
-    import simtk.openmm as mm
-    import simtk.openmm.app as app
-    from simtk.openmm.app import *
-    from simtk.openmm import *
-    from simtk.unit import *
+    from simtk.openmm.app import PDBFile, StateDataReporter, DCDReporter, element
 
 import time
 
@@ -35,10 +25,10 @@ def test_deepmd_energy_forces():
     pass
 
 def test_deepmd_nve_reference():
-    pdb_file = os.path.join(os.path.dirname(__file__), "data", "lw_256_test.pdb")
+    pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
     output_dcd = os.path.join(output_temp_dir, "lw_256_test.reference.nve.dcd")
     output_log = os.path.join(output_temp_dir, "lw_256_test.reference.nve.log")
-    dp_model = os.path.join(os.path.dirname(__file__), "data", "water.pb")
+    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     
     time_step = 0.2 # unit is femtosecond.
     report_frequency = 10
@@ -50,9 +40,7 @@ def test_deepmd_nve_reference():
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
     positions = liquid_water.getPositions()
-    num_atoms = liquid_water.getNumAtoms()
-    
-    randomSeed = random.randint(0, num_atoms)
+    num_atoms = topology.getNumAtoms()
     
     dp_system = mm.System()
     integrator = mm.VerletIntegrator(time_step*u.femtoseconds)
@@ -86,7 +74,7 @@ def test_deepmd_nve_reference():
     sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
     sim.context.setPositions(positions)
     
-    sim.reporters.append(app.DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
+    sim.reporters.append(DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
     sim.reporters.append(
         StateDataReporter(output_log, report_frequency, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
                           remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
@@ -115,10 +103,10 @@ def test_deepmd_nve_reference():
         
 
 def test_deepmd_nve_cuda():
-    pdb_file = os.path.join(os.path.dirname(__file__), "data", "lw_256_test.pdb")
+    pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
     output_dcd = os.path.join(output_temp_dir, "lw_256_test.reference.nve.dcd")
     output_log = os.path.join(output_temp_dir, "lw_256_test.reference.nve.log")
-    dp_model = os.path.join(os.path.dirname(__file__), "data", "water.pb")
+    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     
     time_step = 0.2 # unit is femtosecond.
     report_frequency = 10
@@ -130,9 +118,7 @@ def test_deepmd_nve_cuda():
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
     positions = liquid_water.getPositions()
-    num_atoms = liquid_water.getNumAtoms()
-    
-    randomSeed = random.randint(0, num_atoms)
+    num_atoms = topology.getNumAtoms()
     
     dp_system = mm.System()
     integrator = mm.VerletIntegrator(time_step*u.femtoseconds)
@@ -166,7 +152,7 @@ def test_deepmd_nve_cuda():
     sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
     sim.context.setPositions(positions)
     
-    sim.reporters.append(app.DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
+    sim.reporters.append(DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
     sim.reporters.append(
         StateDataReporter(output_log, report_frequency, step=True, time=True, totalEnergy=True, kineticEnergy=True, potentialEnergy=True, temperature=True, progress=True,
                           remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
