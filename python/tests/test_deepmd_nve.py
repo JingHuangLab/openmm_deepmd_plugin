@@ -19,23 +19,26 @@ from OpenMMDeepmdPlugin import DeepmdForce
 from OpenMMDeepmdPlugin import ForceReporter, Simulation4Deepmd
 
 
-output_temp_dir = "/tmp/openmm_deepmd_plugin_test_output"
+output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output"
 energy_std_tol = 0.0005 # unit is kJ/mol
+
+if not os.path.exists(output_temp_dir):
+    os.mkdir(output_temp_dir)
 
 
 def test_deepmd_nve_reference():
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
+    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     output_dcd = os.path.join(output_temp_dir, "lw_256_test.reference.nve.dcd")
     output_log = os.path.join(output_temp_dir, "lw_256_test.reference.nve.log")
-    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
+    
     
     time_step = 0.2 # unit is femtosecond.
-    report_frequency = 10
-    nsteps = 100    
+    report_frequency = 100
+    nsteps = 1000
     platform_name = "Reference"
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
-    box = [x.value_in_unit(u.nanometers) for x in box]
     
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
@@ -48,24 +51,21 @@ def test_deepmd_nve_reference():
     
     dp_force = DeepmdForce(dp_model)
     dp_force.addType(0, element.oxygen.symbol)
-    dp_force.addType(0, element.hydrogen.symbol)
+    dp_force.addType(1, element.hydrogen.symbol)
     
-    nHydrogen = 0
-    nOxygen = 0
     # Add particles into force.
     for atom in topology.atoms():
         if atom.element == element.oxygen:
             dp_system.addParticle(element.oxygen.mass)
             dp_force.addParticle(atom.index, element.oxygen.symbol)
-            nOxygen += 1
             for at in atom.residue.atoms():
+                # Add bonds for visualization. It will have no effect on the force calculation.
                 topology.addBond(at, atom)
                 if at.index != atom.index:
                     dp_force.addBond(atom.index, at.index)
         elif atom.element == element.hydrogen:
             dp_system.addParticle(element.hydrogen.mass)
             dp_force.addParticle(atom.index, element.hydrogen.symbol)
-            nHydrogen += 1
     
     dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
     dp_system.addForce(dp_force)
@@ -105,13 +105,14 @@ def test_deepmd_nve_reference():
 
 def test_deepmd_nve_cuda():
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
-    output_dcd = os.path.join(output_temp_dir, "lw_256_test.reference.nve.dcd")
-    output_log = os.path.join(output_temp_dir, "lw_256_test.reference.nve.log")
     dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
+    output_dcd = os.path.join(output_temp_dir, "lw_256_test.cuda.nve.dcd")
+    output_log = os.path.join(output_temp_dir, "lw_256_test.cuda.nve.log")
+    
     
     time_step = 0.2 # unit is femtosecond.
-    report_frequency = 10
-    nsteps = 100    
+    report_frequency = 100
+    nsteps = 1000    
     platform_name = "CUDA"
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
@@ -127,16 +128,13 @@ def test_deepmd_nve_cuda():
     
     dp_force = DeepmdForce(dp_model)
     dp_force.addType(0, element.oxygen.symbol)
-    dp_force.addType(0, element.hydrogen.symbol)
+    dp_force.addType(1, element.hydrogen.symbol)
     
-    nHydrogen = 0
-    nOxygen = 0
     # Add particles into force.
     for atom in topology.atoms():
         if atom.element == element.oxygen:
             dp_system.addParticle(element.oxygen.mass)
             dp_force.addParticle(atom.index, element.oxygen.symbol)
-            nOxygen += 1
             for at in atom.residue.atoms():
                 topology.addBond(at, atom)
                 if at.index != atom.index:
@@ -144,7 +142,6 @@ def test_deepmd_nve_cuda():
         elif atom.element == element.hydrogen:
             dp_system.addParticle(element.hydrogen.mass)
             dp_force.addParticle(atom.index, element.hydrogen.symbol)
-            nHydrogen += 1
     
     dp_force.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
     dp_system.addForce(dp_force)
