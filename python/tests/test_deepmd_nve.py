@@ -20,9 +20,8 @@ from OpenMMDeepmdPlugin import ForceReporter, Simulation4Deepmd
 
 
 output_temp_dir = "/tmp/openmm_deepmd_plugin_test_output"
+energy_std_tol = 0.0005 # unit is kJ/mol
 
-def test_deepmd_energy_forces():
-    pass
 
 def test_deepmd_nve_reference():
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
@@ -88,7 +87,8 @@ def test_deepmd_nve_reference():
     cost_time = end_time - start_time
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
-    total_energy = [], tot_energy_index = -5
+    total_energy = []
+    tot_energy_index = -5
     with open(output_log, "r") as f:
         log_content = f.readlines()
     for ii , line in enumerate(log_content):
@@ -98,8 +98,8 @@ def test_deepmd_nve_reference():
         total_energy.append(float(temp[tot_energy_index]))
     total_energy = np.array(total_energy)
     
-    # Check the total energy fluctuations over # of atoms is smaller than 0.005 kJ/mol 
-    assert(np.std(total_energy) / num_atoms < 0.005)
+    # Check the total energy fluctuations over # of atoms is smaller than energy_std_tol. 
+    assert(np.std(total_energy) / num_atoms < energy_std_tol)
         
 
 def test_deepmd_nve_cuda():
@@ -166,7 +166,8 @@ def test_deepmd_nve_cuda():
     cost_time = end_time - start_time
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
-    total_energy = [], tot_energy_index = -5
+    total_energy = []
+    tot_energy_index = -5
     with open(output_log, "r") as f:
         log_content = f.readlines()
     for ii , line in enumerate(log_content):
@@ -176,5 +177,5 @@ def test_deepmd_nve_cuda():
         total_energy.append(float(temp[tot_energy_index]))
     total_energy = np.array(total_energy)
     
-    # Check the total energy fluctuations over # of atoms is smaller than 0.005 kJ/mol 
-    assert(np.std(total_energy) / num_atoms < 0.005)
+    # Check the total energy fluctuations over # of atoms is smaller than energy_std_tol.
+    assert(np.std(total_energy) / num_atoms < energy_std_tol)
