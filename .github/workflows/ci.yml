@@ -68,5 +68,5 @@ jobs:
         source /opt/miniconda3/etc/profile.d/conda.sh        
         conda activate test
         conda install -y pytest
-        cd ${$GITHUB_WORKSPACE/python}
+        cd $GITHUB_WORKSPACE/python
         pytest
