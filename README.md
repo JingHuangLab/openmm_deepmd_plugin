@@ -2,7 +2,8 @@
 
 
 This is a plugin for [OpenMM](http://openmm.org) that allows DeepPotential model
-to be used for defining forces.  It is implemented with [Deepmd-kit](https://github.com/deepmodeling/deepmd-kit) and [TensorFlow](https://www.tensorflow.org/).
+to be used for defining forces. 
+It is implemented with [Deepmd-kit](https://github.com/deepmodeling/deepmd-kit).
 To use it, you create a TensorFlow graph with Deepmd-kit that takes particle positions as input
 and produces forces and energy as output. This plugin uses the graph to apply
 forces to particles during a simulation.
