@@ -47,7 +47,7 @@ using namespace std;
 extern "C" OPENMM_EXPORT void registerDeepmdReferenceKernelFactories();
 
 const double TOL = 1e-5;
-const string graph = "../tests/frozen_model/graph_from_han_dp2.0_compress.pb";
+const string graph = "../tests/frozen_model/water.pb";
 const double coordUnitCoeff = 10;
 const double forceUnitCoeff = 964.8792534459;
 const double energyUnitCoeff = 96.48792534459;
