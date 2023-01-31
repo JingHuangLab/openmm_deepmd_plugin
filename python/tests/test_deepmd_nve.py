@@ -1,9 +1,6 @@
-from sys import stdout, exit
-import sys
-import os, platform
+import os
 import numpy as np
-from math import sqrt
-import glob, random
+import time
 try:
     import openmm as mm
     from openmm import unit as u
@@ -12,11 +9,8 @@ except:
     import simtk.openmm as mm
     from simtk import unit as u
     from simtk.openmm.app import PDBFile, StateDataReporter, DCDReporter, element
-
-import time
-
-from OpenMMDeepmdPlugin import DeepmdForce
-from OpenMMDeepmdPlugin import ForceReporter, Simulation4Deepmd
+    
+from OpenMMDeepmdPlugin import DeepmdForce, Simulation4Deepmd
 
 
 output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output"

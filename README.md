@@ -43,16 +43,18 @@ Compile plugin from source with following steps.
    For example, if you installed Deepmd-kit C API library to `/usr/local/libdeepmd_c`, 
    then `LIBDEEPMD_C_INSTALLED_DIR` is `/usr/local/libdeepmd_c`.
 
-5. Compile the shared library with command `make` running in `build` directory.
+5. Compile the shared library.
    ```shell
    make && make install
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
 
-6. Test the plugin C++ interface and compile the Python interface of this plugin with
+6. Test the plugin C++ interface and install the Python module of this plugin into conda environment
    ```shell
    make test
    make PythonInstall
+   python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+   python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
    ```
 ## Usage
 
