@@ -63,6 +63,12 @@ public:
     void addBond(const int particle1, const int particle2);
     void setPBC(const bool use_pbc);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
+
+    // Extract the model info from dp model.    
+    double getCutoff() const;
+    int getNumberTypes() const;
+    string getTypesMap() const;
+
     /*
     * Used for alchemical simulation.
     */

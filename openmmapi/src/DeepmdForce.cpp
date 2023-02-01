@@ -61,6 +61,13 @@ DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, con
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
+    // Initialize dp model
+    DeepPot tmp_dp = DeepPot(graph_file);
+    
+    // Extract the model informations first.
+    this->numb_types = tmp_dp.numb_types();
+    this->cutoff = tmp_dp.cutoff();
+    tmp_dp.get_type_map(this->type_map);
 }
 
 DeepmdForce::DeepmdForce(const string& GraphFile){
@@ -69,6 +76,11 @@ DeepmdForce::DeepmdForce(const string& GraphFile){
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
+    // Initialize dp model
+    DeepPot tmp_dp = DeepPot(graph_file);
+    this->numb_types = tmp_dp.numb_types();
+    this->cutoff = tmp_dp.cutoff();
+    tmp_dp.get_type_map(this->type_map);
 }
 
 DeepmdForce::~DeepmdForce(){
@@ -92,6 +104,10 @@ void DeepmdForce::setUnitTransformCoefficients(const double coordCoefficient, co
 double DeepmdForce::getCoordUnitCoefficient() const {return coordCoeff;}
 double DeepmdForce::getForceUnitCoefficient() const {return forceCoeff;}
 double DeepmdForce::getEnergyUnitCoefficient() const {return energyCoeff;}
+
+double DeepmdForce::getCutoff() const {return cutoff;}
+int DeepmdForce::getNumberTypes() const {return numb_types;}
+string DeepmdForce::getTypesMap() const {return type_map;}
 
 const string& DeepmdForce::getDeepmdGraphFile() const{return graph_file;}
 const map<int, string>& DeepmdForce::getType4EachParticle() const{return type4EachParticle;}

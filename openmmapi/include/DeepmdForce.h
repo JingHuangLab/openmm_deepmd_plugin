@@ -154,7 +154,25 @@ public:
      * @return double 
      */
     double getEnergyUnitCoefficient() const;
-    
+    /**
+     * @brief Get the Cutoff radius of the model used.
+     * 
+     * @return double
+     */
+    double getCutoff() const;
+    /**
+     * @brief Get the number of types in the model.
+     * 
+     * @return int 
+     */
+    int getNumberTypes() const;
+    /**
+     * @brief Get the string that stores the types information.
+     * 
+     * @return string
+     */
+    string getTypesMap() const;
+     
     // For alchemical simulation.
     /**
      * @brief Set the Deepmd Force is used for alchemical simulation or not.
@@ -231,7 +249,11 @@ private:
     string graph_file, graph_file_1, graph_file_2;
     bool used4Alchemical = false;
     bool use_pbc = true;
-    int gpu_node = 0;
+
+    int numb_types;
+    string type_map;
+    double cutoff;
+    
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;

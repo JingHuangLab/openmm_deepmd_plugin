@@ -13,8 +13,6 @@ except:
     import simtk.unit as unit
     
 import sys
-import re
-from math import sqrt
 from datetime import datetime, timedelta
 try:
     import matplotlib.pyplot as plt
@@ -26,6 +24,8 @@ try:
     string_types = (unicode, str)
 except NameError:
     string_types = (str,)
+
+from .OpenMMDeepmdPlugin import DeepmdForce
 
 class ForceReporter(object):
     def __init__(self, file, group_num, reportInterval):
@@ -53,303 +53,6 @@ class ForceReporter(object):
             state = simulation.context.getState(getForces=True)
         forces = state.getForces().value_in_unit(u.kilojoules_per_mole/u.nanometers)
         self._out.write(str(forces)+"\n")
-
-
-# Implement a simulation class for Deepmd-kit simulation only.
-class Simulation4Deepmd(object):
-    """Simulation provides a simplified API for running simulations with OpenMM and reporting results.
-
-    A Simulation ties together various objects used for running a simulation: a Topology, System,
-    Integrator, and Context.  To use it, you provide the Topology, System, and Integrator, and it
-    creates the Context automatically.
-
-    Simulation also maintains a list of "reporter" objects that record or analyze data as the simulation
-    runs, such as writing coordinates to files or displaying structures on the screen.  For example,
-    the following line will cause a file called "output.pdb" to be created, and a structure written to
-    it every 1000 time steps:
-
-    simulation.reporters.append(PDBReporter('output.pdb', 1000))
-    """
-
-    def __init__(self, topology, system, integrator, platform=None, platformProperties=None, state=None):
-        """Create a Simulation.
-
-        Parameters
-        ----------
-        topology : Topology
-            A Topology describing the the system to simulate
-        system : System or XML file name
-            The OpenMM System object to simulate (or the name of an XML file
-            with a serialized System)
-        integrator : Integrator or XML file name
-            The OpenMM Integrator to use for simulating the System (or the name
-            of an XML file with a serialized System)
-        platform : Platform=None
-            If not None, the OpenMM Platform to use
-        platformProperties : map=None
-            If not None, a set of platform-specific properties to pass to the
-            Context's constructor
-        state : XML file name=None
-            The name of an XML file containing a serialized State. If not None,
-            the information stored in state will be transferred to the generated
-            Simulation object.
-        """
-        self.topology = topology
-        ## The System being simulated
-        if isinstance(system, string_types):
-            with open(system, 'r') as f:
-                self.system = mm.XmlSerializer.deserialize(f.read())
-        else:
-            self.system = system
-        ## The Integrator used to advance the simulation
-        if isinstance(integrator, string_types):
-            with open(integrator, 'r') as f:
-                self.integrator = mm.XmlSerializer.deserialize(f.read())
-        else:
-            self.integrator = integrator
-        ## The index of the current time step
-        self.currentStep = 0
-        ## A list of reporters to invoke during the simulation
-        self.reporters = []
-        if platform is None:
-            ## The Context containing the current state of the simulation
-            self.context = mm.Context(self.system, self.integrator)
-        elif platformProperties is None:
-            self.context = mm.Context(self.system, self.integrator, platform)
-        else:
-            self.context = mm.Context(self.system, self.integrator, platform, platformProperties)
-        if state is not None:
-            with open(state, 'r') as f:
-                self.context.setState(mm.XmlSerializer.deserialize(f.read()))
-        ## Determines whether or not we are using PBC. Try from the System first,
-        ## fall back to Topology if that doesn't work
-        try:
-            self._usesPBC = self.system.usesPeriodicBoundaryConditions()
-        except Exception: # OpenMM just raises Exception if it's not implemented everywhere
-            self._usesPBC = topology.getUnitCellDimensions() is not None
-
-    def minimizeEnergy(self, tolerance=10*unit.kilojoule/unit.mole, maxIterations=0):
-        """Perform a local energy minimization on the system.
-
-        Parameters
-        ----------
-        tolerance : energy=10*kilojoules/mole
-            The energy tolerance to which the system should be minimized
-        maxIterations : int=0
-            The maximum number of iterations to perform.  If this is 0,
-            minimization is continued until the results converge without regard
-            to how many iterations it takes.
-        """
-        mm.LocalEnergyMinimizer.minimize(self.context, tolerance, maxIterations)
-
-    def step(self, steps):
-        """Advance the simulation by integrating a specified number of time steps."""
-        self._simulate(endStep=self.currentStep+steps)
-
-    def runForClockTime(self, time, checkpointFile=None, stateFile=None, checkpointInterval=None):
-        """Advance the simulation by integrating time steps until a fixed amount of clock time has elapsed.
-
-        This is useful when you have a limited amount of computer time available, and want to run the longest simulation
-        possible in that time.  This method will continue taking time steps until the specified clock time has elapsed,
-        then return.  It also can automatically write out a checkpoint and/or state file before returning, so you can
-        later resume the simulation.  Another option allows it to write checkpoints or states at regular intervals, so
-        you can resume even if the simulation is interrupted before the time limit is reached.
-
-        Parameters
-        ----------
-        time : time
-            the amount of time to run for.  If no units are specified, it is
-            assumed to be a number of hours.
-        checkpointFile : string or file=None
-            if specified, a checkpoint file will be written at the end of the
-            simulation (and optionally at regular intervals before then) by
-            passing this to saveCheckpoint().
-        stateFile : string or file=None
-            if specified, a state file will be written at the end of the
-            simulation (and optionally at regular intervals before then) by
-            passing this to saveState().
-        checkpointInterval : time=None
-            if specified, checkpoints and/or states will be written at regular
-            intervals during the simulation, in addition to writing a final
-            version at the end.  If no units are specified, this is assumed to
-            be in hours.
-        """
-        if unit.is_quantity(time):
-            time = time.value_in_unit(unit.hours)
-        if unit.is_quantity(checkpointInterval):
-            checkpointInterval = checkpointInterval.value_in_unit(unit.hours)
-        endTime = datetime.now()+timedelta(hours=time)
-        while (datetime.now() < endTime):
-            if checkpointInterval is None:
-                nextTime = endTime
-            else:
-                nextTime = datetime.now()+timedelta(hours=checkpointInterval)
-                if nextTime > endTime:
-                    nextTime = endTime
-            self._simulate(endTime=nextTime)
-            if checkpointFile is not None:
-                self.saveCheckpoint(checkpointFile)
-            if stateFile is not None:
-                self.saveState(stateFile)
-
-    def _simulate(self, endStep=None, endTime=None):
-        if endStep is None:
-            endStep = sys.maxsize
-        nextReport = [None]*len(self.reporters)
-        while self.currentStep < endStep and (endTime is None or datetime.now() < endTime):
-            nextSteps = endStep-self.currentStep
-            
-            # Find when the next report will happen.
-            
-            anyReport = False
-            for i, reporter in enumerate(self.reporters):
-                nextReport[i] = reporter.describeNextReport(self)
-                if nextReport[i][0] > 0 and nextReport[i][0] <= nextSteps:
-                    nextSteps = nextReport[i][0]
-                    anyReport = True
-            stepsToGo = nextSteps
-            while stepsToGo > 10:
-                self.integrator.step(10) # Only take 10 steps at a time, to give Python more chances to respond to a control-c.
-                stepsToGo -= 10
-                self.currentStep += 10
-                if endTime is not None and datetime.now() >= endTime:
-                    return
-            self.integrator.step(stepsToGo)
-            self.currentStep += stepsToGo
-            if anyReport:
-                # One or more reporters are ready to generate reports.  Organize them into three
-                # groups: ones that want wrapped positions, ones that want unwrapped positions,
-                # and ones that don't care about positions.
-                
-                wrapped = []
-                unwrapped = []
-                either = []
-                for reporter, report in zip(self.reporters, nextReport):
-                    if report[0] == nextSteps:
-                        if len(report) > 5:
-                            wantWrap = report[5]
-                            if wantWrap is None:
-                                wantWrap = self._usesPBC
-                        else:
-                            wantWrap = self._usesPBC
-                        if not report[1]:
-                            either.append((reporter, report))
-                        elif wantWrap:
-                            wrapped.append((reporter, report))
-                        else:
-                            unwrapped.append((reporter, report))
-                if len(wrapped) > len(unwrapped):
-                    wrapped += either
-                else:
-                    unwrapped += either
-                
-                # Generate the reports.
-
-                if len(wrapped) > 0:
-                    self._generate_reports(wrapped, True)
-                if len(unwrapped) > 0:
-                    self._generate_reports(unwrapped, False)
-    
-    def _generate_reports(self, reports, periodic):
-        getPositions = False
-        getVelocities = False
-        getForces = False
-        getEnergy = False
-        for reporter, next in reports:
-            if next[1]:
-                getPositions = True
-            if next[2]:
-                getVelocities = True
-            if next[3]:
-                getForces = True
-            if next[4]:
-                getEnergy = True
-        state = self.context.getState(getPositions=getPositions, getVelocities=getVelocities, getForces=getForces,
-                                      getEnergy=getEnergy, getParameters=True, enforcePeriodicBox=periodic,
-                                      groups=self.context.getIntegrator().getIntegrationForceGroups())
-        for reporter, next in reports:
-            reporter.report(self, state)
-
-    def saveCheckpoint(self, file):
-        """Save a checkpoint of the simulation to a file.
-
-        The output is a binary file that contains a complete representation of the current state of the Simulation.
-        It includes both publicly visible data such as the particle positions and velocities, and also internal data
-        such as the states of random number generators.  Reloading the checkpoint will put the Simulation back into
-        precisely the same state it had before, so it can be exactly continued.
-
-        A checkpoint file is highly specific to the Simulation it was created from.  It can only be loaded into
-        another Simulation that has an identical System, uses the same Platform and OpenMM version, and is running on
-        identical hardware.  If you need a more portable way to resume simulations, consider using saveState() instead.
-
-        Parameters
-        ----------
-        file : string or file
-            a File-like object to write the checkpoint to, or alternatively a
-            filename
-        """
-        if isinstance(file, str):
-            with open(file, 'wb') as f:
-                f.write(self.context.createCheckpoint())
-        else:
-            file.write(self.context.createCheckpoint())
-
-    def loadCheckpoint(self, file):
-        """Load a checkpoint file that was created with saveCheckpoint().
-
-        Parameters
-        ----------
-        file : string or file
-            a File-like object to load the checkpoint from, or alternatively a
-            filename
-        """
-        if isinstance(file, str):
-            with open(file, 'rb') as f:
-                self.context.loadCheckpoint(f.read())
-        else:
-            self.context.loadCheckpoint(file.read())
-
-    def saveState(self, file):
-        """Save the current state of the simulation to a file.
-
-        The output is an XML file containing a serialized State object.  It includes all publicly visible data,
-        including positions, velocities, and parameters.  Reloading the State will put the Simulation back into
-        approximately the same state it had before.
-
-        Unlike saveCheckpoint(), this does not store internal data such as the states of random number generators.
-        Therefore, you should not expect the following trajectory to be identical to what would have been produced
-        with the original Simulation.  On the other hand, this means it is portable across different Platforms or
-        hardware.
-
-        Parameters
-        ----------
-        file : string or file
-            a File-like object to write the state to, or alternatively a
-            filename
-        """
-        state = self.context.getState(getPositions=True, getVelocities=True, getParameters=True, getIntegratorParameters=True)
-        xml = mm.XmlSerializer.serialize(state)
-        if isinstance(file, str):
-            with open(file, 'w') as f:
-                f.write(xml)
-        else:
-            file.write(xml)
-
-    def loadState(self, file):
-        """Load a State file that was created with saveState().
-
-        Parameters
-        ----------
-        file : string or file
-            a File-like object to load the state from, or alternatively a
-            filename
-        """
-        if isinstance(file, str):
-            with open(file, 'r') as f:
-                xml = f.read()
-        else:
-            xml = file.read()
-        self.context.setState(mm.XmlSerializer.deserialize(xml))
 
 
 
@@ -535,3 +238,96 @@ class DeepPotentialContext():
         forces = state.getForces(asNumpy=True)
         posi = state.getPositions(asNumpy=True)
         return potential, forces, posi
+
+class DeepPotentialModel():
+    def __init__(self, model_file, model_file_1 = None, model_file_2 = None) -> None:
+        self.model_file = model_file
+        self.dp_force = DeepmdForce(model_file)
+        self.cutoff = self.dp_force.getCutoff()
+        self.numb_types = self.dp_force.getNumberTypes()
+        self.type_map_raw = self.dp_force.getTypesMap()
+        self.type_map_dict, self.dp_model_types = self.__decode_type_map(self.type_map_raw)
+        self.IsAlchemical = False
+        
+        # Set up the atom type
+        for atom_type in self.type_map_dict.keys():
+            self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
+        
+        if model_file is not None and model_file_1 is not None and model_file_2 is not None:
+            del self.dp_force
+            self.dp_force = DeepmdForce(model_file, model_file_1, model_file_2)
+            self.model_file_1 = model_file_1
+            self.model_file_2 = model_file_2
+            self.IsAlchemical = True
+
+        
+        return
+    
+    def __decode_type_map(self, type_map_string):
+        type_map_dict = dict()
+        type_list = type_map_string.split()
+        for ii, atom_type in enumerate(type_list):
+            type_map_dict[atom_type] = ii
+        dp_model_types = list(type_map_dict.keys())
+        
+        assert len(dp_model_types) == self.numb_types, "Number of types is not consistent with numb_types from dp model"
+        
+        return type_map_dict, dp_model_types
+    
+    def setUnitTransformCoefficients(self, coordinatesCoefficient, forceCoefficient, energyCoefficient):
+        """_summary_
+
+        Args:
+            coordinatesCoefficient (_type_): Coefficient for input coordinates that transforms the units of the coordinates from nanometers to the units used by the DP model.
+            forceCoefficient (_type_): Coefficient for forces that transforms the units of the DP-predicted forces from the units used by the DP model to kJ/(mol * nm).
+            energyCoefficient (_type_): Coefficient for energies that transforms the units of the DP-predicted energy from the units used by the DP model to kJ/mol.
+        """
+        self.dp_force.setUnitTransformCoefficients(coordinatesCoefficient, forceCoefficient, energyCoefficient)
+        return
+    
+    def createSystem(self, topology, particleNameLabeler = "element", particles_group_1 = None, particles_group_2 = None, Lambda = None):
+        """_summary_
+
+        Args:
+            topology (_type_): OpenMM Topology object
+            particleNameLabeler (str, optional): labeler of atom type in topology, element or atom_name. Defaults to "element".
+            particles_group_1 (list, optional): list of particle index in group 1. Defaults to None. Used for alchemical free energy calculation.
+            particles_group_2 (list, optional): list of particle index in group 2. Defaults to None. Used for alchemical free energy calculation.
+            Lambda (float, optional): lambda value for alchemical free energy calculation. Defaults to None.
+        
+        """
+        dp_system = mm.System()
+        
+        # Add particles into force.
+        for atom in topology.atoms():
+            if particleNameLabeler == "element":
+                atom_type = atom.element.symbol
+            elif particleNameLabeler == "atom_name":
+                atom_type = atom.name
+            if atom_type not in self.dp_model_types:
+                raise Exception(f"Atom type {atom_type} is not found in {self.dp_model_types}.")
+            
+            dp_system.addParticle(atom.element.mass)
+            self.dp_force.addParticle(atom.index, atom_type)
+            
+        
+        # Add bond information into DeepmdForce for the PBC issue 
+        # during the trajectory saving. 
+        for bond in topology.bonds():
+            self.dp_force.addBond(bond[0].index, bond[1].index)
+        
+        if self.IsAlchemical:
+            if particles_group_1 is None:
+                raise Exception("particles_group_1 is required for alchemical DP")
+            if particles_group_2 is None:
+                raise Exception("particles_group_2 is required for alchemical DP")
+            if Lambda is None:
+                raise Exception("Lambda is required for alchemical DP")
+            
+            self.dp_force.setAtomsIndex4Graph1(particles_group_1)
+            self.dp_force.setAtomsIndex4Graph2(particles_group_2)
+            self.dp_force.setLambda(Lambda)
+        
+        dp_system.addForce(self.dp_force)
+        
+        return dp_system
