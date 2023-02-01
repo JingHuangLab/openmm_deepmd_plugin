@@ -24,8 +24,8 @@ def test_deepmd_nve(nsteps = 1000, time_step = 0.2, platform_name = "Reference",
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
-    pdb_file = os.path.join(os.path.dirname(__file__), "../data", "lw_256_test.pdb")
-    dp_model = os.path.join(os.path.dirname(__file__), "../data", "water.pb")
+    pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
+    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     output_dcd = os.path.join(output_temp_dir, "lw_256_test.nve.reference.dcd")
     output_log = os.path.join(output_temp_dir, "lw_256_test.nve.reference.log")
     
@@ -89,8 +89,8 @@ def test_deepmd_nve(nsteps = 1000, time_step = 0.2, platform_name = "CUDA", outp
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
-    pdb_file = os.path.join(os.path.dirname(__file__), "../data", "lw_256_test.pdb")
-    dp_model = os.path.join(os.path.dirname(__file__), "../data", "water.pb")
+    pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
+    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     output_dcd = os.path.join(output_temp_dir, "lw_256_test.nve.cuda.dcd")
     output_log = os.path.join(output_temp_dir, "lw_256_test.nve.cuda.log")
     
