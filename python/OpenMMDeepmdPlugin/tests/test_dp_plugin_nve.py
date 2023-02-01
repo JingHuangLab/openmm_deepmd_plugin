@@ -15,7 +15,7 @@ except:
 from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
-def test_deepmd_nve(nsteps, time_step, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output", energy_std_tol = 0.0005 ):
+def test_deepmd_nve(nsteps = 1000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output", energy_std_tol = 0.0005 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
