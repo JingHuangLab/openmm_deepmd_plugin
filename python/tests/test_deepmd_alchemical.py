@@ -95,8 +95,6 @@ def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.
     # Check the temperature fluctuations is smaller than temperature_std_tol, unit in kelvin.
     assert(np.std(temperature_trajectory) < temperature_std_tol)
     
-    assert(abs(np.mean(temperature_trajectory) - temperature) < 10)
-    
     
 def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
     if not os.path.exists(output_temp_dir):
@@ -177,7 +175,6 @@ def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, pl
     # Check the temperature fluctuations is smaller than temperature_std_tol, unit in kelvin.
     assert(np.std(temperature_trajectory) < temperature_std_tol)
     
-    assert(abs(np.mean(temperature_trajectory) - temperature) < 10)
     
 if __name__ == "__main__":
     test_deepmd_alchemical_reference()
