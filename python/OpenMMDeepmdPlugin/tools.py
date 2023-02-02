@@ -249,10 +249,6 @@ class DeepPotentialModel():
         self.type_map_dict, self.dp_model_types = self.__decode_type_map(self.type_map_raw)
         self.IsAlchemical = False
         
-        # Set up the atom type
-        for atom_type in self.type_map_dict.keys():
-            self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
-        
         if model_file is not None and model_file_1 is not None and model_file_2 is not None:
             del self.dp_force
             self.dp_force = DeepmdForce(model_file, model_file_1, model_file_2)
@@ -260,6 +256,9 @@ class DeepPotentialModel():
             self.model_file_2 = model_file_2
             self.IsAlchemical = True
 
+        # Set up the atom type
+        for atom_type in self.type_map_dict.keys():
+            self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
         
         return
     
@@ -324,8 +323,8 @@ class DeepPotentialModel():
             if Lambda is None:
                 raise Exception("Lambda is required for alchemical DP")
             
-            print(f"{len(particles_group_1)} particles are selected for group 1 in alchemical simulation.")
-            print(f"{len(particles_group_2)} particles are selected for group 2 in alchemical simulation")
+            #print(f"{len(particles_group_1)} particles are selected for group 1 in alchemical simulation.")
+            #print(f"{len(particles_group_2)} particles are selected for group 2 in alchemical simulation")
             
             self.dp_force.setAtomsIndex4Graph1(particles_group_1)
             self.dp_force.setAtomsIndex4Graph2(particles_group_2)
