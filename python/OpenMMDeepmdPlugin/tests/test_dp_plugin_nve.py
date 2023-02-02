@@ -25,9 +25,9 @@ def test_deepmd_nve(nsteps, time_step, platform_name = "Reference", output_temp_
     output_log = os.path.join(output_temp_dir, "lw_256_test.nve.log")
     
     # Set up the simulation parameters.
+    nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     report_frequency = 100
-    nsteps = nsteps
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     

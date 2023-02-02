@@ -13,32 +13,33 @@ except:
 from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
-def test_deepmd_nve_reference(nsteps = 1000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output", energy_std_tol = 0.0005 ):
+def test_deepmd_npt_reference(nsteps = 5000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
     dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
-    output_dcd = os.path.join(output_temp_dir, "lw_256_test.nve.reference.dcd")
-    output_log = os.path.join(output_temp_dir, "lw_256_test.nve.reference.log")
+    output_dcd = os.path.join(output_temp_dir, "lw_256_test.npt.reference.dcd")
+    output_log = os.path.join(output_temp_dir, "lw_256_test.npt.reference.log")
     
     # Set up the simulation parameters.
-    time_step = time_step # unit is femtosecond.
-    report_frequency = 100
     nsteps = nsteps
+    time_step = time_step # unit is femtosecond.
+    temperature = 300 # Kelvin
+    report_frequency = 1000
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
     positions = liquid_water.getPositions()
-    num_atoms = topology.getNumAtoms()
     
     # Set up the dp_system with the dp_model.    
     dp_model = DeepPotentialModel(dp_model)
     dp_model.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
     dp_system = dp_model.createSystem(topology)
     
+    dp_system.addForce(mm.MonteCarloBarostat(1*u.atmospheres, temperature*u.kelvin))
     integrator = mm.VerletIntegrator(time_step*u.femtoseconds)
     platform = mm.Platform.getPlatformByName(platform_name)
     
@@ -46,6 +47,7 @@ def test_deepmd_nve_reference(nsteps = 1000, time_step = 0.2, platform_name = "R
     sim = Simulation(topology, dp_system, integrator, platform)
     sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
     sim.context.setPositions(positions)
+    sim.context.setVelocitiesToTemperature(temperature * u.kelvin)
 
     # Add state reporters
     sim.reporters.append(DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
@@ -63,47 +65,48 @@ def test_deepmd_nve_reference(nsteps = 1000, time_step = 0.2, platform_name = "R
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
     # Fetch the total energy from the log file.
-    total_energy = []
-    tot_energy_index = -5
+    density_trajectory = []
+    density_index = -3
     with open(output_log, "r") as f:
         log_content = f.readlines()
     for ii , line in enumerate(log_content):
         if ii == 0:
             continue
-        temp = line.split()
-        total_energy.append(float(temp[tot_energy_index]))
-    total_energy = np.array(total_energy)
+        tmp = line.split()
+        density_trajectory.append(float(tmp[density_index]))
+    density_trajectory = np.array(density_trajectory)
     
-    # Check the total energy fluctuations over # of atoms is smaller than energy_std_tol, unit in kJ/mol.
-    assert(np.std(total_energy) / num_atoms < energy_std_tol)    
+    # Check the density fluctuations is smaller than density_std_tol, unit in g/mL.
+    assert(np.std(density_trajectory) < density_std_tol)
     
     
-def test_deepmd_nve_cuda(nsteps = 1000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nve_output", energy_std_tol = 0.0005 ):
+def test_deepmd_npt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
     dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
-    output_dcd = os.path.join(output_temp_dir, "lw_256_test.nve.cuda.dcd")
-    output_log = os.path.join(output_temp_dir, "lw_256_test.nve.cuda.log")
+    output_dcd = os.path.join(output_temp_dir, "lw_256_test.npt.cuda.dcd")
+    output_log = os.path.join(output_temp_dir, "lw_256_test.npt.cuda.log")
     
     # Set up the simulation parameters.
-    time_step = time_step # unit is femtosecond.
-    report_frequency = 100
     nsteps = nsteps
+    time_step = time_step # unit is femtosecond.
+    temperature = 300 # Kelvin
+    report_frequency = 1000
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
     liquid_water = PDBFile(pdb_file)
     topology = liquid_water.topology
     positions = liquid_water.getPositions()
-    num_atoms = topology.getNumAtoms()
     
     # Set up the dp_system with the dp_model.    
     dp_model = DeepPotentialModel(dp_model)
     dp_model.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
     dp_system = dp_model.createSystem(topology)
     
+    dp_system.addForce(mm.MonteCarloBarostat(1*u.atmospheres, temperature*u.kelvin))
     integrator = mm.VerletIntegrator(time_step*u.femtoseconds)
     platform = mm.Platform.getPlatformByName(platform_name)
     
@@ -111,6 +114,7 @@ def test_deepmd_nve_cuda(nsteps = 1000, time_step = 0.2, platform_name = "CUDA",
     sim = Simulation(topology, dp_system, integrator, platform)
     sim.context.setPeriodicBoxVectors(box[0], box[1], box[2])
     sim.context.setPositions(positions)
+    sim.context.setVelocitiesToTemperature(temperature * u.kelvin)
 
     # Add state reporters
     sim.reporters.append(DCDReporter(output_dcd, report_frequency, enforcePeriodicBox=False))
@@ -128,16 +132,16 @@ def test_deepmd_nve_cuda(nsteps = 1000, time_step = 0.2, platform_name = "CUDA",
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
     # Fetch the total energy from the log file.
-    total_energy = []
-    tot_energy_index = -5
+    density_trajectory = []
+    density_index = -3
     with open(output_log, "r") as f:
         log_content = f.readlines()
     for ii , line in enumerate(log_content):
         if ii == 0:
             continue
-        temp = line.split()
-        total_energy.append(float(temp[tot_energy_index]))
-    total_energy = np.array(total_energy)
+        tmp = line.split()
+        density_trajectory.append(float(tmp[density_index]))
+    density_trajectory = np.array(density_trajectory)
     
-    # Check the total energy fluctuations over # of atoms is smaller than energy_std_tol, unit in kJ/mol.
-    assert(np.std(total_energy) / num_atoms < energy_std_tol)    
+    # Check the density fluctuations is smaller than density_std_tol, unit in g/mL.
+    assert(np.std(density_trajectory) < density_std_tol)

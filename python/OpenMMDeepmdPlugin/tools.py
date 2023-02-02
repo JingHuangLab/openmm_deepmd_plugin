@@ -324,6 +324,9 @@ class DeepPotentialModel():
             if Lambda is None:
                 raise Exception("Lambda is required for alchemical DP")
             
+            print(f"{len(particles_group_1)} particles are selected for group 1 in alchemical simulation.")
+            print(f"{len(particles_group_2)} particles are selected for group 2 in alchemical simulation")
+            
             self.dp_force.setAtomsIndex4Graph1(particles_group_1)
             self.dp_force.setAtomsIndex4Graph2(particles_group_2)
             self.dp_force.setLambda(Lambda)
