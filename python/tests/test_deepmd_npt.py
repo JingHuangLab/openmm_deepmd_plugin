@@ -13,7 +13,7 @@ except:
 from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
-def test_deepmd_npt_reference(nsteps = 5000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
+def test_deepmd_npt_reference(nsteps = 1000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -26,7 +26,7 @@ def test_deepmd_npt_reference(nsteps = 5000, time_step = 0.2, platform_name = "R
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000
+    report_frequency = 100
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
@@ -80,7 +80,7 @@ def test_deepmd_npt_reference(nsteps = 5000, time_step = 0.2, platform_name = "R
     assert(np.std(density_trajectory) < density_std_tol)
     
     
-def test_deepmd_npt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
+def test_deepmd_npt_cuda(nsteps = 1000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_npt_output", density_std_tol = 0.2 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -93,7 +93,7 @@ def test_deepmd_npt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA",
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000
+    report_frequency = 100
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     

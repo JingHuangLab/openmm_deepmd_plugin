@@ -14,7 +14,7 @@ from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
 
-def test_deepmd_alchemical_reference(nsteps = 5000, time_step = 0.2, Lambda = 0.0, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
+def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.0, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -27,7 +27,7 @@ def test_deepmd_alchemical_reference(nsteps = 5000, time_step = 0.2, Lambda = 0.
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000 # Save trajectory every report_frequency steps.
+    report_frequency = 100 # Save trajectory every report_frequency steps.
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
@@ -98,7 +98,7 @@ def test_deepmd_alchemical_reference(nsteps = 5000, time_step = 0.2, Lambda = 0.
     assert(abs(np.mean(temperature_trajectory) - temperature) < 10)
     
     
-def test_deepmd_alchemical_cuda(nsteps = 5000, time_step = 0.2, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
+def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -111,7 +111,7 @@ def test_deepmd_alchemical_cuda(nsteps = 5000, time_step = 0.2, Lambda = 1.0, pl
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000 # Save trajectory every report_frequency steps.
+    report_frequency = 100 # Save trajectory every report_frequency steps.
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     

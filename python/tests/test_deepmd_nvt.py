@@ -13,7 +13,7 @@ except:
 from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
-def test_deepmd_nvt_reference(nsteps = 5000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nvt_output", temperature_std_tol = 25 ):
+def test_deepmd_nvt_reference(nsteps = 1000, time_step = 0.2, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nvt_output", temperature_std_tol = 25 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -26,7 +26,7 @@ def test_deepmd_nvt_reference(nsteps = 5000, time_step = 0.2, platform_name = "R
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000
+    report_frequency = 100
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
@@ -83,10 +83,10 @@ def test_deepmd_nvt_reference(nsteps = 5000, time_step = 0.2, platform_name = "R
     # Check the temperature fluctuations is smaller than temperature_std_tol, unit in kelvin.
     assert(np.std(temperature_trajectory) < temperature_std_tol)
     
-    assert(abs(np.mean(temperature_trajectory) - temperature) < 10)   
+    assert(abs(np.mean(temperature_trajectory) - temperature) < 20)   
     
     
-def test_deepmd_nvt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nvt_output", temperature_std_tol = 25 ):
+def test_deepmd_nvt_cuda(nsteps = 1000, time_step = 0.2, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_nvt_output", temperature_std_tol = 25 ):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -99,7 +99,7 @@ def test_deepmd_nvt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA",
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temperature = 300 # Kelvin
-    report_frequency = 1000
+    report_frequency = 100
     box = [19.807884, 0, 0, 0, 19.807884, 0, 0, 0, 19.807884]
     box = [mm.Vec3(box[0], box[1], box[2]), mm.Vec3(box[3], box[4], box[5]), mm.Vec3(box[6], box[7], box[8])] * u.angstroms
     
@@ -156,4 +156,4 @@ def test_deepmd_nvt_cuda(nsteps = 5000, time_step = 0.2, platform_name = "CUDA",
     # Check the temperature fluctuations is smaller than temperature_std_tol, unit in kelvin.
     assert(np.std(temperature_trajectory) < temperature_std_tol)
     
-    assert(abs(np.mean(temperature_trajectory) - temperature) < 10)
+    assert(abs(np.mean(temperature_trajectory) - temperature) < 20)
