@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import numpy as np
 import math
-from utils import DrawScatter, AlchemicalContext
+from OpenMMDeepmdPlugin import DrawScatter, AlchemicalContext
 from scipy import stats
 import simtk.unit as unit
 import csv

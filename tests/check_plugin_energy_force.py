@@ -2,7 +2,7 @@
 import os, sys, time
 import numpy as np
 from tqdm import tqdm
-from utils import DeepPotentialContext
+from OpenMMDeepmdPlugin import DeepPotentialContext
 import simtk.openmm as mm
 from simtk import unit as u
 import argparse
