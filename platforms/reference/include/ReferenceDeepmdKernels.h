@@ -75,7 +75,7 @@ private:
     // dp_1 and dp_2 are used for alchemical simulation.
     DeepPot dp, dp_1, dp_2;
 
-    int natoms;
+    int natoms, tot_atoms;
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
     vector<VALUETYPE> dvirial;
@@ -83,16 +83,13 @@ private:
     vector<VALUETYPE> dbox;
     vector<int> dtype;
 
+    vector<int> dp_particles;
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
     double forceUnitCoeff, energyUnitCoeff, coordUnitCoeff;
-    #ifdef HIGH_PREC
     vector<double> AddedForces;
-    #else
-    vector<float> AddedForces;
-    #endif
-
+    
     // Parameters for alchemical simulation.
     bool used4Alchemical = false;
     double lambda; // U = lambda * U_A + (1 - lambda) * (U_1 + U_2). Where U_A comes from the original graph, U_1 and U_2 come from two alchemical graph.

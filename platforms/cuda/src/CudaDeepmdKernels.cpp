@@ -52,12 +52,15 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     forceUnitCoeff = force.getForceUnitCoefficient();
     energyUnitCoeff = force.getEnergyUnitCoefficient();
     coordUnitCoeff = force.getCoordUnitCoefficient();
-    natoms = system.getNumParticles();
-   
+    
+    //natoms = system.getNumParticles();
+    natoms = type4EachParticle.size();
+    tot_atoms = system.getNumParticles();
+
     // Load the ordinary graph firstly.
     dp = DeepPot(graph_file);
     if(used4Alchemical){
-        cout<<"Used for alchemical simulation. Load the other two graphs here."<<endl;
+        cout<<"Deep Potential Alchemical simulation. Load the other two graphs here."<<endl;
         graph_file_1 = force.getGraph1_4Alchemical();
         graph_file_2 = force.getGraph2_4Alchemical();
         dp_1 = DeepPot(graph_file_1);
@@ -110,28 +113,24 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     dvirial = vector<VALUETYPE>(9, 0.);
     dcoord = vector<VALUETYPE>(natoms * 3, 0.);
     dbox = vector<VALUETYPE>(9, 0.);
-    dtype = vector<int>(natoms, 0);    
+    //dtype = vector<int>(natoms, 0);    
     // Set atom type;
-    for(int ii = 0; ii < natoms; ii++){
+    //for(int ii = 0; ii < natoms; ii++){
         // ii is the atom index of each particle.
-        dtype[ii] = typesIndexMap[type4EachParticle[ii]];
+    //    dtype[ii] = typesIndexMap[type4EachParticle[ii]];
+    //}
+
+    for(std::map<int, string>::iterator it = type4EachParticle.begin(); it != type4EachParticle.end(); ++it){
+        dp_particles.push_back(it->first);
+        dtype.push_back(typesIndexMap[it->second]);
     }
 
-    #ifdef HIGH_PREC
-    AddedForces = vector<double>(natoms * 3, 0.0);
-    #else
-    AddedForces = vector<float>(natoms * 3, 0.0);
-    #endif
+    AddedForces = vector<double>(tot_atoms * 3, 0.0);
     // Set for CUDA context.
     cu.setAsCurrent();
     map<string, string> defines;
-    #ifdef HIGH_PREC
-        defines["FORCES_TYPE"] = "double";
-        networkForces.initialize(cu, 3*natoms, sizeof(double), "networkForces");
-    #else
-        defines["FORCES_TYPE"] = "float";
-        networkForces.initialize(cu, 3*natoms, sizeof(float), "networkForces");
-    #endif
+    defines["FORCES_TYPE"] = "double";
+    networkForces.initialize(cu, 3*natoms, sizeof(double), "networkForces");
     CUmodule module = cu.createModule(CudaDeepmdKernelSources::DeepmdForce, defines);
     addForcesKernel = cu.getKernel(module, "addForces");
 }
@@ -160,10 +159,11 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
     }
     // Set input coord.
     for(int ii = 0; ii < natoms; ++ii){
-        // Multiply by 10 means the transformation of the unit from nanometers to angstrom.
-        dcoord[ii * 3 + 0] = pos[ii][0] * coordUnitCoeff;
-        dcoord[ii * 3 + 1] = pos[ii][1] * coordUnitCoeff;
-        dcoord[ii * 3 + 2] = pos[ii][2] * coordUnitCoeff;
+        // Multiply by coordUnitCoeff means the transformation of the unit from nanometers to required input unit for positions in trained DP model.
+        int atom_index = dp_particles[ii];
+        dcoord[ii * 3 + 0] = pos[atom_index][0] * coordUnitCoeff;
+        dcoord[ii * 3 + 1] = pos[atom_index][1] * coordUnitCoeff;
+        dcoord[ii * 3 + 2] = pos[atom_index][2] * coordUnitCoeff;
     }
     // Assign the input coord for alchemical simulation.
     if(used4Alchemical){
@@ -186,62 +186,19 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         dbox4alchemical[2] = dbox;
     }
 
-    #ifdef HIGH_PREC
-      dp.compute (dener, dforce, dvirial, dcoord, dtype, dbox);
-    #else
-        vector<float> dcoord_(dcoord.size());
-        vector<float> dbox_(dbox.size());
-        for (unsigned dd = 0; dd < dcoord.size(); ++dd) dcoord_[dd] = dcoord[dd];
-        for (unsigned dd = 0; dd < dbox.size(); ++dd) dbox_[dd] = dbox[dd];
-        vector<float> dforce_(dforce.size(), 0);
-        vector<float> dvirial_(dvirial.size(), 0);
-        double dener_ = 0;
-        dp.compute (dener_, dforce_, dvirial_, dcoord_, dtype, dbox_);
-        for (unsigned dd = 0; dd < dforce.size(); ++dd) dforce[dd] = dforce_[dd];	
-        for (unsigned dd = 0; dd < dvirial.size(); ++dd) dvirial[dd] = dvirial_[dd];
-
-        dener = dener_;      
-    #endif
-
+    dp.compute (dener, dforce, dvirial, dcoord, dtype, dbox);
+    
     if (used4Alchemical){
-        #ifdef HIGH_PREC
-            // Compute the first graph.
-            dp_1.compute (dener4alchemical[1], dforce4alchemical[1], dvirial4alchemical[1], dcoord4alchemical[1], dtype4alchemical[1], dbox4alchemical[1]);
-            // Compute the second graph.
-            dp_2.compute (dener4alchemical[2], dforce4alchemical[2], dvirial4alchemical[2], dcoord4alchemical[2], dtype4alchemical[2], dbox4alchemical[2]);
-        #else
-            // Compute the first graph.
-            vector<float> dcoord_1(dcoord4alchemical[1].size());
-            vector<float> dbox_1(dbox4alchemical[1].size());
-            for (unsigned dd = 0; dd < dcoord4alchemical[1].size(); ++dd) dcoord_1[dd] = dcoord4alchemical[1][dd];
-            for (unsigned dd = 0; dd < dbox4alchemical[1].size(); ++dd) dbox_1[dd] = dbox4alchemical[1][dd];
-            vector<float> dforce_1(dforce4alchemical[1].size(), 0);
-            vector<float> dvirial_1(dvirial4alchemical[1].size(), 0);
-            double dener_1 = 0;
-            dp_1.compute (dener_1, dforce_1, dvirial_1, dcoord_1, dtype4alchemical[1], dbox_1);
-            for (unsigned dd = 0; dd < dforce4alchemical[1].size(); ++dd) dforce4alchemical[1][dd] = dforce_1[dd];	
-            for (unsigned dd = 0; dd < dvirial4alchemical[1].size(); ++dd) dvirial4alchemical[1][dd] = dvirial_1[dd];
-            dener4alchemical[1] = dener_1;
-
-            // Compute the second graph.
-            vector<float> dcoord_2(dcoord4alchemical[2].size());
-            vector<float> dbox_2(dbox4alchemical[2].size());
-            for (unsigned dd = 0; dd < dcoord4alchemical[2].size(); ++dd) dcoord_2[dd] = dcoord4alchemical[2][dd];
-            for (unsigned dd = 0; dd < dbox4alchemical[2].size(); ++dd) dbox_2[dd] = dbox4alchemical[2][dd];
-            vector<float> dforce_2(dforce4alchemical[2].size(), 0);
-            vector<float> dvirial_2(dvirial4alchemical[2].size(), 0);
-            double dener_2 = 0;
-            dp_2.compute (dener_2, dforce_2, dvirial_2, dcoord_2, dtype4alchemical[2], dbox_2);
-            for (unsigned dd = 0; dd < dforce4alchemical[2].size(); ++dd) dforce4alchemical[2][dd] = dforce_2[dd];	
-            for (unsigned dd = 0; dd < dvirial4alchemical[2].size(); ++dd) dvirial4alchemical[2][dd] = dvirial_2[dd];
-            dener4alchemical[2] = dener_2;
-        #endif
+        // Compute the first graph.
+        dp_1.compute (dener4alchemical[1], dforce4alchemical[1], dvirial4alchemical[1], dcoord4alchemical[1], dtype4alchemical[1], dbox4alchemical[1]);
+        // Compute the second graph.
+        dp_2.compute (dener4alchemical[2], dforce4alchemical[2], dvirial4alchemical[2], dcoord4alchemical[2], dtype4alchemical[2], dbox4alchemical[2]);
     }
 
     if(used4Alchemical){
         for(int ii = 0; ii < natoms; ii++){
-            // Here, ii is the index of the atom.
-            // Calcuilate the alchemical forces.
+            // ii is the index of the atom.
+            // Interpolate the alchemical forces.
             if(atomsIndexMap4U_B[ii].first == 1){
                 // Get the force from ordinary graph and graph_1.
                 int index4U_B = atomsIndexMap4U_B[ii].second;
@@ -259,16 +216,17 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
             }
         }
         dener = lambda * dener + (1 - lambda) * (dener4alchemical[1] + dener4alchemical[2]);
-        // Transform the unit from eV to KJ/mol
+        // Transform the unit from output energy unit to KJ/mol
         dener = dener * energyUnitCoeff;
     } else{
-        // Transform the unit from eV/A to KJ/(mol*nm)
+        // Transform the unit from output forces unit to KJ/(mol*nm)
         for(int ii = 0; ii < natoms; ii ++){
-            AddedForces[ii * 3 + 0] = dforce[ii * 3 + 0] * forceUnitCoeff;
-            AddedForces[ii * 3 + 1] = dforce[ii * 3 + 1] * forceUnitCoeff;
-            AddedForces[ii * 3 + 2] = dforce[ii * 3 + 2] * forceUnitCoeff;
+            int atom_index = dp_particles[ii];
+
+            AddedForces[atom_index * 3 + 0] = dforce[ii * 3 + 0] * forceUnitCoeff;
+            AddedForces[atom_index * 3 + 1] = dforce[ii * 3 + 1] * forceUnitCoeff;
+            AddedForces[atom_index * 3 + 2] = dforce[ii * 3 + 2] * forceUnitCoeff;
         }
-        // Transform the unit from eV to KJ/mol
         dener = dener * energyUnitCoeff;
     }
 
@@ -279,9 +237,6 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {&networkForces.getDevicePointer(), &cu.getForce().getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(), &natoms, &paddedNumAtoms};
         cu.executeKernel(addForcesKernel, args, natoms);
-    }
-    if (!includeEnergy){
-        dener = 0.0;
     }
     return dener;
 }

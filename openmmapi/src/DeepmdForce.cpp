@@ -117,7 +117,7 @@ const map<string, int>& DeepmdForce::getTypesIndexMap() const{return typesIndexM
 void DeepmdForce::addParticle(const int particleIndex, const string particleType){
     auto insertResult = type4EachParticle.insert(pair<int, string>(particleIndex, particleType));
     if(insertResult.second == false){
-        throw OpenMMException("Failed to add in particle, duplicate key.");
+        throw OpenMMException("Failed to add particle, duplicate key.");
     }
     auto it = particleGroup4EachType.find(particleType);
     if (it == particleGroup4EachType.end()){

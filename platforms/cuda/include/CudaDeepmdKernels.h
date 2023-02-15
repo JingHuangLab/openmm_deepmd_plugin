@@ -60,7 +60,7 @@ private:
     // nnp_inter_1 and nnp_inter_2 are used for alchemical simulation.
     DeepPot dp, dp_1, dp_2;    
     
-    int natoms;
+    int natoms, tot_atoms;
     int nghost = 0;
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
@@ -68,6 +68,8 @@ private:
     vector<VALUETYPE> dcoord;
     vector<VALUETYPE> dbox;
     vector<int> dtype;
+
+    vector<int> dp_particles;
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
