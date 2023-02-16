@@ -55,7 +55,7 @@ jobs:
         cd $GITHUB_WORKSPACE/build 
         make install
         make PythonInstall
-    
+
     - name: Pytest
       run: | 
         source /opt/miniconda3/etc/profile.d/conda.sh        
@@ -63,3 +63,4 @@ jobs:
         conda install -y pytest
         cd $GITHUB_WORKSPACE/python
         pytest
+

@@ -12,6 +12,7 @@ except:
     from simtk import unit as u
     from simtk.openmm.app import PDBFile, StateDataReporter, DCDReporter, Simulation
 
+
 from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
