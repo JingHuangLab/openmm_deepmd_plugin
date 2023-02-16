@@ -1,0 +1,65 @@
+name: Test in CMake Building and Unit Test
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master", "dev" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  OPENMM_DIR: /usr/local
+  DEEPMD_DIR: /usr/local/libdeepmd_c/
+  LD_LIBRARY_PATH: /usr/local/libdeepmd_c/lib:/usr/local/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs
+
+permissions:
+  actions: read
+  packages: read
+
+jobs:
+  BuildAndUnittest:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash -l {0}
+    container: 
+      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c-api.2.2.0.beta.0
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --gpus all # Used when running on a self-hosted runner, thus we can use GPU for CUDA platform testing.
+  
+    steps:
+    - uses: actions/checkout@v3        
+
+    - name: Configure CMake
+      run: |
+        source /opt/miniconda3/etc/profile.d/conda.sh
+        conda activate test
+        mkdir $GITHUB_WORKSPACE/build
+        cmake -B $GITHUB_WORKSPACE/build -DOPENMM_DIR=${{env.OPENMM_DIR}} -DDEEPMD_DIR=${{env.DEEPMD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: |
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{env.LD_LIBRARY_PATH}}
+        cmake --build $GITHUB_WORKSPACE/build
+
+    - name: Test in C++ API
+      run: | 
+        cd $GITHUB_WORKSPACE/build
+        make test
+    
+    - name: Install Python Module
+      run: |
+        cd $GITHUB_WORKSPACE/build 
+        make install
+        make PythonInstall
+
+    - name: Test in Python interface for NVE
+      run: | 
+        source /opt/miniconda3/etc/profile.d/conda.sh        
+        conda activate test
+        python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+        python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
+    

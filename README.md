@@ -27,7 +27,7 @@ And then compile this plugin with steps below.
    ```
 3. Run `cmake` command with required parameters.
    ```shell
-   cmake .. -DOPENMM_DIR=${OPENMM_INSTALLED_DIR} -DDEEPMD_DIR=${DEEPMD_INSTALLED_DIR} -DTENSORFLOW_DIR=${TENSORFLOW_DIR}
+   cmake .. -DOPENMM_DIR=${OPENMM_INSTALLED_DIR} -DDEEPMD_DIR=${LIBDEEPMD_C_INSTALLED_DIR}
    ```
    If you installed the OpenMM and libdeepmd followed by steps above, the `${OPENMM_INSTALLED_DIR}`, `${DEEPMD_INSTALLED_DIR}`, `${TENSORFLOW_DIR}` should be the path to conda created environment. Such as `/home/dingye/anaconda3/envs/dp_openmm` here. 
    You can also specify the CUDA platform with `-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}`.
