@@ -60,193 +60,196 @@ static Vec3* extractBoxVectors(ContextImpl& context) {
     return (Vec3*) data->periodicBoxVectors;
 }
 
-ReferenceCalcDeepmdForceKernel::~ReferenceCalcDeepmdForceKernel(){return;}
+ReferenceCalcDeepmdForceKernel::~ReferenceCalcDeepmdForceKernel(){
+    dp_particles.clear();
+    dp_types.clear();
+    dvirial.clear();
+    dcoord.clear();
+    dtype.clear();
+    dbox.clear();
+    dforce.clear();
+    if (topology != NULL){
+        delete topology;
+    }
+    return;
+}
 
 void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const DeepmdForce& force) {
     graph_file = force.getDeepmdGraphFile();
     type4EachParticle = force.getType4EachParticle();
     typesIndexMap = force.getTypesIndexMap();
-    used4Alchemical = force.alchemical();
     forceUnitCoeff = force.getForceUnitCoefficient();
     energyUnitCoeff = force.getEnergyUnitCoefficient();
     coordUnitCoeff = force.getCoordUnitCoefficient();
-
+    lambda = force.getLambda();
     natoms = type4EachParticle.size();
     tot_atoms = system.getNumParticles();
 
-    // Load the ordinary graph firstly.
-    dp = DeepPot(graph_file);
-    if(used4Alchemical){
-        cout<<"Deep Potential Alchemical simulation. Load the other two graphs here."<<endl;
-        graph_file_1 = force.getGraph1_4Alchemical();
-        graph_file_2 = force.getGraph2_4Alchemical();
-        dp_1 = DeepPot(graph_file_1);
-        dp_2 = DeepPot(graph_file_2);
-        lambda = force.getLambda();
-        atomsIndex4Graph1 = force.getAtomsIndex4Graph1();
-        atomsIndex4Graph2 = force.getAtomsIndex4Graph2();
-        natoms4alchemical[1] = atomsIndex4Graph1.size();
-        natoms4alchemical[2] = atomsIndex4Graph2.size();
-        
-        // pair<int, int> stores the atoms index in U_B. This might be useful for force assign.
-        atomsIndexMap4U_B = vector<pair<int,int>>(natoms4alchemical[1] + natoms4alchemical[2]);
-
-        // Initialize the input and output array for alchemical simulation.
-        dener4alchemical[1] = 0.0;
-        dforce4alchemical[1] = vector<VALUETYPE>(natoms4alchemical[1] * 3, 0.);
-        dvirial4alchemical[1] = vector<VALUETYPE>(9, 0.);
-        dcoord4alchemical[1] = vector<VALUETYPE>(natoms4alchemical[1] * 3, 0.);
-        dbox4alchemical[1] = vector<VALUETYPE>(9, 0.);
-        dtype4alchemical[1] = vector<int>(natoms4alchemical[1], 0);
-        
-        for(int ii = 0; ii < natoms4alchemical[1]; ++ii){
-            int index = atomsIndex4Graph1[ii];
-            atomsIndexMap4U_B[index] = make_pair(1, ii);
-            dtype4alchemical[1][ii] = typesIndexMap[type4EachParticle[index]];
-        }
-        
-        dener4alchemical[2] = 0.0;
-        dforce4alchemical[2] = vector<VALUETYPE>(natoms4alchemical[2] * 3, 0.);
-        dvirial4alchemical[2] = vector<VALUETYPE>(9, 0.);
-        dcoord4alchemical[2] = vector<VALUETYPE>(natoms4alchemical[2] * 3, 0.);
-        dbox4alchemical[2] = vector<VALUETYPE>(9, 0.);
-        dtype4alchemical[2] = vector<int>(natoms4alchemical[2], 0);
-        
-        for(int ii = 0; ii < natoms4alchemical[2]; ++ii){
-            int index = atomsIndex4Graph2[ii];
-            atomsIndexMap4U_B[index] = make_pair(2, ii);
-            dtype4alchemical[2][ii] = typesIndexMap[type4EachParticle[index]];
-        }
-
-        if ((natoms4alchemical[1] + natoms4alchemical[2]) != natoms){
-        //cout<<natoms4alchemical[1]<<" "<<natoms4alchemical[2]<<" "<<natoms<<endl;
-        throw OpenMMException("Wrong atoms number for graph1 and graph2. Summation of atoms number in graph 1 and 2 is not equal to total atoms number.");
-        }
+    // Initialize DeepPot.
+    this->dp.init(graph_file);
+    string types_str = force.getTypesMap();
+    std::stringstream ss(types_str);
+    string token;
+    while (getline(ss, token, ' ')){
+        this->dp_types.push_back(token);
     }
 
-    // Initialize the ordinary input and output array.
-    // Initialize the input tensor.
-    dener = 0.;
-    dforce = vector<VALUETYPE>(natoms * 3, 0.);
-    dvirial = vector<VALUETYPE>(9, 0.);
-    dcoord = vector<VALUETYPE>(natoms * 3, 0.);
-    dbox = vector<VALUETYPE>(9, 0.);
-    //dtype = vector<int>(natoms, 0);    
-    // Set atom type;
-    //for(int ii = 0; ii < natoms; ii++){
-        // ii is the atom index of each particle.
-    //    dtype[ii] = typesIndexMap[type4EachParticle[ii]];
-    //}
+    // Check if DP region is defined with fixed particles.
+    isFixedRegion = force.isFixedRegion();
 
-    for(std::map<int, string>::iterator it = type4EachParticle.begin(); it != type4EachParticle.end(); ++it){
-        dp_particles.push_back(it->first);
-        dtype.push_back(typesIndexMap[it->second]);
+    // Set up the dtype and input, output arrays.
+    if(isFixedRegion){
+        std::cout<<"Using fixed region for DP."<<std::endl;
+        std::cout<<"Atoms Selected for DP Region: "<<natoms<<std::endl;
+        std::cout<<"Total Atoms in System: "<<tot_atoms<<std::endl;
+        dener = 0.;
+        dforce = vector<VALUETYPE>(natoms * 3, 0.);
+        dvirial = vector<VALUETYPE>(9, 0.);
+        dcoord = vector<VALUETYPE>(natoms * 3, 0.);
+        dbox = vector<VALUETYPE>(9, 0.);
+
+        for(std::map<int, string>::iterator it = type4EachParticle.begin(); it != type4EachParticle.end(); ++it){
+            dp_particles.push_back(it->first);
+            dtype.push_back(typesIndexMap[it->second]);
+        }    
+    } else {
+        center_atoms = force.getCenterAtoms();
+        radius = force.getRegionRadius();
+        atom_names4dp_forces = force.getAtomNames4DPForces();
+        sel_num4type = force.getSelNum4EachType();
+        topology = force.getTopology();
+
+        natoms = 0;
+        // Fix the order of atom types.
+        assert (typesIndexMap.size() == sel_num4type.size());
+        assert (typesIndexMap.size() == dp_types.size());
+        for(int i = 0; i < dp_types.size(); i++){
+            string type_name = dp_types[i];
+            cum_sum4type[type_name] = vector<int>(2, 0);
+            cum_sum4type[type_name][0] = natoms;
+            natoms += sel_num4type[type_name];
+            cum_sum4type[type_name][1] = natoms;
+            for (int j = 0; j < sel_num4type[type_name]; j++){ 
+                dtype.push_back(typesIndexMap[type_name]);
+            }
+        }
+
+        dener = 0.;
+        dforce = vector<VALUETYPE>(natoms * 3, 0.);
+        dvirial = vector<VALUETYPE>(9, 0.);
+        dcoord = vector<VALUETYPE>(natoms * 3, 0.);
+        dbox = {}; // Empty vector for adaptive region.
+        daparam = vector<VALUETYPE>(natoms, 0.);
+        dp_particles = vector<int>(natoms, -1);
     }
 
-    AddedForces = vector<double>(tot_atoms * 3, 0.0);
+    //AddedForces = vector<double>(tot_atoms * 3, 0.0);
+
 }
 
 double ReferenceCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     vector<RealVec>& pos = extractPositions(context);
     vector<RealVec>& force = extractForces(context);
 
-    // Set box size.
-    if (context.getSystem().usesPeriodicBoundaryConditions()){
-        Vec3* box = extractBoxVectors(context);
-        // Transform unit from nanometers to angstrom.
-        dbox[0] = box[0][0] * coordUnitCoeff;
-        dbox[1] = box[0][1] * coordUnitCoeff;
-        dbox[2] = box[0][2] * coordUnitCoeff;
-        dbox[3] = box[1][0] * coordUnitCoeff;
-        dbox[4] = box[1][1] * coordUnitCoeff;
-        dbox[5] = box[1][2] * coordUnitCoeff;
-        dbox[6] = box[2][0] * coordUnitCoeff;
-        dbox[7] = box[2][1] * coordUnitCoeff;
-        dbox[8] = box[2][2] * coordUnitCoeff;
-    }else{
-        dbox = {}; // No PBC.
-    }
-    // Set input coord.
-    for(int ii = 0; ii < natoms; ++ii){
-        // Multiply by coordUnitCoeff means the transformation of the unit from nanometers to required input unit for positions in trained DP model.
-        int atom_index = dp_particles[ii];
-        dcoord[ii * 3 + 0] = pos[atom_index][0] * coordUnitCoeff;
-        dcoord[ii * 3 + 1] = pos[atom_index][1] * coordUnitCoeff;
-        dcoord[ii * 3 + 2] = pos[atom_index][2] * coordUnitCoeff;
-    }
-
-    // Assign the input coord for alchemical simulation.
-    if(used4Alchemical){
-        // Set the input coord and box array for graph 1 first.
-        for(int ii = 0; ii < natoms4alchemical[1]; ii ++){
-            int index = atomsIndex4Graph1[ii];
-            dcoord4alchemical[1][ii * 3 + 0] = pos[index][0] * coordUnitCoeff;
-            dcoord4alchemical[1][ii * 3 + 1] = pos[index][1] * coordUnitCoeff;
-            dcoord4alchemical[1][ii * 3 + 2] = pos[index][2] * coordUnitCoeff;
+    if (isFixedRegion){
+        // Set box size.
+        if (context.getSystem().usesPeriodicBoundaryConditions()){
+            Vec3* box = extractBoxVectors(context);
+            // Transform unit from nanometers to angstrom.
+            dbox[0] = box[0][0] * coordUnitCoeff;
+            dbox[1] = box[0][1] * coordUnitCoeff;
+            dbox[2] = box[0][2] * coordUnitCoeff;
+            dbox[3] = box[1][0] * coordUnitCoeff;
+            dbox[4] = box[1][1] * coordUnitCoeff;
+            dbox[5] = box[1][2] * coordUnitCoeff;
+            dbox[6] = box[2][0] * coordUnitCoeff;
+            dbox[7] = box[2][1] * coordUnitCoeff;
+            dbox[8] = box[2][2] * coordUnitCoeff;
+        }else{
+            dbox = {}; // No PBC.
         }
-        dbox4alchemical[1] = dbox;
-
-        // Set the input coord and box array for graph 2.
-        for(int ii = 0; ii < natoms4alchemical[2]; ii ++){
-            int index = atomsIndex4Graph2[ii];
-            dcoord4alchemical[2][ii * 3 + 0] = pos[index][0] * coordUnitCoeff;
-            dcoord4alchemical[2][ii * 3 + 1] = pos[index][1] * coordUnitCoeff;
-            dcoord4alchemical[2][ii * 3 + 2] = pos[index][2] * coordUnitCoeff;
+        // Set input coord.
+        for(int ii = 0; ii < natoms; ++ii){
+            // Multiply by coordUnitCoeff means the transformation of the unit from nanometers to required input unit for positions in trained DP model.
+            int atom_index = dp_particles[ii];
+            dcoord[ii * 3 + 0] = pos[atom_index][0] * coordUnitCoeff;
+            dcoord[ii * 3 + 1] = pos[atom_index][1] * coordUnitCoeff;
+            dcoord[ii * 3 + 2] = pos[atom_index][2] * coordUnitCoeff;
         }
-        dbox4alchemical[2] = dbox;
-    }
+        dp.compute (dener, dforce, dvirial, dcoord, dtype, dbox);
 
-    dp.compute (dener, dforce, dvirial, dcoord, dtype, dbox);
-    
-    if (used4Alchemical){
-        // Compute the first graph.
-        dp_1.compute (dener4alchemical[1], dforce4alchemical[1], dvirial4alchemical[1], dcoord4alchemical[1], dtype4alchemical[1], dbox4alchemical[1]);
-        // Compute the second graph.
-        dp_2.compute (dener4alchemical[2], dforce4alchemical[2], dvirial4alchemical[2], dcoord4alchemical[2], dtype4alchemical[2], dbox4alchemical[2]);
-    }
+    } else {
+        std::fill(dp_particles.begin(), dp_particles.end(), -1);
+        std::fill(dcoord.begin(), dcoord.end(), 0.);
+        std::fill(daparam.begin(), daparam.end(), 0.);
+        
+        vector<bool> addForcesSign(natoms, false);
+        map<string, vector<bool>> addOrNot; // Whether to add the dp forces for selected atoms. 
+        
+        map<string, vector<int>> dp_region_atoms = DeepmdPlugin::SearchAtomsInRegion
+        (pos, center_atoms, radius, topology, atom_names4dp_forces, addOrNot);
+        
+        for(map<string, int>::iterator it = sel_num4type.begin(); it != sel_num4type.end(); ++it){
+            string atom_type = it->first;
+            int max_atom_num = it->second;
+            if (dp_region_atoms.find(atom_type) == dp_region_atoms.end()){
+                // Selected atoms of this type are not found in the adaptive region. That's ok for adaptive region.
+                continue;
+            }
 
-    if(used4Alchemical){
-        for(int ii = 0; ii < natoms; ii++){
-            //  ii is the index of the atom.
-            // Calcuilate the alchemical forces.
-            if(atomsIndexMap4U_B[ii].first == 1){
-                // Get the force from ordinary graph and graph_1.
-                int index4U_B = atomsIndexMap4U_B[ii].second;
-                // F = \lambda * (F_A) + (1 - \lambda) * F_1
-                AddedForces[ii * 3 + 0] = (lambda * dforce[ii * 3 + 0] + (1 - lambda) * (dforce4alchemical[1][index4U_B * 3 + 0])) * forceUnitCoeff;
-                AddedForces[ii * 3 + 1] = (lambda * dforce[ii * 3 + 1] + (1 - lambda) * (dforce4alchemical[1][index4U_B * 3 + 1])) * forceUnitCoeff;
-                AddedForces[ii * 3 + 2] = (lambda * dforce[ii * 3 + 2] + (1 - lambda) * (dforce4alchemical[1][index4U_B * 3 + 2])) * forceUnitCoeff;
-            } else if (atomsIndexMap4U_B[ii].first == 2){
-                // Get the force from ordinary graph and graph_2.
-                int index4U_B = atomsIndexMap4U_B[ii].second;
-                // F = \lambda * (F_A) + (1 - \lambda) * F_1
-                AddedForces[ii * 3 + 0] = (lambda * dforce[ii * 3 + 0] + (1 - lambda) * (dforce4alchemical[2][index4U_B * 3 + 0])) * forceUnitCoeff;
-                AddedForces[ii * 3 + 1] = (lambda * dforce[ii * 3 + 1] + (1 - lambda) * (dforce4alchemical[2][index4U_B * 3 + 1])) * forceUnitCoeff;
-                AddedForces[ii * 3 + 2] = (lambda * dforce[ii * 3 + 2] + (1 - lambda) * (dforce4alchemical[2][index4U_B * 3 + 2])) * forceUnitCoeff;
+            vector<int> sel_atoms4type = dp_region_atoms[atom_type];
+            // Checks whether the number of selected atoms exceeds the maximum number of input atoms allowed
+            int sel_atom_num = sel_atoms4type.size();
+            if (sel_atom_num > max_atom_num){
+                throw OpenMMException("The number of atoms in the adaptive region is larger than the number of atoms selected for DP forces.");
+            }
+
+            int cum_sum_start = cum_sum4type[atom_type][0];
+            for (int i = 0; i < sel_atom_num; i++){
+                int atom_index = sel_atoms4type[i];
+                int dp_index = cum_sum_start + i;
+                dcoord[dp_index * 3 + 0] = pos[atom_index][0] * coordUnitCoeff;
+                dcoord[dp_index * 3 + 1] = pos[atom_index][1] * coordUnitCoeff;
+                dcoord[dp_index * 3 + 2] = pos[atom_index][2] * coordUnitCoeff;
+                daparam[dp_index] = 1;
+                dp_particles[dp_index] = atom_index;
+                addForcesSign[dp_index] = addOrNot[atom_type][i];
             }
         }
-        dener = lambda * dener + (1 - lambda) * (dener4alchemical[1] + dener4alchemical[2]);
-        // Transform the unit from output energy unit to KJ/mol
-        dener = dener * energyUnitCoeff;
-    } else{
-        // Transform the unit from output forces unit to KJ/(mol*nm)
+        vector<VALUETYPE> dfparam = {};
+        
+        // Calculate energy and forces.
+        dp.compute(dener, dforce, dvirial, dcoord, dtype, dbox, dfparam, daparam);
+        
+        // Filter the forces for atoms that can be add dp force.
+        for(int ii = 0; ii < natoms; ii++){
+            if (!addForcesSign[ii]){
+                dforce[ii * 3 + 0] = 0.;
+                dforce[ii * 3 + 1] = 0.;
+                dforce[ii * 3 + 2] = 0.;
+            }
+        }
+        // Set dp ener to 0 since it is invalid.
+        dener = 0.;
+    }
+
+    // Add dp forces to the total forces.
+    if (includeForces){
         for(int ii = 0; ii < natoms; ii ++){
             int atom_index = dp_particles[ii];
+            if (atom_index == -1) { continue;}
 
-            AddedForces[atom_index * 3 + 0] = dforce[ii * 3 + 0] * forceUnitCoeff;
-            AddedForces[atom_index * 3 + 1] = dforce[ii * 3 + 1] * forceUnitCoeff;
-            AddedForces[atom_index * 3 + 2] = dforce[ii * 3 + 2] * forceUnitCoeff;
-        }
-        dener = dener * energyUnitCoeff;
-    }
-
-    if(includeForces){
-        for(int ii = 0; ii < tot_atoms; ii ++){
-        force[ii][0] += AddedForces[ii * 3 + 0];
-        force[ii][1] += AddedForces[ii * 3 + 1];
-        force[ii][2] += AddedForces[ii * 3 + 2];
+            force[atom_index][0] += lambda * dforce[ii * 3 + 0] * forceUnitCoeff;
+            force[atom_index][1] += lambda * dforce[ii * 3 + 1] * forceUnitCoeff;
+            force[atom_index][2] += lambda * dforce[ii * 3 + 2] * forceUnitCoeff;
         }
     }
+    if (includeEnergy){
+        dener = lambda * dener * energyUnitCoeff;
+    } else {
+        dener = 0.;
+    }
+    
     // Return energy.
     return dener;
 }

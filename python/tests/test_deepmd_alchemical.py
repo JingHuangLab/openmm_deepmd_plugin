@@ -14,12 +14,12 @@ from OpenMMDeepmdPlugin import DeepPotentialModel
 
 
 
-def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.0, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
+def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.5, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
-    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
+    dp_model_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     output_dcd = os.path.join(output_temp_dir, f"lw_256_test.alchemical.reference.{Lambda}.dcd")
     output_log = os.path.join(output_temp_dir, f"lw_256_test.alchemical.reference.{Lambda}.log")
     
@@ -36,21 +36,31 @@ def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.
     positions = liquid_water.getPositions()
     
     # Set up the dp_system with the dp_model.    
-    dp_model = DeepPotentialModel(dp_model, dp_model, dp_model)
+    dp_model = DeepPotentialModel(dp_model_file, Lambda = Lambda)
     dp_model.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    # By default, createSystem from dp_model will put all atoms in topology into the DP particles for dp_model.
+    dp_system = dp_model.createSystem(topology)
     
-    # Set up alchemical simulation for DP
-    # Extract the atoms indexes in two groups of alchemical simulation.
+    # Initial the other two dp_models for alchemical simulation.
+    dp_model_1 = DeepPotentialModel(dp_model_file, Lambda = 1 - Lambda)
+    dp_model_2 = DeepPotentialModel(dp_model_file, Lambda = 1 - Lambda)
+    dp_model_1.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    dp_model_2.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    
+    # Split the system particles into two groups for alchemical simulation.
     graph1_particles = []
     graph2_particles = []
     for atom in topology.atoms():
-        # Assume the residue with residue.id = 1 will be the alchemically extracted from other atoms.
         if int(atom.residue.id) == 1:
             graph2_particles.append(atom.index)
         else:
             graph1_particles.append(atom.index)
-    dp_system = dp_model.createSystem(topology, particles_group_1 = graph1_particles, particles_group_2 = graph2_particles, Lambda = Lambda)
+    dp_force_1 =  dp_model_1.addParticlesToDPRegion(graph1_particles, topology)
+    dp_force_2 = dp_model_2.addParticlesToDPRegion(graph2_particles, topology)
     
+    # Add the two dp_forces to the dp_system.
+    dp_system.addForce(dp_force_1)
+    dp_system.addForce(dp_force_2)    
     
     integrator = mm.LangevinIntegrator(
                                 temperature*u.kelvin, # Temperature of heat bath
@@ -96,12 +106,12 @@ def test_deepmd_alchemical_reference(nsteps = 1000, time_step = 0.2, Lambda = 0.
     assert(np.std(temperature_trajectory) < temperature_std_tol)
     
     
-def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
+def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 0.5, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_alchemical_output", temperature_std_tol = 25):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
     pdb_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
-    dp_model = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
+    dp_model_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "water.pb")
     output_dcd = os.path.join(output_temp_dir, f"lw_256_test.alchemical.cuda.{Lambda}.dcd")
     output_log = os.path.join(output_temp_dir, f"lw_256_test.alchemical.cuda.{Lambda}.log")
     
@@ -118,10 +128,18 @@ def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, pl
     positions = liquid_water.getPositions()
     
     # Set up the dp_system with the dp_model.    
-    dp_model = DeepPotentialModel(dp_model, dp_model, dp_model)
+    dp_model = DeepPotentialModel(dp_model_file, Lambda = Lambda)
     dp_model.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    # By default, createSystem from dp_model will put all atoms in topology into the DP particles for dp_model.
+    dp_system = dp_model.createSystem(topology)
     
-    # Set up alchemical simulation for DP
+    # Initial the other two dp_models for alchemical simulation.
+    dp_model_1 = DeepPotentialModel(dp_model_file, Lambda = 1 - Lambda)
+    dp_model_2 = DeepPotentialModel(dp_model_file, Lambda = 1 - Lambda)
+    dp_model_1.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    dp_model_2.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
+    
+    # Split the system particles into two groups for alchemical simulation.
     graph1_particles = []
     graph2_particles = []
     for atom in topology.atoms():
@@ -129,8 +147,12 @@ def test_deepmd_alchemical_cuda(nsteps = 1000, time_step = 0.2, Lambda = 1.0, pl
             graph2_particles.append(atom.index)
         else:
             graph1_particles.append(atom.index)
-    dp_system = dp_model.createSystem(topology, particles_group_1 = graph1_particles, particles_group_2 = graph2_particles, Lambda = Lambda)
+    dp_force_1 =  dp_model_1.addParticlesToDPRegion(graph1_particles, topology)
+    dp_force_2 = dp_model_2.addParticlesToDPRegion(graph2_particles, topology)
     
+    # Add the two dp_forces to the dp_system.
+    dp_system.addForce(dp_force_1)
+    dp_system.addForce(dp_force_2)
     
     integrator = mm.LangevinIntegrator(
                                 temperature*u.kelvin,       # Temperature of heat bath

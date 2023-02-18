@@ -53,7 +53,7 @@ void testSerialization() {
     const double temperature = 300;
 
     // Create a Force.
-    DeepmdForce dp_force = DeepmdForce(graph, graph, graph);
+    DeepmdForce dp_force = DeepmdForce(graph);
     
     stringstream buffer;
     XmlSerializer::serialize<DeepmdForce>(&dp_force, "Force", buffer);
