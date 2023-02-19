@@ -48,6 +48,7 @@ jobs:
     - name: Test in C++ API
       run: | 
         cd $GITHUB_WORKSPACE/build
+        make install
         make test
     
     - name: Install Python Module
