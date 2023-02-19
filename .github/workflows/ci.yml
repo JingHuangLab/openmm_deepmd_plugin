@@ -10,8 +10,8 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   OPENMM_DIR: /usr/local
-  DEEPMD_DIR: /usr/local/libdeepmd_c/
-  LD_LIBRARY_PATH: /usr/local/libdeepmd_c/lib:/usr/local/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs
+  DEEPMD_DIR: /usr/local/libdeepmd_cc/
+  LD_LIBRARY_PATH: /usr/local/libdeepmd_cc/lib:/usr/local/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs
 
 permissions:
   actions: read
@@ -24,7 +24,7 @@ jobs:
       run:
         shell: bash -l {0}
     container: 
-      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_cuda11.6_lib.dp.c-api.2.2.0.beta.0
+      image: ghcr.io/${{github.repository_owner}}/openmm_deepmd_plugin-test:omm7.7.0_dp.cxx-api.2.2.0.beta.0_dp4mask
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
