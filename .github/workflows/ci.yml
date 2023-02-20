@@ -13,6 +13,7 @@ env:
   DEEPMD_DIR: /usr/local/libdeepmd_cc/
   LD_LIBRARY_PATH: /usr/local/libdeepmd_cc/lib:/usr/local/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs
 
+
 permissions:
   actions: read
   packages: read
@@ -63,4 +64,3 @@ jobs:
         conda activate test
         cd $GITHUB_WORKSPACE/python
         pytest
-
