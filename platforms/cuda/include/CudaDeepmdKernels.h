@@ -56,41 +56,37 @@ private:
     CUfunction addForcesKernel;
 
     // graph_file 1 and 2 are used for alchemical simulation.
-    std::string graph_file, graph_file_1, graph_file_2;
+    std::string graph_file;
     // nnp_inter_1 and nnp_inter_2 are used for alchemical simulation.
-    DeepPot dp, dp_1, dp_2;    
+    DeepPot dp;    
     
-    int natoms;
-    int nghost = 0;
+    int natoms, tot_atoms;
+    double lambda = 0.0; // interpolate the DP generated forces.
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
     vector<VALUETYPE> dvirial;
     vector<VALUETYPE> dcoord;
     vector<VALUETYPE> dbox;
     vector<int> dtype;
+
+    vector<int> dp_particles;
+    vector<string> dp_types;
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
     double forceUnitCoeff, energyUnitCoeff, coordUnitCoeff;
-    #ifdef HIGH_PREC
     vector<double> AddedForces;
-    #else
-    vector<float> AddedForces;
-    #endif
 
-    // Parameters for alchemical simulation.
-    bool used4Alchemical = false;
-    double lambda; // U = lambda * U_A + (1 - lambda) * (U_1 + U_2). Where U_A comes from the original graph, U_1 and U_2 comes from alchemical graph.
-    vector<int> atomsIndex4Graph1;
-    vector<int> atomsIndex4Graph2;
-    map<int, vector<VALUETYPE>> dcoord4alchemical;
-    map<int, vector<VALUETYPE>> dbox4alchemical;
-    map<int, vector<int>> dtype4alchemical;
-    map<int, ENERGYTYPE> dener4alchemical;
-    map<int, vector<VALUETYPE>> dforce4alchemical;
-    map<int, vector<VALUETYPE>> dvirial4alchemical;
-    map<int, int> natoms4alchemical;
-    vector<pair<int, int>> atomsIndexMap4U_B;
+    bool isFixedRegion = true;
+    vector<int> center_atoms;
+    double radius;
+    vector<string> atom_names4dp_forces;
+    map<string, int> sel_num4type;
+    DeepmdPlugin::Topology* topology = NULL;
+
+    map<string, vector<int>> cum_sum4type;
+    vector<VALUETYPE> daparam;
+
 };
 
 

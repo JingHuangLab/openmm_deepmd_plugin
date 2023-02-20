@@ -56,20 +56,31 @@ class DeepmdForce : public OpenMM::Force {
 public:
     //DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
     DeepmdForce(const string& GraphFile);
-    DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2);
+    DeepmdForce(const string& GraphFile, const double& lambda);
 
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
     void setPBC(const bool use_pbc);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
-    /*
-    * Used for alchemical simulation.
-    */
-    void setAlchemical(const bool used4Alchemical);
-    void setAtomsIndex4Graph1(const vector<int> atomsIndex);
-    void setAtomsIndex4Graph2(const vector<int> atomsIndex);
     void setLambda(const double lambda);
+
+    // Extract the model info from dp model.    
+    double getCutoff() const;
+    int getNumberTypes() const;
+    string getTypesMap() const;
+
+    // Add methods for adaptive DP region selection.
+    bool isFixedRegion() const;
+    void setAdaptiveRegion(const bool& adaptive_region_sign);
+    void setCenterAtoms(const vector<int>& center_atoms);
+    void setRegionRadius(const double& region_radius);
+    void setAtomNames4DPForces(const vector<string>& atom_names);
+    void setSelNum4EachType(const vector<string>& type_names, const vector<int>& sel_num);
+
+    void addChain(int chainIndex, int Id);
+    void addResidue(int chainIndex, string ResName, int ResIndex, int ResId);
+    void addAtom(int resIndex, string AtomName, string AtomElement, int atomIndex, int atomId);
 
     /*
      * Add methods for casting a Force to a DeepmdForce.

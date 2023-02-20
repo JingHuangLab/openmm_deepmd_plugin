@@ -11,5 +11,5 @@ __version__ = "@GIT_HASH@"
 
 import os, os.path
 import sys
-from .tools import DeepPotentialContext, AlchemicalContext, Simulation4Deepmd, ForceReporter
+from .tools import ForceReporter, DeepPotentialModel
 from .OpenMMDeepmdPlugin import DeepmdForce

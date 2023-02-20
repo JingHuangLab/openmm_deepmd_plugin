@@ -34,24 +34,24 @@
 
 #include "openmm/Context.h"
 #include "openmm/Force.h"
-#include <vector>
-// Include DeepPot.h for DeepPotential model inference.
-#include <deepmd/deepmd.hpp>
 #include "internal/windowsExportDeepmd.h"
+#include "Topology.h"
+#include <vector>
+#include <sstream>
+// Include DeepPot.h for DeepPotential model inference.
+//#include <deepmd/deepmd.hpp>
+#include "deepmd/DeepPot.h"
 
-#ifdef HIGH_PREC
-typedef double VALUETYPE;
-typedef double ENERGYTYPE;
-#else 
-typedef float  VALUETYPE;
-typedef double ENERGYTYPE;
-#endif
+
 
 using namespace std;
-using deepmd::hpp::DeepPot;
+using deepmd::DeepPot;
+//using deepmd::hpp::DeepPot;
 
 namespace DeepmdPlugin {
 
+typedef double VALUETYPE;
+typedef double ENERGYTYPE;
 
 class OPENMM_EXPORT_DEEPMD DeepmdForce : public OpenMM::Force {
 public:
@@ -65,10 +65,9 @@ public:
      * @brief Construct a new Deepmd Force object. Used when running alchemical simulation.
      * 
      * @param GraphFile 
-     * @param GraphFile_1 
-     * @param GraphFile_2 
+     * @param lambda
      */
-    DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2);
+    DeepmdForce(const string& GraphFile, const double& lambda);
     ~DeepmdForce();
     
     /**
@@ -154,26 +153,48 @@ public:
      * @return double 
      */
     double getEnergyUnitCoefficient() const;
-    
-    // For alchemical simulation.
     /**
-     * @brief Set the Deepmd Force is used for alchemical simulation or not.
+     * @brief Get the Cutoff radius of the model used.
      * 
-     * @param used4Alchemical 
+     * @return double
      */
-    void setAlchemical(const bool used4Alchemical);
+    double getCutoff() const;
     /**
-     * @brief Set the atoms index list for graph 1 in alchemical simulation.
+     * @brief Get the number of types in the model.
      * 
-     * @param atomsIndex 
+     * @return int 
      */
-    void setAtomsIndex4Graph1(const vector<int> atomsIndex);
+    int getNumberTypes() const;
     /**
-     * @brief Set the atoms index list for graph 2 in alchemical simulation.
+     * @brief Get the string that stores the types information.
      * 
-     * @param atomsIndex 
+     * @return string
      */
-    void setAtomsIndex4Graph2(const vector<int> atomsIndex);
+    string getTypesMap() const;
+    /**
+     * @brief Is the DP region is fixed or adaptively selected.
+     * 
+     * @return bool
+     */
+    bool isFixedRegion() const;
+    void setAdaptiveRegion(const bool& adaptive_region_sign);
+    void setCenterAtoms(const vector<int>& center_atoms);
+    void setRegionRadius(const double& region_radius);
+    void setAtomNames4DPForces(const vector<string>& atom_names);
+    void setSelNum4EachType(const vector<string>& type_names, const vector<int>& sel_num);
+    vector<int> getCenterAtoms() const;
+    double getRegionRadius() const;
+    vector<string> getAtomNames4DPForces() const;
+    map<string, int> getSelNum4EachType() const;
+
+    /**
+    * Get the topology structure from the python generated topology with OpenMM.
+    */
+    void addChain(int chainIndex, int Id);
+    void addResidue(int chainIndex, string ResName, int ResIndex, int ResId);
+    void addAtom(int resIndex, string AtomName, string AtomElement, int atomIndex, int atomId);
+
+    Topology* getTopology() const;
     /**
      * @brief Set the lambda value for this alchemical simulation.
      * 
@@ -181,44 +202,11 @@ public:
      */
     void setLambda(const double lambda);
     /**
-     * @brief Check whether the Deepmd Force is used for alchemical simulation or not.
-     * 
-     * @return true : used for alchemical simulation. 
-     * @return false : not used for alchemical simulation.
-     */
-    bool alchemical() const {
-        return used4Alchemical;
-    }
-    /**
-     * @brief Get the lambda value for this alchemical simulation.
+     * @brief Get the lambda value for DP force scale weights in simulation.
      * 
      * @return double 
      */
     double getLambda() const;
-    /**
-     * @brief Get the path to first graph for alchemical simulation.
-     * 
-     * @return const string 
-     */
-    const string getGraph1_4Alchemical() const;
-    /**
-     * @brief Get the path to second graph for alchemical simulation.
-     * 
-     * @return const string 
-     */
-    const string getGraph2_4Alchemical() const;
-    /**
-     * @brief Get the atoms index vector for graph 1 in alchemical simulation.
-     * 
-     * @return vector<int> 
-     */
-    vector<int> getAtomsIndex4Graph1() const;
-    /**
-     * @brief Get the atoms index vector for graph 2 in alchemical simulation.
-     * 
-     * @return vector<int> 
-     */
-    vector<int> getAtomsIndex4Graph2() const;
 
     void updateParametersInContext(OpenMM::Context& context);
     bool usesPeriodicBoundaryConditions() const {
@@ -227,23 +215,40 @@ public:
 protected:
     OpenMM::ForceImpl* createImpl() const;
 private:
-    // graph_1 and 2 are used for alchemical simulation.
-    string graph_file, graph_file_1, graph_file_2;
-    bool used4Alchemical = false;
+    string graph_file = "";
+    double lambda = 1.0;
     bool use_pbc = true;
-    int gpu_node = 0;
+
+    int numb_types = 0;
+    string type_map = "";
+    double cutoff = 0.;
+    
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;
     vector<pair<int, int>> bondsList;
     double coordCoeff, forceCoeff, energyCoeff;
 
-    // Used for alchemical simulation.
-    vector<int> atomsIndex4Graph1;
-    vector<int> atomsIndex4Graph2;
-    double lambda;    
-};
+    /* The following parameters are prepared for adaptive dp region.
+     Especially for the support of zinc-protein simulations with dp-mask.
+     Adaptive dp region is constructed by following steps:
+     1. Select the **center_atoms** that would be appended into the dp region.
+     2. Select the atoms within the **radius4adaptive_dp_region** from the center atoms.
+     3. Extend the selected atoms to the whole residues.
+     4. Put the selected residues atoms and center atoms into the dp region and dp model, get energy and forces.
+     5. Assign the dp forces to the selected atoms that atom names are in the **atom_names4dp_forces**.
+    */
 
+    // By default, it is true. If false, the dp region will be selected adaptively with the selected_atoms and radius4adaptive_dp_region parameters.
+    bool fixed_dp_region = true;
+    double radius4adaptive_dp_region = 0.35; // unit in nanometers.
+    // Only the atoms within **atom_names4dp_forces ** would be added in dp forces.
+    vector<int> center_atoms;
+    vector<string> atom_names4dp_forces;
+    map<string, int> sel_num4each_type;
+    Topology* topology = NULL;
+
+};
 } // namespace DeepmdPlugin
 
 #endif /*OPENMM_DEEPMDFORCE_H_*/
