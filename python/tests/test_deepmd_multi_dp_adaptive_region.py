@@ -13,7 +13,7 @@ except:
 from OpenMMDeepmdPlugin import DeepPotentialModel
 from utils import read_top, read_crd, read_params, read_box, vfswitch, restraints
 
-def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lambda = 1.0, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_adaptive_dp_particles_output"):
+def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lambda = 1.0, platform_name = "Reference", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_multi_adaptive_dp_particles_output"):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -23,16 +23,16 @@ def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lam
     sysinfo_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "1aay.sysinfo")
     toppar_file = os.path.join(os.path.dirname(__file__), "../OpenMMDeepmdPlugin/data", "toppar.str")
     
-    output_dcd = os.path.join(output_temp_dir, f"1aay_test.adaptive.dp.region.reference.dp.mm.dcd")
-    output_log = os.path.join(output_temp_dir, f"1aay_test.adaptive.dp.region.reference.dp.mm.log")
+    output_dcd = os.path.join(output_temp_dir, f"1aay_test.multi.adaptive.dp.region.reference.dp.mm.dcd")
+    output_log = os.path.join(output_temp_dir, f"1aay_test.multi.adaptive.dp.region.reference.dp.mm.log")
     
     # Set up the simulation parameters.
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temp = 300 # Kelvin
-    report_frequency = 100 # Save trajectory every report_frequency steps.
+    report_frequency = 1 # Save trajectory every report_frequency steps.
     fric_coeff = 1.0     # friction coefficient
-    mini_nstep = 0       # minimization step
+    mini_nstep = 100      # minimization step
     mini_Tol = 100      # minimization tolerance
     r_on = 1.0           # unit is nanometer
     r_off = 1.2          # unit is nanometer
@@ -103,7 +103,7 @@ def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lam
     cost_time = end_time - start_time
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
-def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_adaptive_dp_particles_output"):
+def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda = 1.0, platform_name = "CUDA", output_temp_dir = "/tmp/openmm_deepmd_plugin_test_multi_adaptive_dp_particles_output"):
     if not os.path.exists(output_temp_dir):
         os.mkdir(output_temp_dir)
     
@@ -122,7 +122,7 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
     temp = 300 # Kelvin
     report_frequency = 100 # Save trajectory every report_frequency steps.
     fric_coeff = 1.0     # friction coefficient
-    mini_nstep = 0      # minimization step
+    mini_nstep = 100     # minimization step
     mini_Tol = 100       # minimization tolerance
     r_on = 1.0           # unit is nanometer
     r_off = 1.2          # unit is nanometer
@@ -195,5 +195,5 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
         
 if __name__ == "__main__":
     test_deepmd_adaptive_dp_particles_reference(nsteps = 100, Lambda= 1.0)
-    test_deepmd_adaptive_dp_particles_cuda(nsteps = 1000 * 1000, Lambda= 1.0)
+    test_deepmd_adaptive_dp_particles_cuda(nsteps = 1000, Lambda= 1.0)
     

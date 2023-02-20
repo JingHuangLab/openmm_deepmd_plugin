@@ -217,7 +217,7 @@ class DeepPotentialModel():
                     atomName = str(at.name)
                     atomElement = at.element._symbol
                     
-                    # Small hack for Zn
+                    # Small patch for Zn
                     if atomElement == "Zn":
                         atomElement = "ZN"
                     
