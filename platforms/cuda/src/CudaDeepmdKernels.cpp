@@ -178,6 +178,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
             // Checks whether the number of selected atoms exceeds the maximum number of input atoms allowed
             int sel_atom_num = sel_atoms4type.size();
             if (sel_atom_num > max_atom_num){
+                std::cout << "Atom type "<< atom_type << " has " << sel_atom_num << " atoms in the adaptive region, which is larger than the maximum number of input atoms allowed " << max_atom_num << std::endl;
                 throw OpenMMException("The number of atoms in the adaptive region is larger than the number of atoms selected for DP forces.");
             }
 
@@ -206,7 +207,7 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
                 dforce[ii * 3 + 2] = 0.;
             }
         }
-        // Set dp ener to 0 since it is invalid.
+        // Set dp ener to 0 since it is invalid in adaptive dp region.
         dener = 0.;
     }
     

@@ -49,6 +49,8 @@ public:
         position = pos;
     }
 
+    friend ostream& operator<<(ostream& os, const Atom& at);
+
     std::string name;
     std::string element;
     int index;
@@ -57,6 +59,12 @@ public:
 
     Vec3 position;
 };
+
+ostream& operator<<(ostream& os, const Atom& at)
+{
+    os <<"Atom: "<< at.name << ' ' << at.element << ' ' << at.index << ' ' << at.ResIndex << ' ' << at.id ;
+    return os;
+}
 
 class OPENMM_EXPORT_DEEPMD Residue{
 public:
@@ -197,16 +205,16 @@ public:
         bonds[atomIndex2].push_back(atomIndex1);
     }
 
-    const map<int, Atom>& getAtoms() const {
+    map<int, Atom>& getAtoms() {
         return atoms;
     }
-    const map<int, Residue>& getResidues() const{
+    map<int, Residue>& getResidues() {
         return residues;
     }
-    const map<int, Chain>& getChains() const {
+    map<int, Chain>& getChains() {
         return chains;
     }
-    const vector<vector<int> >& getBonds() const {
+    vector<vector<int> >& getBonds() {
         return bonds;
     }
 
@@ -218,7 +226,7 @@ private:
     vector<vector<int> > bonds;
 };
 
-map<string, vector<int>> SearchAtomsInRegion(vector<Vec3> pos, vector<int> center_atoms, double radius, Topology* top, vector<string> atom_names, map<string, vector<bool>> &addOrNot){
+inline map<string, vector<int>> SearchAtomsInRegion(vector<Vec3> pos, vector<int> center_atoms, double radius, Topology* top, vector<string> atom_names, map<string, vector<bool>> &addOrNot){
     map<string, vector<int>> selected_atoms;
     map<int, Atom> atoms = top->getAtoms();
     double r2 = radius * radius;
