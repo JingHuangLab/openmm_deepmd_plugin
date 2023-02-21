@@ -30,7 +30,7 @@ def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lam
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temp = 300 # Kelvin
-    report_frequency = 1 # Save trajectory every report_frequency steps.
+    report_frequency = 100 # Save trajectory every report_frequency steps.
     fric_coeff = 1.0     # friction coefficient
     mini_nstep = 100      # minimization step
     mini_Tol = 100      # minimization tolerance
