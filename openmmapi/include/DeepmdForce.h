@@ -39,14 +39,14 @@
 #include <vector>
 #include <sstream>
 // Include DeepPot.h for DeepPotential model inference.
-//#include <deepmd/deepmd.hpp>
-#include "deepmd/DeepPot.h"
+#include "deepmd/deepmd.hpp"
+//#include "deepmd/DeepPot.h"
 
 
 
 using namespace std;
-using deepmd::DeepPot;
-//using deepmd::hpp::DeepPot;
+//using deepmd::DeepPot;
+using deepmd::hpp::DeepPot;
 
 namespace DeepmdPlugin {
 
