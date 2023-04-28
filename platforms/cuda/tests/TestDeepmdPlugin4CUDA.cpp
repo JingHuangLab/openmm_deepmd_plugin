@@ -44,7 +44,6 @@
 
 using namespace OpenMM;
 using namespace DeepmdPlugin;
-using namespace deepmd;
 using namespace std;
 
 extern "C" OPENMM_EXPORT void registerDeepmdCudaKernelFactories();
@@ -126,7 +125,7 @@ void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, 
     context.setVelocitiesToTemperature(temperature, randomSeed);
 
     // Initialize the nnp_inter.
-    deepmd::DeepPot nnp_inter(graph);
+    DeepPot nnp_inter(graph);
     // Record the difference of forces and energy on each step.
     vector<double> errorForce;
     vector<double> errorEnergy;
