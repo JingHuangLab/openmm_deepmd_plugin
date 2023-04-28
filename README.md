@@ -1,17 +1,17 @@
-# OpenMM Plugin for Deepmd-kit
+# OpenMM Plugin for DeePMD-kit
 
 
 This is a plugin for [OpenMM](http://openmm.org) that allows DeepPotential model
 to be used for defining forces. 
-It is implemented with [Deepmd-kit](https://github.com/deepmodeling/deepmd-kit).
-To use it, you create a TensorFlow graph with Deepmd-kit that takes particle positions as input
+It is implemented with [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API.
+To use it, you create a TensorFlow graph with DeePMD-kit that takes particle positions as input
 and produces forces and energy as output. This plugin uses the graph to apply
 forces to particles during a simulation.
 
 ## Installation
 
 ### Install from source
-This plugin requires the library of **OpenMM, v7.6**, **Deepmd-kit C API package, v2.2.0.beta.0**. 
+This plugin requires the library of **OpenMM**, **DeePMD-kit C API package**. 
 Compile plugin from source with following steps.
 
 1. Prepare the conda environment.
@@ -23,7 +23,7 @@ Compile plugin from source with following steps.
 
 2. Download and install the Deepmd-kit C API library.
    ```shell
-   wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.0.b0/libdeepmd_c.tar.gz
+   wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.1/libdeepmd_c.tar.gz
    # Extract the C API library of Deepmd-kit to the directory of your choice.
    tar -xf libdeepmd_c.tar.gz -C /usr/local/libdeepmd_c 
    ```
