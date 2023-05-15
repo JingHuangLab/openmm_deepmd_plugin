@@ -22,8 +22,11 @@ Compile plugin from source with following steps.
    ```
 
 2. Download and install the Deepmd-kit C API library.
+   ~~Download from release: wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.1/libdeepmd_c.tar.gz~~ 
+   (Not ready for now. The released version of the libdeepmd_c.tar.gz is not compatible with OpenMM Deepmd Plugin.)
+   Download from the uploaded version (Compiled concerning **dev** branch of DeePMD-kit).
    ```shell
-   wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.1/libdeepmd_c.tar.gz
+   wget https://transfer.sh/YECNo3/libdeepmd_c.zip
    # Extract the C API library of Deepmd-kit to the directory of your choice.
    tar -xf libdeepmd_c.tar.gz -C /usr/local/libdeepmd_c 
    ```
