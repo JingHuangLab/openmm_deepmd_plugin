@@ -1,9 +1,8 @@
 # OpenMM Plugin for DeePMD-kit
 
-
-This is a plugin for [OpenMM](http://openmm.org) that allows DeepPotential model
-to be used for defining forces. 
-It is implemented with [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API.
+This is a plugin for [OpenMM](http://openmm.org) that allows `DeepPotential` model
+to be used for defining forces.
+It is implemented with [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API interface.
 To use it, you create a TensorFlow graph with DeePMD-kit that takes particle positions as input
 and produces forces and energy as output. This plugin uses the graph to apply
 forces to particles during a simulation.
@@ -12,7 +11,7 @@ forces to particles during a simulation.
 
 ### Install from source
 This plugin requires the library of **OpenMM**, **DeePMD-kit C API package**. 
-Compile plugin from source with following steps.
+Compile plugin from source with the following steps.
 
 1. Prepare the conda environment.
    ```
@@ -62,6 +61,6 @@ Compile plugin from source with following steps.
 ## Usage
 
 In the [tests](./tests) directory, you can find [test_deepmd_simulation.py](./tests/test_deepmd_simulation.py) and [test_deepmd_alchemical.py](./tests/test_deepmd_alchemical.py) two files for reference.
-That's used for running of this plugin with on trained [water model](./tests/frozen_model/water.pb).
-Alchemical simulation feature for Deepmd-kit is also implemented in this plugin. 
-More details about the alchemical simulation can be refered to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
+That's used for running this plugin with on trained [water model](./tests/frozen_model/water.pb).
+The alchemical simulation feature for DeePMD-kit is also supported in this plugin.
+More details about the alchemical simulation can be referred to [AlchemicalProtocol.pdf](./tests/refer/AlchemicalProtocol.pdf).
