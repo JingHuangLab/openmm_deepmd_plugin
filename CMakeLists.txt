@@ -52,7 +52,7 @@ SET(DEEPMD_PLUGIN_SOURCE_SUBDIRS openmmapi serialization)
 SET(DEEPMD_LIBRARY_NAME OpenMMDeepmd)
 SET(SHARED_DEEPMD_TARGET ${DEEPMD_LIBRARY_NAME})
 
-# These are all the places to search for header files which are to be part of the API.
+# These are all the places to search for header files that are to be part of the API.
 SET(API_INCLUDE_DIRS "openmmapi/include" "openmmapi/include/internal" ${DeePMD_INCLUDE_DIRS})
 
 # Locate header files.
@@ -62,7 +62,7 @@ FOREACH(dir ${API_INCLUDE_DIRS})
     SET(API_INCLUDE_FILES ${API_INCLUDE_FILES} ${fullpaths})
 ENDFOREACH(dir)
 
-# Collect up source files
+# Collect source files
 SET(SOURCE_FILES) # empty
 SET(SOURCE_INCLUDE_FILES)
 FOREACH(subdir ${DEEPMD_PLUGIN_SOURCE_SUBDIRS})
@@ -76,17 +76,6 @@ FOREACH(subdir ${DEEPMD_PLUGIN_SOURCE_SUBDIRS})
     INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/include)
 ENDFOREACH(subdir)
 
-if (DEFINED FLOAT_PREC)
-  string ( TOLOWER ${FLOAT_PREC} lower_float_prec )
-  if (lower_float_prec STREQUAL "high")
-    set(PREC_DEF "-DHIGH_PREC")
-  else ()
-    set(PREC_DEF "")
-  endif ()
-else ()
-    set(PREC_DEF "-DHIGH_PREC")
-endif()
-add_definitions (${PREC_DEF})
 
 # Create the library.
 
@@ -96,6 +85,8 @@ SET_TARGET_PROPERTIES(${SHARED_DEEPMD_TARGET}
     LINK_FLAGS "${EXTRA_COMPILE_FLAGS}")
 TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} OpenMM)
 TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_c)
+#TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_cc)
+
 
 INSTALL_TARGETS(/lib RUNTIME_DIRECTORY /lib ${SHARED_DEEPMD_TARGET})
 

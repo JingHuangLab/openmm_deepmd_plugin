@@ -46,14 +46,14 @@ extern "C" void registerDeepmdSerializationProxies();
 
 void testSerialization() {
     const double TOL = 1e-5;
-    const string graph = "../tests/frozen_model/graph_from_han_dp2.0_compress.pb";
+    const string graph = "../tests/frozen_model/water.pb";
     const double coordUnitCoeff = 10;
     const double forceUnitCoeff = 964.8792534459;
     const double energyUnitCoeff = 96.48792534459;
     const double temperature = 300;
 
     // Create a Force.
-    DeepmdForce dp_force = DeepmdForce(graph, graph, graph);
+    DeepmdForce dp_force = DeepmdForce(graph);
     
     stringstream buffer;
     XmlSerializer::serialize<DeepmdForce>(&dp_force, "Force", buffer);

@@ -47,15 +47,14 @@ using namespace std;
 extern "C" OPENMM_EXPORT void registerDeepmdReferenceKernelFactories();
 
 const double TOL = 1e-5;
-const string graph = "../tests/frozen_model/graph_from_han_dp2.0_compress.pb";
+const string graph = "../tests/frozen_model/water.pb";
 const double coordUnitCoeff = 10;
 const double forceUnitCoeff = 964.8792534459;
 const double energyUnitCoeff = 96.48792534459;
 const double temperature = 300;
 const int randomSeed = 123456;
 
-void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> types, vector<Vec3>& force, double& energy, DeepPot nnp_inter){
-    
+void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> types, vector<Vec3>& force, double& energy, DeepPot& dp){    
     int natoms = positions.size();
     vector<VALUETYPE> nnp_coords(natoms*3);
     vector<VALUETYPE> nnp_box(9);
@@ -80,7 +79,7 @@ void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> 
     nnp_box[8] = box[2][2] * coordUnitCoeff;
     int nghost = 0;
     // Compute the nnp forces and energy.
-    nnp_inter.compute (nnp_energy, nnp_force, nnp_virial, nnp_coords, types, nnp_box);
+    dp.compute (nnp_energy, nnp_force, nnp_virial, nnp_coords, types, nnp_box);
     // Assign the energy and forces for return.
     energy = nnp_energy * energyUnitCoeff;
     for(int ii = 0; ii < natoms; ++ii){
@@ -123,7 +122,7 @@ void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, 
     context.setVelocitiesToTemperature(temperature, randomSeed);
 
     // Initialize the nnp_inter for comparision.
-    DeepPot nnp_inter = DeepPot(graph);
+    DeepPot nnp_inter(graph);
     for (int ii = 0; ii < nsteps; ++ii){
         // Running dynamics 1 step.
         integrator.step(1);
