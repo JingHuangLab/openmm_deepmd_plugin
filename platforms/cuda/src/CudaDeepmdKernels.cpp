@@ -56,7 +56,7 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     tot_atoms = system.getNumParticles();
     
     // Initialize DeepPot.
-    this->dp.init(graph_file);
+    this->dp.init(graph_file, force.getGPURank());
     string types_str = force.getTypesMap();
     std::stringstream ss(types_str);
     string token;

@@ -58,18 +58,19 @@ DeepmdForce::DeepmdForce(const string& GraphFile){
     tmp_dp.get_type_map(this->type_map);
 }
 
-DeepmdForce::DeepmdForce(const string& GraphFile, const double& lambda){
-    graph_file  = GraphFile;
-    topology = new Topology();
+DeepmdForce::DeepmdForce(const string& GraphFile, const double& lambda = 0){
+    this->graph_file  = GraphFile;
+    this->topology = new Topology();
     this->lambda = lambda;
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
     // Initialize dp model
-    DeepPot tmp_dp = DeepPot(graph_file);
-    this->numb_types = tmp_dp.numb_types();
-    this->cutoff = tmp_dp.cutoff();
-    tmp_dp.get_type_map(this->type_map);
+    DeepPot* tmp_dp = new DeepPot(graph_file);
+    this->numb_types = tmp_dp->numb_types();
+    this->cutoff = tmp_dp->cutoff();
+    tmp_dp->get_type_map(this->type_map);
+    delete tmp_dp;
 }
 
 DeepmdForce::~DeepmdForce(){
@@ -142,6 +143,12 @@ void DeepmdForce::setLambda(const double lambda){
 }
 
 double DeepmdForce::getLambda() const {return lambda;}
+
+void DeepmdForce::setGPURank(const int gpu_rank) {
+    this->gpu_rank = gpu_rank;
+}
+
+int DeepmdForce::getGPURank() const {return gpu_rank;}
 
 // Get parameters for adaptively changed DP region selection.
 bool DeepmdForce::isFixedRegion() const {return fixed_dp_region;}

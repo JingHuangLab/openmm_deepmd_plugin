@@ -62,12 +62,16 @@ public:
      */
     DeepmdForce(const string& GraphFile);
     /**
-     * @brief Construct a new Deepmd Force object. Used when running alchemical simulation.
+     * @brief Construct a new Deepmd Force object. Used when running with specific lambda.
      * 
      * @param GraphFile 
      * @param lambda
      */
     DeepmdForce(const string& GraphFile, const double& lambda);
+    /**
+     * @brief Destroy the Deepmd Force object.
+     * 
+     */
     ~DeepmdForce();
     
     /**
@@ -208,6 +212,19 @@ public:
      */
     double getLambda() const;
 
+    /**
+     * @brief Set the GPU rank index for DP model evaluation.
+     * 
+     * @param gpu_rank 
+     */
+    void setGPURank(const int gpu_rank);
+    /**
+     * @brief Get the GPU rank index for DP model evaluation.
+     * 
+     * @return int
+     */
+    int getGPURank() const;
+
     void updateParametersInContext(OpenMM::Context& context);
     bool usesPeriodicBoundaryConditions() const {
         return use_pbc;
@@ -218,6 +235,7 @@ private:
     string graph_file = "";
     double lambda = 1.0;
     bool use_pbc = true;
+    int gpu_rank = 0;
 
     int numb_types = 0;
     string type_map = "";

@@ -64,6 +64,7 @@ public:
     void setPBC(const bool use_pbc);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
     void setLambda(const double lambda);
+    void setGPURank(const int gpu_rank);
 
     // Extract the model info from dp model.    
     double getCutoff() const;

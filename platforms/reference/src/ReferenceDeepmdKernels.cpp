@@ -61,16 +61,7 @@ static Vec3* extractBoxVectors(ContextImpl& context) {
 }
 
 ReferenceCalcDeepmdForceKernel::~ReferenceCalcDeepmdForceKernel(){
-    //dp_particles.clear();
-    //dp_types.clear();
-    //dvirial.clear();
-    //dcoord.clear();
-    //dtype.clear();
-    //dbox.clear();
-    //dforce.clear();
-    //if (topology != NULL){
-    //    delete topology;
-    //}
+    
     return;
 }
 
@@ -86,7 +77,7 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
     tot_atoms = system.getNumParticles();
 
     // Initialize DeepPot.
-    this->dp.init(graph_file);
+    this->dp.init(graph_file, force.getGPURank());
     string types_str = force.getTypesMap();
     std::stringstream ss(types_str);
     string token;
