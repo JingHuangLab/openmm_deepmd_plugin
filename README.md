@@ -1,14 +1,19 @@
 # OpenMM Plugin for Deep Potential Model
 
-This plugin is specifically designed for [OpenMM](http://openmm.org), enabling the integration of the Deep Potential model to define forces. The implementation has been made possible with the [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API interface.
 
-To use this plugin, you must create a TensorFlow graph using DeePMD-kit that takes particle positions as input and produces energy and forces as output. During simulation, this plugin utilizes the graph to apply forces to the particles.
-
+This is a plugin for [OpenMM](http://openmm.org) that allows `DeepPotential` model
+to be used for defining forces.
+It is implemented with [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API interface.
+To use it, you create a TensorFlow graph with DeePMD-kit that takes particle positions as input
+and produces forces and energy as output. This plugin uses the graph to apply
+forces to particles during a simulation.
 
 ## Installation
 
-### Installing from Source
-To install this plugin, you will need the **OpenMM** and **DeePMD-kit C API package** libraries. You can compile the plugin from source by following these steps:
+### Install from source
+This plugin requires the library of **OpenMM**, **DeePMD-kit C API package**. 
+Compile plugin from source with the following steps.
+
 
 1. Prepare a conda environment by running the following commands:
    ```
@@ -51,8 +56,6 @@ To install this plugin, you will need the **OpenMM** and **DeePMD-kit C API pack
    python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
    python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
    ```
-
-
 
 
 ## Usage of `DeepPotentialModel` class
@@ -173,3 +176,4 @@ To perform alchemical simulations with the DP models based, combine `lambda` and
 The alchemical simulations protocol with the DP models is described in `AlchemicalProtocol.pdf`.
 
 For an example script about alchemical simulation for water's hydration-free energy calculation, refer to [test_deepmd_alchemical.py](./python/tests/test_deepmd_alchemical.py).
+
