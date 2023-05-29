@@ -4,15 +4,14 @@
 This is a plugin for [OpenMM](http://openmm.org) that allows `DeepPotential` model
 to be used for defining forces.
 It is implemented with [DeePMD-kit](https://github.com/deepmodeling/deepmd-kit) C API interface.
-To use it, you create a TensorFlow graph with DeePMD-kit that takes particle positions as input
-and produces forces and energy as output. This plugin uses the graph to apply
-forces to particles during a simulation.
+To use it, you need a trained Deep Potential model with DeePMD-kit that takes particle positions as input and produces forces and energy as output. 
+This plugin uses the Deep Potential model to apply forces to particles during a simulation.
 
 ## Installation
 
 ### Install from source
 This plugin requires the library of **OpenMM**, **DeePMD-kit C API package**. 
-Compile plugin from source with the following steps.
+Compile the plugin from the source with the following steps.
 
 
 1. Prepare a conda environment by running the following commands:
