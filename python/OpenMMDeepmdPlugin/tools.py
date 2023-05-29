@@ -88,6 +88,12 @@ def DrawScatter(x, y, name, xlabel="Time", ylabel="Force, unit is KJ/(mol*nm)", 
 
 class DeepPotentialModel():
     def __init__(self, model_file, Lambda = 1.0) -> None:
+        """Initialize the Deep Potential model.
+
+        Args:
+            model_file (string): Path to the Deep Potential model file.
+            Lambda (float, optional): Weight of the Deep Potential models in use. Output forces and energy from the Deep Potential model will be multiplied by Lambda and return to the OpenMM context. Defaults to 1.0.
+        """
         self.model_file = model_file
         self.dp_force = DeepmdForce(model_file, Lambda)
         self.cutoff = self.dp_force.getCutoff()
@@ -112,13 +118,22 @@ class DeepPotentialModel():
         
         return type_map_dict, dp_model_types
     
+    def setGPURank(self, rank = 0):
+        """Specify the GPU device to run DP model. Default is 0.
+
+        Args:
+            rank (int, optional): Rank id of the GPU device to run DP model. Defaults to 0.
+        """
+        self.dp_force.setGPURank(rank)
+        return
+    
     def setUnitTransformCoefficients(self, coordinatesCoefficient, forceCoefficient, energyCoefficient):
         """ Set the coefficients for transforming the units of the DP-predicted forces and energies to the units used by OpenMM.
 
         Args:
-            coordinatesCoefficient (_type_): Coefficient for input coordinates that transforms the units of the coordinates from nanometers to the units used by the DP model.
-            forceCoefficient (_type_): Coefficient for forces that transforms the units of the DP-predicted forces from the units used by the DP model to kJ/(mol * nm).
-            energyCoefficient (_type_): Coefficient for energies that transforms the units of the DP-predicted energy from the units used by the DP model to kJ/mol.
+            coordinatesCoefficient (float): Coefficient for input coordinates that transforms the units of the coordinates from nanometers to the units used by the DP model.
+            forceCoefficient (float): Coefficient for forces that transforms the units of the DP-predicted forces from the units used by the DP model to kJ/(mol * nm).
+            energyCoefficient (float): Coefficient for energies that transforms the units of the DP-predicted energy from the units used by the DP model to kJ/mol.
         """
         self.dp_force.setUnitTransformCoefficients(coordinatesCoefficient, forceCoefficient, energyCoefficient)
             
@@ -126,11 +141,11 @@ class DeepPotentialModel():
     
     def createSystem(self, topology, particleNameLabeler = "element"):
         """Create a OpenMM system with Deep Potential force.
-            Used for conventional MD simulation. (NVT, NPT, NVE with DP force only etc.)
+            Used for conventional MD simulation. (NVT, NPT, NVE simulations with the DP model only etc.)
 
         Args:
-            topology (_type_): OpenMM Topology object
-            particleNameLabeler (str, optional): labeler of atom type in topology, element or atom_name. Defaults to "element".
+            topology (Topology): OpenMM Topology object
+            particleNameLabeler (str, optional): Labeler of the atom type in topology, element or atom_name. Defaults to "element".
         
         """
         dp_system = mm.System()
@@ -161,8 +176,8 @@ class DeepPotentialModel():
             Only the particles in the DP region will be used to calculate the DP force and energy.
 
         Args:
-            particles (_type_): list of particle index
-            topology (_type_): OpenMM Topology object
+            particles (List): list of particle index
+            topology (Topology): OpenMM Topology object
             particleNameLabeler (str, optional): labeler of atom type in topology, element or atom_name. Defaults to "element".
         """
         for atom in topology.atoms():
@@ -181,18 +196,22 @@ class DeepPotentialModel():
         topology, 
         sel_num4each_type = None,
         radius = 0.35, 
-        atom_names_to_add_forces = ["CB", "CG", "CD", "CD2", "CE1", 'OE1', 'OE2', 'OD1', 'OD2', 'OH2', 'ND1', "NE2", "SG", "ZN"]
+        atom_names_to_add_forces = None,
+        extend_residues = True
         ):
         """Add center particles into adaptive DP region.
             Put the required information for adaptive DP region into the DeepmdForce object.
 
         Args:
-            center_particles List of atom index: list of particle index
-            topology: OpenMM Topology object
+            center_particles (List): list of particle index
+            topology (Topology): OpenMM Topology object
+            sel_num4each_type (List, optional): list of number of particles for each type. Defaults to None.
+            radius (float, optional): radius of the adaptive region. Defaults to 0.35 nanometers.
+            atom_names_to_add_forces (List): list of atom names to add forces.
             
         """
         self.dp_force.setAdaptiveRegion(True)
-        # Fed the topology information to the DeepmdForce object.
+        # Feed the topology information to the DeepmdForce object.
         for chain in topology.chains():
             chainIndex = chain.index
             chainId = chain.id
@@ -226,7 +245,8 @@ class DeepPotentialModel():
         # add Center atoms into the DeepmdForce object.
         self.dp_force.setCenterAtoms(center_particles)
         self.dp_force.setRegionRadius(radius)
-        self.dp_force.setAtomNames4DPForces(atom_names_to_add_forces)
+        if atom_names_to_add_forces is not None:
+            self.dp_force.setAtomNames4DPForces(atom_names_to_add_forces)
         
         if sel_num4each_type is not None:
             num4type = []
