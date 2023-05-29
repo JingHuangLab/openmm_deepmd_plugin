@@ -65,7 +65,9 @@ def test_deepmd_adaptive_dp_particles_reference(nsteps = 100, time_step = 1, Lam
         dp_force = dp_model.addCenterParticlesToAdaptiveDPRegion(
             center_particles = [zinc], 
             topology = psf.topology, 
-            sel_num4each_type={"C": 36, "O": 16, "N":24, "H":64, "S":6, "ZN":1}
+            sel_num4each_type={"C": 36, "O": 16, "N":24, "H":64, "S":6, "ZN":1},
+            radius=0.35*u.nanometer,
+            atom_names_to_add_forces=["CB", "CG", "CD", "CD2", "CE1", 'OE1', 'OE2', 'OD1', 'OD2', 'OH2', 'ND1', "NE2", "SG", "ZN"]
             )
         # Add force into the system.
         mm_sys.addForce(dp_force)
