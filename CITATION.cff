@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Ding
+    given-names: Ye
+    orcid: https://orcid.org/0009-0005-1986-2879
+  - family-names: Huang
+    given-names: Jing
+    orcid: https://orcid.org/0000-0001-9639-2907
+title: "Implementation and Validation of an OpenMM Plugin for the Deep Potential Representation of Potential Energy"
+version: 0.3.0
+date-released: 2023-05-29
