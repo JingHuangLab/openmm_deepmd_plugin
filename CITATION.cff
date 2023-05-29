@@ -8,5 +8,4 @@ authors:
     given-names: Jing
     orcid: https://orcid.org/0000-0001-9639-2907
 title: "Implementation and Validation of an OpenMM Plugin for the Deep Potential Representation of Potential Energy"
-version: 0.3.0
 date-released: 2023-05-29
