@@ -49,7 +49,7 @@ using namespace std;
 extern "C" OPENMM_EXPORT void registerDeepmdCudaKernelFactories();
 
 const double TOL = 1e-5;
-const string graph = "../tests/frozen_model/water.pb";
+const string graph = "../python/OpenMMDeepmdPlugin/data/water.pb";
 const double coordUnitCoeff = 10;
 const double forceUnitCoeff = 964.8792534459;
 const double energyUnitCoeff = 96.48792534459;
