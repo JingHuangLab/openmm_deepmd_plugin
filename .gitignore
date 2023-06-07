@@ -3,3 +3,4 @@
 **/__pycache__
 *.dcd
 **/output
+._wordcount_selection.tex
