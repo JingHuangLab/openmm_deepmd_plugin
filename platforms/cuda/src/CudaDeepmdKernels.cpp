@@ -159,6 +159,8 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         std::fill(dp_particles.begin(), dp_particles.end(), -1);
         std::fill(dcoord.begin(), dcoord.end(), 0.);
         std::fill(daparam.begin(), daparam.end(), 0.);
+        std::fill(dforce.begin(), dforce.end(), 0.);
+        std::fill(dvirial.begin(), dvirial.end(), 0.);
         
         vector<bool> addForcesSign(natoms, false);
         map<string, vector<bool>> addOrNot; // Whether to add the dp forces for selected atoms. 
@@ -231,6 +233,9 @@ double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForc
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {&networkForces.getDevicePointer(), &cu.getForce().getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(), &tot_atoms, &paddedNumAtoms};
         cu.executeKernel(addForcesKernel, args, tot_atoms);
+
+        // Clean variables for AddedForces.
+        std::fill(AddedForces.begin(), AddedForces.end(), 0.0);
     }
 
     if (includeEnergy){

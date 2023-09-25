@@ -239,6 +239,9 @@ class DeepPotentialModel():
                     # Small patch for Zn
                     if atomElement == "Zn":
                         atomElement = "ZN"
+                    # Small patch for oxygen name in water molecule.
+                    if res.name == "HOH" and atomName == "O":
+                        atomName = "OH2"
                     
                     self.dp_force.addAtom(resIndex, atomName, atomElement, atomIndex, atomId)
                         
