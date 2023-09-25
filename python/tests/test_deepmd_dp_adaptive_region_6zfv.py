@@ -121,7 +121,7 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
     nsteps = nsteps
     time_step = time_step # unit is femtosecond.
     temp = 300 # Kelvin
-    report_frequency = 1 # Save trajectory every report_frequency steps.
+    report_frequency = 100 # Save trajectory every report_frequency steps.
     fric_coeff = 1.0     # friction coefficient
     mini_nstep = 0      # minimization step
     mini_Tol = 100       # minimization tolerance
@@ -159,7 +159,6 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
             sel_num4each_type={"C": 36, "O": 16, "N":24, "H":64, "S":6, "ZN":1},
             atom_names_to_add_forces=["CB", "CG", "CD", "CD2", "CE1", 'OE1', 'OE2', 'OD1', 'OD2', 'OH2', 'ND1', "NE2", "SG", "ZN"]
             )
-        dp_force.setForceGroup(8)
         # Add force into the system.
         mm_sys.addForce(dp_force)
         
@@ -187,15 +186,6 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
                           remainingTime=True, speed=True,  density=True,totalSteps=nsteps, separator='\t')
     )
     
-    # Define a force reporter to print the force on the zinc and its coordinated atoms.
-    output_force_log = output_log.replace(".log", ".nnp.force.log")
-    force_reporter = ForceReporter(
-        output_force_log, 
-        group_num=8,
-        reportInterval=report_frequency,
-        )
-    sim.reporters.append(force_reporter)
-    
     # Run dynamics
     print("Running dynamics")
     start_time = time.time()
@@ -205,6 +195,6 @@ def test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, time_step = 1, Lambda =
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
         
 if __name__ == "__main__":
-    #test_deepmd_adaptive_dp_particles_reference(nsteps = 100, Lambda= 1.0)
-    test_deepmd_adaptive_dp_particles_cuda(nsteps = 1000, Lambda= 1.0)
+    test_deepmd_adaptive_dp_particles_reference(nsteps = 100, Lambda= 1.0)
+    test_deepmd_adaptive_dp_particles_cuda(nsteps = 100, Lambda= 1.0)
     
