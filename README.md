@@ -23,7 +23,7 @@ Compile the plugin from the source with the following steps.
 
 2. Download and install the DeePMD-kit C API library by running the following command:
    ```shell
-   wget https://github.com/deepmodeling/deepmd-kit/releases/download/v2.2.4/libdeepmd_c.tar.gz
+   wget https://github.com/deepmodeling/deepmd-kit/releases/latest/download/libdeepmd_c.tar.gz
    # Extract the C API library of Deepmd-kit to the directory of your choice.
    tar -xf libdeepmd_c.tar.gz -C ${LIBDEEPMD_C_INSTALLED_DIR}
    ```
