@@ -8,4 +8,11 @@ authors:
     given-names: Jing
     orcid: https://orcid.org/0000-0001-9639-2907
 title: "Implementation and Validation of an OpenMM Plugin for the Deep Potential Representation of Potential Energy"
-date-released: 2023-05-29
+version: 0.2.0
+date-released: 2024-03-28
+identifiers:
+  - description: This is the DOI of the software paper. Please cite this DOI when you use this software.
+    type: doi
+    value: https://doi.org/10.3390/ijms25031448
+license: Apache-2.0
+repository-code: "https://github.com/JingHuangLab/openmm_deepmd_plugin"

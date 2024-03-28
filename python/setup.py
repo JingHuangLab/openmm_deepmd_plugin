@@ -1,5 +1,5 @@
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup
+from setuptools import Extension
 import os
 import platform
 
@@ -32,7 +32,7 @@ extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
 
 
 setup(name='OpenMMDeepmdPlugin',
-      version="@GIT_HASH@",
+      version="0.2.0",
       ext_modules=[extension],
       packages=['OpenMMDeepmdPlugin', "OpenMMDeepmdPlugin.tests"],
       package_data={"OpenMMDeepmdPlugin":['data/*.pb', 'data/*.pdb']},
