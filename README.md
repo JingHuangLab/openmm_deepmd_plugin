@@ -18,7 +18,7 @@ Compile the plugin from the source with the following steps.
    ```
    conda create -n dp_openmm
    conda activate dp_openmm
-   conda install -c conda-forge openmm cudatoolkit=11.6
+   conda install -c conda-forge openmm
    ```
 
 2. Download and install the DeePMD-kit C API library by running the following command:
@@ -48,10 +48,11 @@ Compile the plugin from the source with the following steps.
    ```
    It will install the plugin to the subdirectory of `OPENMM_DIR` automatically.
 
-6. Test the plugin C++ interface and install the Python module of this plugin into conda environment by running the following commands:
+6. Test the plugin C interface and install the Python module of this plugin into conda environment by running the following commands:
    ```shell
    make test
    make PythonInstall
+   export LD_LIBRARY_PATH=${LIBDEEPMD_C_INSTALLED_DIR}/lib:$LD_LIBRARY_PATH
    python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
    python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
    ```
@@ -172,7 +173,7 @@ For more practical usage of these two methods, refer to the provided simulation 
 ### Alchemical Simulations with Deep Potential
 
 To perform alchemical simulations with the DP models based, combine `lambda` and `addParticlesToDPRegion`. 
-The alchemical simulations protocol with the DP models is described in `AlchemicalProtocol.pdf`.
+A detailed description about the alchemical simulations protocol with the DP models could be refered to the [paper](https://www.mdpi.com/1422-0067/25/3/1448).
 
 For an example script about alchemical simulation for water's hydration-free energy calculation, refer to [test_deepmd_alchemical.py](./python/tests/test_deepmd_alchemical.py).
 
