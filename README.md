@@ -177,3 +177,30 @@ A detailed description about the alchemical simulations protocol with the DP mod
 
 For an example script about alchemical simulation for water's hydration-free energy calculation, refer to [test_deepmd_alchemical.py](./python/tests/test_deepmd_alchemical.py).
 
+
+## Citing OpenMM Deepmd Plugin
+To cite this repository:
+
+```
+@article{ding2024dp,
+  title={DP/MM: A Hybrid Model for Zinc--Protein Interactions in Molecular Dynamics},
+  author={Ding, Ye and Huang, Jing},
+  journal={The Journal of Physical Chemistry Letters},
+  volume={15},
+  number={2},
+  pages={616--627},
+  year={2024},
+  publisher={ACS Publications}
+}
+
+@article{ding2024implementation,
+  title={Implementation and validation of an openmm plugin for the deep potential representation of potential energy},
+  author={Ding, Ye and Huang, Jing},
+  journal={International Journal of Molecular Sciences},
+  volume={25},
+  number={3},
+  pages={1448},
+  year={2024},
+  publisher={MDPI}
+}
+```
