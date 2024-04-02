@@ -1,5 +1,5 @@
-from setuptools import setup
-from setuptools import Extension
+from distutils.core import setup
+from distutils.extension import Extension
 import os
 import platform
 
@@ -23,8 +23,15 @@ if platform.system() == 'Darwin':
 extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
                       sources=['OpenMMDeepmdPluginWrapper.cpp'],
                       libraries=['OpenMM', 'OpenMMDeepmd'],
-                      include_dirs=[os.path.join(openmm_dir, 'include'), os.path.join(deepmd_dir, 'include'), DeepmdPlugin_header_dir],
-                      library_dirs=[os.path.join(openmm_dir, 'lib'), os.path.join(deepmd_dir, 'lib'), DeepmdPlugin_library_dir],
+                      include_dirs=[os.path.join(openmm_dir, 'include'), 
+                                    os.path.join(deepmd_dir, 'include'), 
+                                    DeepmdPlugin_header_dir, 
+                                    "/home/fengxp/softwares/pytorch/torch/include",
+                                    "/home/fengxp/miniforge3/envs/deepmd-pt-plugin/include/eigen3"],
+                      library_dirs=[os.path.join(openmm_dir, 'lib'), 
+                                    os.path.join(deepmd_dir, 'lib'), 
+                                    DeepmdPlugin_library_dir, 
+                                    "/home/fengxp/softwares/pytorch/torch/lib"],
                       extra_compile_args=extra_compile_args,
                       extra_link_args=extra_link_args
                      )
@@ -32,7 +39,7 @@ extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
 
 
 setup(name='OpenMMDeepmdPlugin',
-      version="0.2.0",
+      version="@GIT_HASH@",
       ext_modules=[extension],
       packages=['OpenMMDeepmdPlugin', "OpenMMDeepmdPlugin.tests"],
       package_data={"OpenMMDeepmdPlugin":['data/*.pb', 'data/*.pdb']},

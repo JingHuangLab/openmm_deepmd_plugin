@@ -39,7 +39,6 @@
 #include <vector>
 #include <cmath>
 
-
 using namespace OpenMM;
 using namespace DeepmdPlugin;
 using namespace std;
@@ -47,23 +46,25 @@ using namespace std;
 extern "C" OPENMM_EXPORT void registerDeepmdReferenceKernelFactories();
 
 const double TOL = 1e-5;
-const string graph = "../python/OpenMMDeepmdPlugin/data/water.pb";
+const string graph = "/home/fengxp/softwares/openmm_deepmd_pytorch_plugin/python/OpenMMDeepmdPlugin/data/model.pt";
 const double coordUnitCoeff = 10;
 const double forceUnitCoeff = 964.8792534459;
 const double energyUnitCoeff = 96.48792534459;
 const double temperature = 300;
 const int randomSeed = 123456;
 
-void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> types, vector<Vec3>& force, double& energy, DeepPot& dp){    
+void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> types, vector<Vec3> &force, double &energy, DeepPot &dp)
+{
     int natoms = positions.size();
-    vector<VALUETYPE> nnp_coords(natoms*3);
+    vector<VALUETYPE> nnp_coords(natoms * 3);
     vector<VALUETYPE> nnp_box(9);
-    vector<VALUETYPE> nnp_force(natoms*3);
+    vector<VALUETYPE> nnp_force(natoms * 3);
     vector<VALUETYPE> nnp_virial(9);
     double nnp_energy;
-    
+
     // Set box and coordinates input for NNPInter.
-    for (int ii = 0; ii < natoms; ++ii){
+    for (int ii = 0; ii < natoms; ++ii)
+    {
         nnp_coords[ii * 3 + 0] = positions[ii][0] * coordUnitCoeff;
         nnp_coords[ii * 3 + 1] = positions[ii][1] * coordUnitCoeff;
         nnp_coords[ii * 3 + 2] = positions[ii][2] * coordUnitCoeff;
@@ -79,108 +80,117 @@ void referenceDeepmdForce(vector<Vec3> positions, vector<Vec3> box, vector<int> 
     nnp_box[8] = box[2][2] * coordUnitCoeff;
     int nghost = 0;
     // Compute the nnp forces and energy.
-    dp.compute (nnp_energy, nnp_force, nnp_virial, nnp_coords, types, nnp_box);
+    dp.compute(nnp_energy, nnp_force, nnp_virial, nnp_coords, types, nnp_box);
     // Assign the energy and forces for return.
     energy = nnp_energy * energyUnitCoeff;
-    for(int ii = 0; ii < natoms; ++ii){
+    for (int ii = 0; ii < natoms; ++ii)
+    {
         force[ii][0] = nnp_force[ii * 3 + 0] * forceUnitCoeff;
         force[ii][1] = nnp_force[ii * 3 + 1] * forceUnitCoeff;
         force[ii][2] = nnp_force[ii * 3 + 2] * forceUnitCoeff;
     }
 }
 
-void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, vector<int> atype, vector<double> box, vector<double> mass, map<int, string> typeDict, int nsteps=100){
-
+void testDeepmdDynamics(int natoms, vector<string> names, vector<double> coord, vector<int> atype, vector<double> box, vector<double> mass, map<int, string> typeDict, int nsteps = 100)
+{
 
     ASSERT_EQUAL(names.size(), atype.size());
 
     System system;
     VerletIntegrator integrator(0.0002); // Time step is 0.2 fs here.
-    DeepmdForce* dp_force = new DeepmdForce(graph);
+    DeepmdForce *dp_force = new DeepmdForce(graph);
 
     // Convert the units of coordinates and box from angstrom to nanometers.
     vector<Vec3> omm_coord;
     vector<Vec3> omm_box;
-    for(auto it = typeDict.begin(); it != typeDict.end(); it++){
+    for (auto it = typeDict.begin(); it != typeDict.end(); it++)
+    {
         dp_force->addType(it->first, it->second);
     }
-    for(int ii = 0; ii < 3; ii++){
+    for (int ii = 0; ii < 3; ii++)
+    {
         omm_box.push_back(Vec3(box[ii * 3 + 0] / coordUnitCoeff, box[ii * 3 + 1] / coordUnitCoeff, box[ii * 3 + 2] / coordUnitCoeff));
     }
-    for (int ii = 0; ii < natoms; ++ii){
+    for (int ii = 0; ii < natoms; ++ii)
+    {
         system.addParticle(mass[ii]);
-        dp_force->addParticle(ii, names[ii]);    
+        dp_force->addParticle(ii, names[ii]);
         omm_coord.push_back(Vec3(coord[ii * 3 + 0] * 0.1, coord[ii * 3 + 1] * 0.1, coord[ii * 3 + 2] * 0.1));
     }
-    dp_force->setUnitTransformCoefficients(coordUnitCoeff, forceUnitCoeff, energyUnitCoeff); 
+    dp_force->setUnitTransformCoefficients(coordUnitCoeff, forceUnitCoeff, energyUnitCoeff);
     system.addForce(dp_force);
 
-    Platform& platform = Platform::getPlatformByName("Reference");
+    Platform &platform = Platform::getPlatformByName("Reference");
     Context context(system, integrator, platform);
     context.setPositions(omm_coord);
     context.setPeriodicBoxVectors(omm_box[0], omm_box[1], omm_box[2]);
     context.setVelocitiesToTemperature(temperature, randomSeed);
 
     // Initialize the nnp_inter for comparision.
-    DeepPot nnp_inter(graph);
-    for (int ii = 0; ii < nsteps; ++ii){
+    DeepPot nnp_inter;
+    nnp_inter.init<double>(graph);
+    for (int ii = 0; ii < nsteps; ++ii)
+    {
         // Running dynamics 1 step.
         integrator.step(1);
         // Get the forces and energy from openmm context state.
         State state = context.getState(State::Forces | State::Energy | State::Positions);
-        const vector<Vec3>& omm_forces = state.getForces();
-        const double& omm_energy = state.getPotentialEnergy();
+        const vector<Vec3> &omm_forces = state.getForces();
+        const double &omm_energy = state.getPotentialEnergy();
 
         // Calculate the force from NNPInter directly.
-        std::vector<Vec3> forces(natoms, Vec3(0,0,0));
+        std::vector<Vec3> forces(natoms, Vec3(0, 0, 0));
         double energy;
         referenceDeepmdForce(state.getPositions(), omm_box, atype, forces, energy, nnp_inter);
 
-        for (int jj = 0; jj < natoms; ++jj){
+        for (int jj = 0; jj < natoms; ++jj)
+        {
             ASSERT_EQUAL_VEC(omm_forces[jj], forces[jj], TOL);
         }
         ASSERT_EQUAL_TOL(energy, omm_energy, TOL);
     }
 }
 
-
-int main() {
+int main()
+{
     // Initialize positions, unit is angstrom.
     std::vector<double> coord = {12.83, 2.56, 2.18,
-    12.09, 2.87, 2.74,
-    00.25, 3.32, 1.68,
-    3.36, 3.00, 1.81,
-    3.51, 2.51, 2.60,
-    4.27, 3.22, 1.56};
+                                 12.09, 2.87, 2.74,
+                                 00.25, 3.32, 1.68,
+                                 3.36, 3.00, 1.81,
+                                 3.51, 2.51, 2.60,
+                                 4.27, 3.22, 1.56};
     std::vector<int> atype = {0, 1, 1, 0, 1, 1};
     std::vector<double> box = {
-    13., 0., 0., 0., 13., 0., 0., 0., 13.
-    };
-    
+        13., 0., 0., 0., 13., 0., 0., 0., 13.};
+
     std::map<int, string> typeDict = {{0, "O"}, {1, "H"}};
     std::vector<double> mass;
     int nsteps = 100;
     int natoms = coord.size() / 3;
-    for(int ii = 0; ii < natoms; ++ii){
+    for (int ii = 0; ii < natoms; ++ii)
+    {
         if (atype[ii] == 0)
             mass.push_back(15.99943);
         else if (atype[ii] == 1)
             mass.push_back(1.007947);
     }
     std::vector<string> atomNames;
-    for(int ii = 0; ii < natoms; ++ii){
-        atomNames.push_back(typeDict[atype[ii]]);        
+    for (int ii = 0; ii < natoms; ++ii)
+    {
+        atomNames.push_back(typeDict[atype[ii]]);
     }
 
-
-    try{
+    try
+    {
         registerDeepmdReferenceKernelFactories();
         testDeepmdDynamics(natoms, atomNames, coord, atype, box, mass, typeDict, nsteps);
     }
-    catch(const std::exception& e) {
-        std::cout << "exception: "<<e.what() << std::endl;
+    catch (const std::exception &e)
+    {
+        std::cout << "exception: " << e.what() << std::endl;
         return 1;
     }
-    std::cout<<"Done"<<std::endl;
+    std::cout << "Done" << std::endl;
     return 0;
 }
