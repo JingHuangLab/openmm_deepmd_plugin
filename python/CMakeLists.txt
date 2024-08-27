@@ -31,9 +31,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/OpenMMDeepmdPlugin DESTINATION ${CMAKE_CUR
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/OpenMMDeepmdPlugin/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/OpenMMDeepmdPlugin/__init__.py)
 add_custom_command(TARGET PythonInstall
-    COMMAND "${PYTHON_EXECUTABLE}" setup.py build
-    COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/OpenMMDeepmdPlugin.py ${CMAKE_CURRENT_BINARY_DIR}/OpenMMDeepmdPlugin
-    COMMAND "${PYTHON_EXECUTABLE}" setup.py install
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/OpenMMDeepmdPlugin.py ${CMAKE_CURRENT_BINARY_DIR}/OpenMMDeepmdPlugin
+    COMMAND "${PYTHON_EXECUTABLE}" -m pip install . 
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
