@@ -38,39 +38,42 @@
 
 using namespace DeepmdPlugin;
 using namespace OpenMM;
-using namespace deepmd;
+// using namespace deepmd;
 using namespace std;
 
 extern "C" void registerDeepmdSerializationProxies();
 
-
-void testSerialization() {
+void testSerialization()
+{
     const double TOL = 1e-5;
-    const string graph = "../python/OpenMMDeepmdPlugin/data/water.pb";
+    const string graph = "/home/fengxp/softwares/openmm_deepmd_pytorch_plugin/python/OpenMMDeepmdPlugin/data/model.pt";
     const double coordUnitCoeff = 10;
     const double forceUnitCoeff = 964.8792534459;
     const double energyUnitCoeff = 96.48792534459;
     const double temperature = 300;
 
     // Create a Force.
-    DeepmdForce dp_force = DeepmdForce(graph);
-    
+    DeepmdForce dp_force(graph);
+
     stringstream buffer;
     XmlSerializer::serialize<DeepmdForce>(&dp_force, "Force", buffer);
-    DeepmdForce* copy = XmlSerializer::deserialize<DeepmdForce>(buffer);
+    DeepmdForce *copy = XmlSerializer::deserialize<DeepmdForce>(buffer);
 
     // Compare the two forces to see if they are identical.
-    DeepmdForce& dp_force2 = *copy;
+    DeepmdForce &dp_force2 = *copy;
     ASSERT_EQUAL(dp_force2.getDeepmdGraphFile(), dp_force.getDeepmdGraphFile());
     return;
 }
 
-int main() {
-    try {
+int main()
+{
+    try
+    {
         registerDeepmdSerializationProxies();
         testSerialization();
     }
-    catch(const exception& e) {
+    catch (const exception &e)
+    {
         cout << "exception: " << e.what() << endl;
         return 1;
     }
