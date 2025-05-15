@@ -55,9 +55,7 @@ private:
     OpenMM::CudaArray networkForces;
     CUfunction addForcesKernel;
 
-    // graph_file 1 and 2 are used for alchemical simulation.
     std::string graph_file;
-    // nnp_inter_1 and nnp_inter_2 are used for alchemical simulation.
     DeepPot dp;    
     
     int natoms, tot_atoms;
