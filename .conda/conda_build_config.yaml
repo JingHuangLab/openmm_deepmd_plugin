@@ -1,0 +1,3 @@
+channel_sources:
+  - defaults,conda-forge # [linux-64]
+  - defaults,conda-forge # [ppc64le]

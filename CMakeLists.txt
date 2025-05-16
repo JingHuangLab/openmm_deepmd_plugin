@@ -17,6 +17,15 @@ SET(DEEPMD_DIR "/usr/local/deepmd/" CACHE PATH "Where libdeepmd_c is installed")
 INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include")
 LINK_DIRECTORIES("${DEEPMD_DIR}/lib")
 
+# Enable REINSTALL_DEEPMD_LIB when you compile this plugin with respect to a conda environment
+SET(REINSTALL_DEEPMD_LIB OFF CACHE BOOL "Move libdeepmd_c/lib to OpenMM lib directory")
+IF(REINSTALL_DEEPMD_LIB)
+    MESSAGE(STATUS "Copying libdeepmd_c/lib/* to OpenMM lib directory")
+    FILE(GLOB DEEPMD_LIB_FILES "${DEEPMD_DIR}/lib/*")
+    FOREACH(file ${DEEPMD_LIB_FILES})
+        FILE(COPY ${file} DESTINATION "${OPENMM_DIR}/lib/")
+    ENDFOREACH(file)
+ENDIF(REINSTALL_DEEPMD_LIB)
 
 # Specify the C++ version we are building for.
 SET (CMAKE_CXX_STANDARD 11)
