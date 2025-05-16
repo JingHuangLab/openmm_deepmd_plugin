@@ -9,6 +9,15 @@ This plugin uses the Deep Potential model to apply forces to particles during a 
 
 ## Installation
 
+### Install with conda
+The conda package is only compatible with Linux system
+
+```
+conda create -n omm_dp
+conda activate omm_dp
+conda install -c conda-forge ye-ding::openmm_deepmd_plugin
+```
+
 ### Install from source
 This plugin requires the library of **OpenMM**, **DeePMD-kit C API package**. 
 Compile the plugin from the source with the following steps.
@@ -21,7 +30,7 @@ Compile the plugin from the source with the following steps.
    conda install -c conda-forge openmm
    ```
 
-2. Download and install the DeePMD-kit C API library by running the following command:
+2. Download and intall the DeePMD-kit C API library by running the following command:
    ```shell
    wget https://github.com/deepmodeling/deepmd-kit/releases/latest/download/libdeepmd_c.tar.gz
    # Extract the C API library of Deepmd-kit to the directory of your choice.
