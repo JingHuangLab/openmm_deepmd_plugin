@@ -7,6 +7,15 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(OpenMMDeepmd)
 
+# Include the deepmd-kit.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+# Find required packages
+find_package(Eigen3 REQUIRED)
+find_package(Torch REQUIRED)
+
 # We need to know where OpenMM is installed so we can access the headers and libraries.
 SET(OPENMM_DIR "/usr/local/openmm" CACHE PATH "Where OpenMM is installed")
 INCLUDE_DIRECTORIES("${OPENMM_DIR}/include")
@@ -15,7 +24,7 @@ LINK_DIRECTORIES("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")
 # Include the deepmd-kit.
 SET(DEEPMD_DIR "/usr/local/deepmd/" CACHE PATH "Where libdeepmd_c is installed")
 INCLUDE_DIRECTORIES("${DEEPMD_DIR}/include")
-LINK_DIRECTORIES("${DEEPMD_DIR}/lib")
+LINK_DIRECTORIES("${DEEPMD_DIR}/build")
 
 # Enable REINSTALL_DEEPMD_LIB when you compile this plugin with respect to a conda environment
 SET(REINSTALL_DEEPMD_LIB OFF CACHE BOOL "Move libdeepmd_c/lib to OpenMM lib directory")
@@ -28,7 +37,7 @@ IF(REINSTALL_DEEPMD_LIB)
 ENDIF(REINSTALL_DEEPMD_LIB)
 
 # Specify the C++ version we are building for.
-SET (CMAKE_CXX_STANDARD 11)
+# SET (CMAKE_CXX_STANDARD 11)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes -Wl,--allow-multiple-definition  -Wl,--no-as-needed")
 
@@ -93,8 +102,8 @@ SET_TARGET_PROPERTIES(${SHARED_DEEPMD_TARGET}
     PROPERTIES COMPILE_FLAGS "-DDEEPMD_BUILDING_SHARED_LIBRARY ${EXTRA_COMPILE_FLAGS}"
     LINK_FLAGS "${EXTRA_COMPILE_FLAGS}")
 TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} OpenMM)
-TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_c)
-#TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_cc)
+TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} deepmd_cc)
+TARGET_LINK_LIBRARIES(${SHARED_DEEPMD_TARGET} ${TORCH_LIBRARIES} Eigen3::Eigen)
 
 
 INSTALL_TARGETS(/lib RUNTIME_DIRECTORY /lib ${SHARED_DEEPMD_TARGET})

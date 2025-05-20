@@ -96,27 +96,27 @@ class DeepPotentialModel():
         """
         self.model_file = model_file
         self.dp_force = DeepmdForce(model_file, Lambda)
-        self.cutoff = self.dp_force.getCutoff()
-        self.numb_types = self.dp_force.getNumberTypes()
-        self.type_map_raw = self.dp_force.getTypesMap()
-        self.type_map_dict, self.dp_model_types = self.__decode_type_map(self.type_map_raw)
+        # self.cutoff = self.dp_force.getCutoff()
+        # self.numb_types = self.dp_force.getNumberTypes()
+        # self.type_map_raw = self.dp_force.getTypesMap()
+        # self.type_map_dict, self.dp_model_types = self.__decode_type_map(self.type_map_raw)
 
         # Set up the atom type
-        for atom_type in self.type_map_dict.keys():
-            self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
+        # for atom_type in self.type_map_dict.keys():
+        #     self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
         
         return
     
-    def __decode_type_map(self, type_map_string):
-        type_map_dict = dict()
-        type_list = type_map_string.split()
-        for ii, atom_type in enumerate(type_list):
-            type_map_dict[atom_type] = ii
-        dp_model_types = list(type_map_dict.keys())
+    # def __decode_type_map(self, type_map_string):
+        # type_map_dict = dict()
+        # type_list = type_map_string.split()
+        # for ii, atom_type in enumerate(type_list):
+        #     type_map_dict[atom_type] = ii
+        # dp_model_types = list(type_map_dict.keys())
         
-        assert len(dp_model_types) == self.numb_types, "Number of types is not consistent with numb_types from dp model"
+        # assert len(dp_model_types) == self.numb_types, "Number of types is not consistent with numb_types from dp model"
         
-        return type_map_dict, dp_model_types
+        # return type_map_dict, dp_model_types
     
     def setGPURank(self, rank = 0):
         """Specify the GPU device to run DP model. Default is 0.
@@ -156,8 +156,8 @@ class DeepPotentialModel():
                 atom_type = atom.element.symbol
             elif particleNameLabeler == "atom_name":
                 atom_type = atom.name
-            if atom_type not in self.dp_model_types:
-                raise Exception(f"Atom type {atom_type} is not found in {self.dp_model_types}.")
+            # if atom_type not in self.dp_model_types:
+            #     raise Exception(f"Atom type {atom_type} is not found in {self.dp_model_types}.")
             
             dp_system.addParticle(atom.element.mass)
             self.dp_force.addParticle(atom.index, atom_type)
@@ -251,11 +251,11 @@ class DeepPotentialModel():
         if atom_names_to_add_forces is not None:
             self.dp_force.setAtomNames4DPForces(atom_names_to_add_forces)
         
-        if sel_num4each_type is not None:
-            num4type = []
-            for type_name in self.dp_model_types:
-                num4type.append(sel_num4each_type[type_name])
-            self.dp_force.setSelNum4EachType(self.dp_model_types, num4type)        
+        # if sel_num4each_type is not None:
+        #     num4type = []
+        #     for type_name in self.dp_model_types:
+        #         num4type.append(sel_num4each_type[type_name])
+        #     self.dp_force.setSelNum4EachType(self.dp_model_types, num4type)        
 
         return self.dp_force
     

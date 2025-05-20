@@ -4,3 +4,6 @@
 *.dcd
 **/output
 ._wordcount_selection.tex
+*.pt
+*.pth
+*.pb
