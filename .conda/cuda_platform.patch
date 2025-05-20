@@ -1,0 +1,10 @@
+diff --git a/platforms/cuda/CMakeLists.txt b/platforms/cuda/CMakeLists.txt
+index 921db0b..511df2d 100644
+--- a/platforms/cuda/CMakeLists.txt
++++ b/platforms/cuda/CMakeLists.txt
+@@ -76,4 +76,4 @@ IF (APPLE)
+ ENDIF (APPLE)
+ 
+ 
+-SUBDIRS (tests)
++#SUBDIRS (tests)

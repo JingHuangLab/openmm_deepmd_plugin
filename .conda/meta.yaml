@@ -1,0 +1,83 @@
+{% set name = "openmm_deepmd_plugin" %}
+{% set version = "0.2.0" %}
+{% set cuda_compiler_version = "12.0" %}
+{% set py_version = "3.11" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/JingHuangLab/openmm_deepmd_plugin.git
+  git_rev: 43e319f75e8597eac7d2060ee475e1bd6d30e674
+  patches:
+    - cuda_platform.patch
+  build:
+    number: 2
+    string: "py{{ py_version }}_cuda{{ cuda_compiler_version }}_{{ build_number|default(1) }}"
+    skip: True  # [not linux]
+    missing_dso_whitelist:
+      - "*/libcuda.*"    # [linux64 or ppc64le]
+
+requirements:
+  build:
+    - python {{ py_version }}
+    - {{ compiler('c') }} 11.4
+    - {{ compiler('cxx') }} 11.4
+    - cuda-version {{ cuda_compiler_version }}
+    - cuda-nvcc # [linux64]
+    - cuda-libraries-dev # [linux64]    
+    - cudnn
+    - cuda-cudart
+    - sysroot_linux-64 2.17
+    - cython
+    - swig
+    - cmake
+    - make
+    - doxygen
+    - wget
+    - openmm
+    - setuptools
+
+  host:
+    - cuda-version {{ cuda_compiler_version }}
+    - cudnn
+    - cuda-cudart
+    - openmm
+    - python {{ py_version }}
+
+  run: 
+    - openmm
+    - cuda-version {{ cuda_compiler_version }}
+    - cudnn
+    - cuda-cudart
+    - python {{ py_version }}
+    
+test:
+  commands:
+    - python -m openmm.testInstallation
+    - test -f $PREFIX/lib/libOpenMM.so
+    - test -f $PREFIX/lib/libOpenMMDeepmd.so
+    - python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve
+    - python -m OpenMMDeepmdPlugin.tests.test_dp_plugin_nve --platform CUDA
+
+about:
+  home: https://github.com/JingHuangLab/openmm_deepmd_plugin
+  summary: 'OpenMM Plugin for DeePMD-kit.'
+  license: LGPL-3.0-or-later
+  license_family: LGPL
+  description: |
+    OpenMM is a toolkit for molecular simulation. It can be used either as a
+    stand-alone application for running simulations, or as a library you call
+    from your own code. It provides a combination of extreme flexibility
+    (through custom forces and integrators), openness, and high performance
+    (especially on recent GPUs) that make it truly unique among simulation
+    codes. OpenMM is MIT licensed with some LGPL portions (CUDA and OpenCL
+    platforms).
+  doc_url: http://docs.openmm.org
+  dev_url: https://github.com/JingHuangLab/openmm_deepmd_plugin.git
+
+extra:
+  recipe-maintainers:
+    - ye-ding

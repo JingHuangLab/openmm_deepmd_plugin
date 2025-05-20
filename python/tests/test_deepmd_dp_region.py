@@ -93,7 +93,7 @@ def test_deepmd_fixed_dp_particles_reference(nsteps = 1000, time_step = 0.2, Lam
     cost_time = end_time - start_time
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
-    # Fetch the temperature info from the log file.
+    # Fetch the total energy info from the log file.
     energy_trajectory = []
     energy_index = -5
     with open(output_log, "r") as f:
@@ -188,7 +188,7 @@ def test_deepmd_fixed_dp_particles_cuda(nsteps = 1000, time_step = 0.2, Lambda =
     cost_time = end_time - start_time
     print("Running on %s platform, time cost: %.4f s"%(platform_name, cost_time))
     
-    # Fetch the temperature info from the log file.
+    # Fetch the total energy info from the log file.
     energy_trajectory = []
     energy_index = -5
     with open(output_log, "r") as f:
@@ -204,6 +204,6 @@ def test_deepmd_fixed_dp_particles_cuda(nsteps = 1000, time_step = 0.2, Lambda =
     assert (np.std(energy_trajectory) > 0.0001)
     
 if __name__ == "__main__":
-    test_deepmd_fixed_dp_particles_reference(nsteps = 5000, Lambda= 0.0)
-    test_deepmd_fixed_dp_particles_cuda(nsteps = 5000, Lambda= 0.0)
+    test_deepmd_fixed_dp_particles_reference(nsteps = 5000, Lambda= 1.0)
+    test_deepmd_fixed_dp_particles_cuda(nsteps = 5000, Lambda= 1.0)
     
