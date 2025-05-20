@@ -151,7 +151,8 @@ if __name__ == "__main__":
     
     all_alchem_simulations = []
 
-    
+    ## Run the alchemical simulation for each lambda value.
+    ## This is a time consuming step, and it is recommended to run it in parallel.
     for lambda_value in lambda_list:
         output_dcd = os.path.join(output_temp_dir, f"lw_256.alchemical.{lambda_value}.dcd")
         output_log = os.path.join(output_temp_dir, f"lw_256.alchemical.{lambda_value}.log")
