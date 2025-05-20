@@ -134,8 +134,6 @@ IF(PYTHON_EXECUTABLE AND SWIG_EXECUTABLE)
     SET(PLUGIN_BUILD_PYTHON_WRAPPERS ON CACHE BOOL "Build wrappers ON for Python")
 ELSE(PYTHON_EXECUTABLE AND SWIG_EXECUTABLE)
     MESSAGE(FATAL_ERROR "Python or SWIG not found, not building wrappers for Python. Try to install python and swig.")
-    # This is a fatal error, so we stop the build.
-    SET(PLUGIN_BUILD_PYTHON_WRAPPERS OFF CACHE BOOL "Build wrappers OFF for Python")
 ENDIF(PYTHON_EXECUTABLE AND SWIG_EXECUTABLE)
 IF(PLUGIN_BUILD_PYTHON_WRAPPERS)
     ADD_SUBDIRECTORY(python)

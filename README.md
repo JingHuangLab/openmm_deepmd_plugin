@@ -30,7 +30,7 @@ Compile the plugin from the source with the following steps.
    conda install -c conda-forge openmm
    ```
 
-2. Download and intall the DeePMD-kit C API library by running the following command:
+2. Download and install the DeePMD-kit C API library by running the following command:
    ```shell
    wget https://github.com/deepmodeling/deepmd-kit/releases/latest/download/libdeepmd_c.tar.gz
    # Extract the C API library of Deepmd-kit to the directory of your choice.
