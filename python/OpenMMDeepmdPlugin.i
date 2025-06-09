@@ -56,14 +56,16 @@ class DeepmdForce : public OpenMM::Force {
 public:
     //DeepmdForce::DeepmdForce(const string& GraphFile, const string& GraphFile_1, const string& GraphFile_2, const bool used4Alchemical);
     DeepmdForce(const string& GraphFile);
-    DeepmdForce(const string& GraphFile, const double& lambda);
+
+    const std::string& getLambdaName() const;
+    void setLambdaName(const std::string& name);
+    void addLambdaParameter(const std::string& name, double defaultValue);
 
     void addParticle(const int particleIndex, const string particleType);
     void addType(const int typeIndex, const string Type);
     void addBond(const int particle1, const int particle2);
     void setPBC(const bool use_pbc);
     void setUnitTransformCoefficients(const double coordCoefficient, const double forceCoefficient, const double energyCoefficient);
-    void setLambda(const double lambda);
     void setGPURank(const int gpu_rank);
 
     // Extract the model info from dp model.    

@@ -59,7 +59,9 @@ private:
     DeepPot dp;    
     
     int natoms, tot_atoms;
-    double lambda = 0.0; // interpolate the DP generated forces.
+    double lambda = 1.0; // interpolate the DP generated forces.
+    string lambda_name = "";
+
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
     vector<VALUETYPE> dvirial;

@@ -87,7 +87,7 @@ def DrawScatter(x, y, name, xlabel="Time", ylabel="Force, unit is KJ/(mol*nm)", 
 
 
 class DeepPotentialModel():
-    def __init__(self, model_file, Lambda = 1.0) -> None:
+    def __init__(self, model_file, LambdaName = "dp_alchem_lambda", Lambda = 1.0) -> None:
         """Initialize the Deep Potential model.
 
         Args:
@@ -95,12 +95,15 @@ class DeepPotentialModel():
             Lambda (float, optional): Weight of the Deep Potential models in use. Output forces and energy from the Deep Potential model will be multiplied by Lambda and return to the OpenMM context. Defaults to 1.0.
         """
         self.model_file = model_file
-        self.dp_force = DeepmdForce(model_file, Lambda)
+        self.dp_force = DeepmdForce(model_file)
         self.cutoff = self.dp_force.getCutoff()
         self.numb_types = self.dp_force.getNumberTypes()
         self.type_map_raw = self.dp_force.getTypesMap()
         self.type_map_dict, self.dp_model_types = self.__decode_type_map(self.type_map_raw)
-
+    
+        self.dp_force.addLambdaParameter(LambdaName, Lambda)
+        self.lambda_name = LambdaName
+        
         # Set up the atom type
         for atom_type in self.type_map_dict.keys():
             self.dp_force.addType(self.type_map_dict[atom_type], atom_type)
@@ -259,3 +262,13 @@ class DeepPotentialModel():
 
         return self.dp_force
     
+    def setLambdaName(lambda_name):
+        """Set the name of the lambda parameter for the DP model.
+
+        Args:
+            lambda_name (str): Name of the lambda parameter.
+        """
+        self.lambda_name = lambda_name
+        self.dp_force.setLambdaName(lambda_name)
+        assert self.dp_force.getLambdaName() == lambda_name, "Failed to set the lambda name."
+        return
