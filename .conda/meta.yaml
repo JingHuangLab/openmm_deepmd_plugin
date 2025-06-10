@@ -9,12 +9,13 @@ package:
   version: {{ version }}
 
 source:
-  git_url: https://github.com/JingHuangLab/openmm_deepmd_plugin.git
-  git_rev: 43e319f75e8597eac7d2060ee475e1bd6d30e674
-  patches:
-    - cuda_platform.patch
+  #git_url: https://github.com/JingHuangLab/openmm_deepmd_plugin.git
+  #git_rev: 43e319f75e8597eac7d2060ee475e1bd6d30e674
+  #patches:
+  #  - cuda_platform.patch
+  path: ..
   build:
-    number: 2
+    number: 1
     string: "py{{ py_version }}_cuda{{ cuda_compiler_version }}_{{ build_number|default(1) }}"
     skip: True  # [not linux]
     missing_dso_whitelist:

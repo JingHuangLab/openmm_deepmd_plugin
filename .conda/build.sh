@@ -8,6 +8,11 @@ cd build
 wget https://github.com/deepmodeling/deepmd-kit/releases/latest/download/libdeepmd_c.tar.gz
 tar -xf libdeepmd_c.tar.gz -C ${PREFIX}
 
+mkdir -p ${PREFIX}/lib/libdeepmd_c
+mkdir -p ${PREFIX}/include/libdeepmd_c
+cp -r ${PREFIX}/libdeepmd_c/include/* ${PREFIX}/include/
+cp -r ${PREFIX}/libdeepmd_c/lib/* ${PREFIX}/lib/
+
 cmake -DOPENMM_DIR=${PREFIX} -DDEEPMD_DIR=${PREFIX}/libdeepmd_c ..
 
 make #-j${NUM_CPUS}
