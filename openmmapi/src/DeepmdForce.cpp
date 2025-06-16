@@ -51,6 +51,8 @@ DeepmdForce::DeepmdForce(const string& GraphFile){
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
+    globalParameters[lambda_name] = lambda; // Initialize the lambda parameter with default value 1.0
+
     // Initialize dp model
     DeepPot tmp_dp = DeepPot(graph_file);
     this->numb_types = tmp_dp.numb_types();
@@ -58,13 +60,15 @@ DeepmdForce::DeepmdForce(const string& GraphFile){
     tmp_dp.get_type_map(this->type_map);
 }
 
-DeepmdForce::DeepmdForce(const string& GraphFile, const double& lambda = 0){
+DeepmdForce::DeepmdForce(const string& GraphFile, const string& lambda_name = "dp_alchem_lambda"){
     this->graph_file  = GraphFile;
     this->topology = new Topology();
-    this->lambda = lambda;
+    this->lambda_name = lambda_name;
     if (!exists(graph_file)){
         throw OpenMMException("Graph file not found: "+graph_file);
     }
+    globalParameters[lambda_name] = lambda; // Initialize the lambda parameter with default value 1.0
+
     // Initialize dp model
     DeepPot* tmp_dp = new DeepPot(graph_file);
     this->numb_types = tmp_dp->numb_types();
@@ -138,12 +142,6 @@ const vector<pair<int, int>> DeepmdForce::getBondsList() const{
     return bondsList;
 }
 
-void DeepmdForce::setLambda(const double lambda){
-    this->lambda = lambda;
-}
-
-double DeepmdForce::getLambda() const {return lambda;}
-
 void DeepmdForce::setGPURank(const int gpu_rank) {
     this->gpu_rank = gpu_rank;
 }
@@ -197,3 +195,26 @@ void DeepmdForce::updateParametersInContext(Context& context) {
     return;
 }
 
+map<string, double> DeepmdForce::getGlobalParameters() const {
+    map<string, double> parameters;
+    for (const auto& param : globalParameters) {
+        parameters[param.first] = param.second;
+    }
+    return parameters;
+}
+
+void DeepmdForce::addLambdaParameter(const string& name, double defaultValue) {
+    lambda_name = name; // Set the name for the lambda parameter
+    globalParameters[name] = defaultValue; // Add or update the parameter with the default value
+    //globalParameters.push_back(make_pair(name, defaultValue));
+}
+
+void DeepmdForce::setLambdaName(const string& name) {
+    lambda_name = name;
+    globalParameters[name] = lambda; // Initialize the lambda parameter with default value 0.0
+    //globalParameters.push_back(make_pair(name, lambda)); // Add lambda parameter with default value 0.0
+}
+
+const std::string& DeepmdForce::getLambdaName() const {
+    return lambda_name;
+}

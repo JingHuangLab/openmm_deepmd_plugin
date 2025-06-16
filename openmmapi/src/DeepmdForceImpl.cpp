@@ -66,6 +66,10 @@ vector<pair<int, int>> DeepmdForceImpl::getBondedParticles() const{
     return owner.getBondsList();
 }
 
+std::map<std::string, double> DeepmdForceImpl::getDefaultParameters() {
+    return owner.getGlobalParameters();
+}
+
 std::vector<std::string> DeepmdForceImpl::getKernelNames() {
     std::vector<std::string> names;
     names.push_back(CalcDeepmdForceKernel::Name());

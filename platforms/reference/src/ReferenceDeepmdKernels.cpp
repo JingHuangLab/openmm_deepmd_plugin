@@ -72,7 +72,7 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
     forceUnitCoeff = force.getForceUnitCoefficient();
     energyUnitCoeff = force.getEnergyUnitCoefficient();
     coordUnitCoeff = force.getCoordUnitCoefficient();
-    lambda = force.getLambda();
+    lambda_name = force.getLambdaName();
     natoms = type4EachParticle.size();
     tot_atoms = system.getNumParticles();
 
@@ -141,6 +141,8 @@ void ReferenceCalcDeepmdForceKernel::initialize(const System& system, const Deep
 double ReferenceCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     vector<RealVec>& pos = extractPositions(context);
     vector<RealVec>& force = extractForces(context);
+
+    lambda = context.getParameter(lambda_name);
 
     if (isFixedRegion){
         // Set box size.

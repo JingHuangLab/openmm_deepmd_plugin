@@ -32,7 +32,7 @@ extension = Extension(name='OpenMMDeepmdPlugin._OpenMMDeepmdPlugin',
 
 
 setup(name='OpenMMDeepmdPlugin',
-      version="0.2.0",
+      version="0.3.0",
       ext_modules=[extension],
       packages=['OpenMMDeepmdPlugin', "OpenMMDeepmdPlugin.tests"],
       package_data={"OpenMMDeepmdPlugin":['data/*.pb', 'data/*.pdb']},

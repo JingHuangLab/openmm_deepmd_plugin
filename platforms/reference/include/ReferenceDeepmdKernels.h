@@ -75,6 +75,7 @@ private:
 
     int natoms, tot_atoms;
     double lambda = 0.0;
+    string lambda_name = "dp_alchem_lambda";
     ENERGYTYPE dener;
     vector<VALUETYPE> dforce;
     vector<VALUETYPE> dvirial;

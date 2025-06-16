@@ -25,14 +25,14 @@ def create_alchemical_builder(pdb_file, dp_model_file, dp_model_file1, dp_model_
     
     def get_alchemical_system(lambda_value):
         # Set up the dp_system with the dp_model.    
-        dp_model = DeepPotentialModel(dp_model_file, Lambda = lambda_value)
+        dp_model = DeepPotentialModel(dp_model_file, LambdaName = "dp_alchem_lambda_0", Lambda = lambda_value)
         dp_model.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
         # By default, createSystem from dp_model will put all atoms in topology into the DP particles for dp_model.
         dp_system = dp_model.createSystem(topology)
         
         # Initial the other two dp_models for alchemical simulation.
-        dp_model_1 = DeepPotentialModel(dp_model_file1, Lambda = 1 - lambda_value)
-        dp_model_2 = DeepPotentialModel(dp_model_file2, Lambda = 1 - lambda_value)
+        dp_model_1 = DeepPotentialModel(dp_model_file1, LambdaName = "dp_alchem_lambda_1", Lambda = 1 - lambda_value)
+        dp_model_2 = DeepPotentialModel(dp_model_file2, LambdaName = "dp_alchem_lambda_2", Lambda = 1 - lambda_value)
         dp_model_1.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
         dp_model_2.setUnitTransformCoefficients(10.0, 964.8792534459, 96.48792534459)
         
@@ -127,11 +127,11 @@ def reevaluate_energy(simulation, dcd_files, pdb_file):
 
 if __name__ == "__main__":
     
-    pdb_file = os.path.join(os.path.dirname(__file__), "openmm_deepmd_plugin/python/OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
+    pdb_file = os.path.join(os.path.dirname(__file__), "../../OpenMMDeepmdPlugin/data", "lw_256_test.pdb")
     
-    dp_model_file = os.path.join(os.path.dirname(__file__), "openmm_deepmd_plugin/python/OpenMMDeepmdPlugin/data", "water.pb")
-    dp_model_file1 = os.path.join(os.path.dirname(__file__), "openmm_deepmd_plugin/python/OpenMMDeepmdPlugin/data", "water.pb")
-    dp_model_file2 = os.path.join(os.path.dirname(__file__), "openmm_deepmd_plugin/python/OpenMMDeepmdPlugin/data", "water.pb")
+    dp_model_file = os.path.join(os.path.dirname(__file__), "../../OpenMMDeepmdPlugin/data", "water.pb")
+    dp_model_file1 = os.path.join(os.path.dirname(__file__), "../../OpenMMDeepmdPlugin/data", "water.pb")
+    dp_model_file2 = os.path.join(os.path.dirname(__file__), "../../OpenMMDeepmdPlugin/data", "water.pb")
     
     output_temp_dir = "/tmp/omm_dp_water_solvation_free_energy"
     if not os.path.exists(output_temp_dir):
@@ -173,13 +173,15 @@ if __name__ == "__main__":
     num_lambdas = len(lambda_list)
     energy_matrix = {}
     
-    
+    alchemical_system, topology, positions = alchemical_builder(lambda_list[0])
+    alchem_simulation = build_alchemical_simulation(alchemical_system, topology, box, positions, nsteps, time_step, temperature, report_frequency, None, None)    
     for ii, lambda_value in enumerate(lambda_list):
         energy_matrix[ii] = {"00": None, "01": None, "10": None, "11": None}
         
         print("Re-evaluating energy for lambda: ", lambda_value)
-        alchemical_system, topology, positions = alchemical_builder(lambda_value)
-        alchem_simulation = build_alchemical_simulation(alchemical_system, topology, box, positions, nsteps, time_step, temperature, report_frequency, None, None)
+        alchem_simulation.context.setParameter("dp_alchem_lambda_0", lambda_value)
+        alchem_simulation.context.setParameter("dp_alchem_lambda_1", 1 - lambda_value)
+        alchem_simulation.context.setParameter("dp_alchem_lambda_2", 1 - lambda_value)
         
         if ii == 0:
             input_dcd_files = [dcd_files[ii], dcd_files[ii+1]]

@@ -65,9 +65,9 @@ public:
      * @brief Construct a new Deepmd Force object. Used when running with specific lambda.
      * 
      * @param GraphFile 
-     * @param lambda
+     * @param lambda_name : the name of the lambda parameter in the OpenMM context.
      */
-    DeepmdForce(const string& GraphFile, const double& lambda);
+    DeepmdForce(const string& GraphFile, const string& lambda_name);
     /**
      * @brief Destroy the Deepmd Force object.
      * 
@@ -199,18 +199,6 @@ public:
     void addAtom(int resIndex, string AtomName, string AtomElement, int atomIndex, int atomId);
 
     Topology* getTopology() const;
-    /**
-     * @brief Set the lambda value for this alchemical simulation.
-     * 
-     * @param lambda 
-     */
-    void setLambda(const double lambda);
-    /**
-     * @brief Get the lambda value for DP force scale weights in simulation.
-     * 
-     * @return double 
-     */
-    double getLambda() const;
 
     /**
      * @brief Set the GPU rank index for DP model evaluation.
@@ -225,6 +213,11 @@ public:
      */
     int getGPURank() const;
 
+    const std::string& getLambdaName() const;
+    void setLambdaName(const std::string& name);
+    void addLambdaParameter(const std::string& name, double defaultValue);
+    map<string, double> getGlobalParameters() const;
+
     void updateParametersInContext(OpenMM::Context& context);
     bool usesPeriodicBoundaryConditions() const {
         return use_pbc;
@@ -233,14 +226,17 @@ protected:
     OpenMM::ForceImpl* createImpl() const;
 private:
     string graph_file = "";
-    double lambda = 1.0;
     bool use_pbc = true;
     int gpu_rank = 0;
 
     int numb_types = 0;
     string type_map = "";
     double cutoff = 0.;
-    
+  
+    string lambda_name = "dp_alchem_lambda";
+    double lambda = 1.0; // Default value for lambda, used for alchemical simulations.
+    map<string, double> globalParameters;
+
     map<int, string> type4EachParticle;
     map<string, vector<int>> particleGroup4EachType;
     map<string, int> typesIndexMap;

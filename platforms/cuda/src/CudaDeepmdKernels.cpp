@@ -51,7 +51,8 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
     forceUnitCoeff = force.getForceUnitCoefficient();
     energyUnitCoeff = force.getEnergyUnitCoefficient();
     coordUnitCoeff = force.getCoordUnitCoefficient();
-    lambda = force.getLambda();
+    lambda_name = force.getLambdaName();
+
     natoms = type4EachParticle.size();
     tot_atoms = system.getNumParticles();
     
@@ -126,6 +127,8 @@ void CudaCalcDeepmdForceKernel::initialize(const System& system, const DeepmdFor
 double CudaCalcDeepmdForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     vector<Vec3> pos;
     context.getPositions(pos);
+    lambda = context.getParameter(lambda_name);
+    
     Vec3 box[3];
 
     if (isFixedRegion){
