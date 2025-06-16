@@ -167,7 +167,7 @@ class DeepPotentialModel():
             
         
         # Add bond information into DeepmdForce for the PBC issue 
-        # during the trajectory saving. 
+        # during the trajectory saving. For visualization, the bond information is not necessary.
         for bond in topology.bonds():
             self.dp_force.addBond(bond[0].index, bond[1].index)
         
